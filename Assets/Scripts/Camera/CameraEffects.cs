@@ -62,15 +62,15 @@ public class CameraEffects : MonoBehaviour
 	{
 		if (!landed)
 		{
-			magnitude = (mag * 0.05f) - 0.5f;
+			magnitude = (mag * 0.05f) - 0.3f;
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
 			magnitude = Mathf.Clamp(magnitude, 0f, 2.5f);
 
 			if (magnitude < 0.5f) magnitude = 0f;
-			if (Input.GetKey(KeyCode.LeftControl)) magnitude *= 0.6f;
+			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 0.8f;
 
-			offsetSmoothTime = setSmoothTime / (magnitude + 3f);
-			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 100.0f) * 0.01f;
+			offsetSmoothTime = setSmoothTime / magnitude;
+			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
 			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.05f, 0.06f);
 			
 			landed = true;

@@ -135,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
             wallClimbForce = setClimbForce;
             wallClimbForce = wallMagnitude + wallClimbForce;
             wallClimbForce = Mathf.Clamp(wallClimbForce, -10f, 10f);
-            rb.velocity = new Vector3(rb.velocity.x, wallClimbForce, rb.velocity.z);
+            rb.velocity = (s.orientation.forward * s.PlayerInput.y * (wallRunForce * 0.5f)) + new Vector3(0, wallClimbForce, 0);
         }
 
         rb.AddForce(s.orientation.forward * s.PlayerInput.y * wallRunForce);

@@ -1663,7 +1663,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxWallRunCameraTilt: 20
   maxSlideCameraTilt: 5
-  tiltSmoothTime: 0.25
+  tiltSmoothTime: 0.3
   playerTurnSpeed: 20
   sensitivity: 80
   cameraTurnSpeed: {x: 15, y: 15}
@@ -1679,15 +1679,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 838078163}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 335552ddfaccd6e4caeb7bb0ebe435e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bobSpeed: 5
-  bobAmount: 1
-  returnSmoothTime: 0.1
+  bobSpeed: 10
+  bobAmount: 0.2
+  returnSmoothTime: 0.05
   s: {fileID: 1650519438}
+  playerHead: {fileID: 32658971}
 --- !u!1 &907979589
 GameObject:
   m_ObjectHideFlags: 0
@@ -2066,7 +2067,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.2
+  offsetSmoothTime: 0.1
   backSmoothTime: 0.3
   maxSpeed: 100
   fov: 80
@@ -2859,7 +2860,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.54
+  m_Name: Save 1.55
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3234,7 +3235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 50
+  moveSpeed: 60
   maxGroundSpeed: 20
   jumpForce: 23
   jumpCooldown: 0.06

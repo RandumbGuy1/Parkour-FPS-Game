@@ -73,21 +73,16 @@ public class InputManager : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate()
-    {
-        if (!Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
-        {
-            grounded = false;
-            landed = false;
-        }
-    }
-
     void Update()
     {
         x = Input.GetAxisRaw("Horizontal");
         y = Input.GetAxisRaw("Vertical");
 
-        jumping = Input.GetKey(jumpKey);
+        if (grounded)
+            if (!Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
+                grounded = false;
+
+        jumping = Input.GetKeyDown(jumpKey);
         crouching = Input.GetKey(crouchKey) && !wallRunning;
         startCrouch = Input.GetKeyDown(crouchKey) && !wallRunning;
         stopCrouch = Input.GetKeyUp(crouchKey) && !wallRunning;
@@ -108,8 +103,6 @@ public class InputManager : MonoBehaviour
 
     void LateUpdate()
     {
-        if (landed && !grounded) landed = false;
-
         lastMagVel = rb.velocity.magnitude;
         lastYVel = rb.velocity.y;
     }
@@ -120,7 +113,7 @@ public class InputManager : MonoBehaviour
         if (Ground != (Ground | (1 << layer))) return;
 
         grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) && !reachedMaxSlope;
-        if (grounded && !landed && !jumping) Land();
+        if (grounded && !jumping) Land();
     }
 
     #region Movement Calculations

@@ -13,20 +13,21 @@ public class HeadBobbing : MonoBehaviour
     private float waveSlice;
     private float timer;
     private float vel = 0;
-    private float newRot;
+    private float newPos;
 
     [Header("Assignables")]
     public ScriptManager s;
+    public Transform playerHead;
 
     void Update()
     {
-        newRot = waveSlice;
-        transform.rotation = Quaternion.Euler(newRot, transform.rotation.y, transform.rotation.z);
+        newPos = waveSlice;
+        transform.position = playerHead.position + (Vector3.up * waveSlice);
 
-        if (s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed) 
+        if (s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && !s.PlayerInput.nearWall && s.cam.localPosition.y >= -0.1f) 
         {
             timer += bobSpeed * Time.deltaTime;
-            waveSlice = Math.Abs(Mathf.Sin(timer) * bobAmount) * -1f;
+            waveSlice = Mathf.Sin(timer) * bobAmount;
         }
         else
         {

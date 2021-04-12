@@ -51,7 +51,7 @@ public class CameraFollow : MonoBehaviour
 
 	void Update()
 	{
-		transform.position = playerHead.position;
+		//transform.position = playerHead.position;
 		mouseX = Input.GetAxisRaw("Mouse X");
 		mouseY = Input.GetAxisRaw("Mouse Y");
 	}
