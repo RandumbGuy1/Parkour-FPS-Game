@@ -62,7 +62,7 @@ public class CameraEffects : MonoBehaviour
 	{
 		if (!landed)
 		{
-			magnitude = (mag * 0.05f) - 0.3f;
+			magnitude = (mag * 0.05f) - 0.4f;
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
 			magnitude = Mathf.Clamp(magnitude, 0f, 2.5f);
 

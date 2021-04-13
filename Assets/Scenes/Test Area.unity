@@ -2860,7 +2860,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.55
+  m_Name: Save 1.56
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3196,11 +3196,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f99ec47f208b6e4c8004bceb911b6fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  x: 0
-  y: 0
-  wallCast: 1
+  input: {x: 0, y: 0}
   maxSlopeAngle: 55
-  maxVaultHeight: 3
   grounded: 1
   crouching: 0
   nearWall: 0

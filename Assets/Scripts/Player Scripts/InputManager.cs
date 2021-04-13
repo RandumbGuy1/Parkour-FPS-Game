@@ -6,18 +6,16 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    [HideInInspector] public float x, y;
+    [HideInInspector] public Vector2 input = Vector3.zero;
     public Vector3 moveDir { get; private set; }
     public Vector3 inputDir { get; private set; }
     public Vector3 wallJump { get; private set; }
 
-    [HideInInspector] public float wallCast = 1f;
+    float multiplier, multiplierV;
 
     [Header("Thresholds")]
     [Range(0f, 90f)]
     public float maxSlopeAngle;
-    [Range(0f, 30f)]
-    public float maxVaultHeight;
     public float angle { get; private set; }
 
     [Header("States")]
@@ -68,15 +66,16 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
-        //Save 1.38
+        //Save 1.39
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-        x = Input.GetAxisRaw("Horizontal");
-        y = Input.GetAxisRaw("Vertical");
+        input.x = Input.GetAxisRaw("Horizontal");
+        input.y = Input.GetAxisRaw("Vertical");
+        input.Normalize();
 
         if (grounded)
             if (!Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
@@ -86,16 +85,17 @@ public class InputManager : MonoBehaviour
         crouching = Input.GetKey(crouchKey) && !wallRunning;
         startCrouch = Input.GetKeyDown(crouchKey) && !wallRunning;
         stopCrouch = Input.GetKeyUp(crouchKey) && !wallRunning;
-        moving = x != 0f || y != 0f;
+        moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && !grounded && !crouching || nearWall && isWallRight && !grounded && !crouching) wallRunning = true;
-        stopWallRun = x > 0 && isWallLeft && wallRunning && canWallJump || x < 0 && isWallRight && wallRunning && canWallJump;
+        stopWallRun = input.x > 0 && isWallLeft && wallRunning && canWallJump || input.x < 0 && isWallRight && wallRunning && canWallJump;
 
-        inputDir = (orientation.forward * y + orientation.right * x);
+        inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, hit.normal);
 
         CalcSlope();
         CheckForWall();
+        MovementControl();
 
         CameraTilt();
         SprintEffect();
@@ -139,14 +139,11 @@ public class InputManager : MonoBehaviour
 
     private void CheckForWall()
     {
-        if (!wallRunning) wallCast = 1f;
-        if (wallRunning) wallCast = 1.5f;
-
         RaycastHit hit;
-        nearWall = Physics.Raycast(transform.position + Vector3.down, moveDir, out hit, 1f, Environment);
+        nearWall = Physics.Raycast(transform.position + Vector3.down, moveDir.normalized, out hit, 1f, Environment);
 
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, wallCast, Environment) && !isWallRight;
-        isWallRight = Physics.Raycast(transform.position, orientation.right, wallCast, Environment) && !isWallLeft;
+        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.2f, Environment) && !isWallRight;
+        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.2f, Environment) && !isWallLeft;
 
         if (nearWall && !crouching)
         {
@@ -168,6 +165,35 @@ public class InputManager : MonoBehaviour
             readyToWallJump = true;
             rb.useGravity = true;
         }    
+    }
+
+    private void MovementControl()
+    {
+        if (grounded)
+        {
+            multiplierV = 1f;
+            if (!crouching && !wallRunning) multiplier = 1f;
+            if (crouching && !wallRunning) multiplier = 0.05f;
+        }
+
+        if (!grounded)
+        {
+            if (!wallRunning && !crouching)
+            {
+                multiplier = 0.5f;
+                multiplierV = 0.8f;
+            }
+            if (!wallRunning && crouching)
+            {
+                multiplier = 0.5f; 
+                multiplierV = 0.8f;
+            }
+            if (s.PlayerInput.wallRunning)
+            {
+                multiplier = 0.01f; 
+                multiplierV = 20f;
+            }
+        }
     }
 
     /*
