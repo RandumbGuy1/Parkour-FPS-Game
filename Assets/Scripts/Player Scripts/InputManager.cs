@@ -40,7 +40,6 @@ public class InputManager : MonoBehaviour
 
     bool fast = false;
     bool readyToWallJump = true;
-    public bool landed { get; private set; }
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -180,37 +179,21 @@ public class InputManager : MonoBehaviour
         {
             if (!wallRunning && !crouching)
             {
-                multiplier = 0.5f;
-                multiplierV = 0.8f;
+                multiplier = 0.6f;
+                multiplierV = 0.7f;
             }
             if (!wallRunning && crouching)
             {
-                multiplier = 0.5f; 
-                multiplierV = 0.8f;
+                multiplier = 0.6f; 
+                multiplierV = 0.6f;
             }
             if (s.PlayerInput.wallRunning)
             {
                 multiplier = 0.01f; 
-                multiplierV = 20f;
+                multiplierV = 25f;
             }
         }
     }
-
-    /*
-    public bool CanVault()
-    {
-        if (Physics.CheckSphere(s.groundCheck.position + (orientation.forward * 0.1f), 1f, Environment))
-        {
-            if (Physics.Raycast(s.groundCheck.position, orientation.forward, out vaultHit, 1f, Environment))
-            {
-                return !Physics.Raycast(transform.position + Vector3.up * maxVaultHeight, -vaultHit.normal, 1f, Environment) && !Physics.Raycast(transform.position + Vector3.up * maxVaultHeight, orientation.forward, 1f, Environment);
-            }
-            else return false;
-        }
-        else return false;          
-    }
-    */
-
     #endregion
 
     #region Visual Effects
@@ -243,8 +226,6 @@ public class InputManager : MonoBehaviour
         s.Effects.CameraLand(LandVel(lastMagVel, lastYVel));
         if (Math.Abs(rb.velocity.magnitude * 0.5f) + Math.Abs(rb.velocity.y) > 40f) Instantiate(landEffect, transform.position + -transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
         rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
-
-        landed = true;
     }
 
     private void SprintEffect()

@@ -69,7 +69,7 @@ public class CameraEffects : MonoBehaviour
 			if (magnitude < 0.5f) magnitude = 0f;
 			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 0.8f;
 
-			offsetSmoothTime = setSmoothTime / magnitude;
+			offsetSmoothTime = setSmoothTime / (magnitude - 0.05f);
 			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
 			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.05f, 0.06f);
 			
