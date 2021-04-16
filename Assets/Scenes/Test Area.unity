@@ -1703,8 +1703,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39d572476ad42843b5ab94208d1dd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: 0, y: 0, z: 0}
-  isShaking: 0
+  maxMagnitude: 50
+  blendOverLifetime:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 9.36564
+      outSlope: 9.36564
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.08362716
+    - serializedVersion: 3
+      time: 0.3020934
+      value: 0.9955552
+      inSlope: -0.28742513
+      outSlope: -0.28742513
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.04025287
+      outWeight: 0.07433766
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0.16172372
+      outSlope: 0.16172372
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.06256262
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &907979589
 GameObject:
   m_ObjectHideFlags: 0

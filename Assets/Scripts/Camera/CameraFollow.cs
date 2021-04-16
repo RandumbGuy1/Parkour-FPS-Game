@@ -55,7 +55,7 @@ public class CameraFollow : MonoBehaviour
 		mouseX = Input.GetAxisRaw("Mouse X");
 		mouseY = Input.GetAxisRaw("Mouse Y");
 
-		if (Input.GetMouseButtonDown(1) && !Shake.isShaking) Shake.ShakeOnce(9f, 6f, 0.1f, 3f, 1f);
+		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(6f, 10f, 1.5f);
 	}
 
 	void LateUpdate()
