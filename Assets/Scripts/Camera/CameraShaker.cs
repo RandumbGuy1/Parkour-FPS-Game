@@ -17,12 +17,14 @@ public class CameraShaker : MonoBehaviour
 
     private bool isShaking = false;
     private float lastMagnitude = 0f;
+    private float lastDuration = 0f;
 
     public void ShakeOnce(float magnitude, float frequency, float duration)
     {
         if (isShaking)
         {
-            magnitude += (lastMagnitude * 0.7f);
+            magnitude += (lastMagnitude * 0.9f);
+            duration += (lastDuration * 0.6f);
             magnitude = Mathf.Clamp(magnitude, 0, maxMagnitude);
 
             StopAllCoroutines();
@@ -36,8 +38,8 @@ public class CameraShaker : MonoBehaviour
     IEnumerator Shake(float magitude, float frequency, float duration)
     {
         float vel = 0f;
-        float timeRemaining = duration;
 
+        float timeRemaining = duration;
         float trama = 0f;
         float agePercent;
 
@@ -51,6 +53,7 @@ public class CameraShaker : MonoBehaviour
         {
             timeRemaining -= Time.deltaTime;
             scroller += Time.deltaTime * frequency;
+            lastDuration = timeRemaining;
 
             noise.x = Mathf.PerlinNoise(seed, scroller);
             noise.y = Mathf.PerlinNoise(seed + 1f, scroller);

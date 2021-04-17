@@ -1664,7 +1664,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxWallRunCameraTilt: 20
   maxSlideCameraTilt: 5
-  tiltSmoothTime: 0.3
+  tiltSmoothTime: 0.25
+  fov: 80
+  wallFovSpeed: 0.9
+  returnFovSpeed: 0.8
   playerTurnSpeed: 20
   sensitivity: 80
   cameraTurnSpeed: {x: 15, y: 15}
@@ -1703,7 +1706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39d572476ad42843b5ab94208d1dd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMagnitude: 50
+  maxMagnitude: 40
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:
@@ -2118,11 +2121,6 @@ MonoBehaviour:
   offsetSmoothTime: 0.1
   backSmoothTime: 0.3
   maxSpeed: 100
-  fov: 80
-  wallFovSpeed: 3
-  returnFovSpeed: 2
-  playerHead: {fileID: 32658971}
-  orientation: {fileID: 1277575616}
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2908,7 +2906,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.58
+  m_Name: Save 1.6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3333,6 +3331,7 @@ MonoBehaviour:
   PlayerInput: {fileID: 1650519435}
   CamInput: {fileID: 838078165}
   Effects: {fileID: 963194229}
+  Shake: {fileID: 838078167}
   orientation: {fileID: 1277575616}
   playerHead: {fileID: 32658971}
   groundCheck: {fileID: 2073544792}

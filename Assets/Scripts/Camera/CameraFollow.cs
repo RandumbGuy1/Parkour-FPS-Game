@@ -13,6 +13,13 @@ public class CameraFollow : MonoBehaviour
 	private float tiltVel = 0f;
 	public float CameraTilt { get; private set; }
 
+	[Header("Fov")]
+	public float fov;
+	public float wallFovSpeed;
+	public float returnFovSpeed;
+
+	private float maxFov, currentFov;
+
 	[Header("Sensitivity")]
 	public float playerTurnSpeed;
 	public float sensitivity;
@@ -44,10 +51,15 @@ public class CameraFollow : MonoBehaviour
 	public Transform playerHead;
 	public CameraShaker Shake;
 
+	private Camera cam;
+
 	void Start()
     {
-		//Save 3.1
+		//Save 3.2
 		CameraTilt = 0f;
+		currentFov = fov;
+		maxFov = currentFov + 20f;
+		cam = GetComponentInChildren<Camera>();
 	}
 
 	void Update()
@@ -65,6 +77,8 @@ public class CameraFollow : MonoBehaviour
 		ApplyRotation();
 
 		CalcDelta();
+
+		cam.fieldOfView = fov;
 	}
 
 	void CalcRotation()
@@ -98,6 +112,7 @@ public class CameraFollow : MonoBehaviour
 	public void CameraWallRun(int i)
 	{
 		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime);
+		fov = Mathf.Lerp(fov, maxFov, wallFovSpeed * Time.smoothDeltaTime);
 	}
 
 	public void CameraSlide()
@@ -108,6 +123,9 @@ public class CameraFollow : MonoBehaviour
 	public void ResetCameraTilt()
 	{
 		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, tiltSmoothTime);
+		fov = Mathf.Lerp(fov, currentFov, returnFovSpeed * Time.smoothDeltaTime);
+
 		if (Math.Abs(CameraTilt) < 0.1f) CameraTilt = 0f;
+		if (fov <= 80.1f) fov = 80f;
 	}
 }

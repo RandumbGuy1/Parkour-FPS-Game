@@ -50,8 +50,6 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
 
     public float groundRadius;
-    float lastYVel;
-    float lastMagVel;
 
     [Header("Assignables")]
     public GameObject landEffect;
@@ -65,7 +63,7 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
-        //Save 1.39
+        //Save 1.4
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
     }
@@ -100,19 +98,13 @@ public class InputManager : MonoBehaviour
         SprintEffect();
     }
 
-    void LateUpdate()
-    {
-        lastMagVel = rb.velocity.magnitude;
-        lastYVel = rb.velocity.y;
-    }
-
     void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
         if (Ground != (Ground | (1 << layer))) return;
 
         grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) && !reachedMaxSlope;
-        if (grounded && !jumping) Land();
+        if (grounded && !jumping) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
     }
 
     #region Movement Calculations
@@ -202,29 +194,19 @@ public class InputManager : MonoBehaviour
         if (crouching && grounded) s.CamInput.CameraSlide();
         if (!crouching && !wallRunning) s.CamInput.ResetCameraTilt();
 
-        if (wallRunning && isWallLeft)
-        {
-            s.CamInput.CameraWallRun(-1);
-            s.Effects.CameraWallRun();
-        }
+        if (wallRunning && isWallLeft) s.CamInput.CameraWallRun(-1);
+        if (wallRunning && isWallRight) s.CamInput.CameraWallRun(1);
 
-        if (wallRunning && isWallRight)
-        {
-            s.CamInput.CameraWallRun(1);
-            s.Effects.CameraWallRun();
-        }
-
-        if (!wallRunning && Math.Abs(s.CamInput.CameraTilt) > 0f || !wallRunning && s.Effects.fov > 80f)
-        {
+        if (!wallRunning && Math.Abs(s.CamInput.CameraTilt) > 0f || !wallRunning && s.CamInput.fov > 80f)
             s.CamInput.ResetCameraTilt();
-            s.Effects.ResetCameraWallRun();
-        }
     }
 
-    private void Land()
+    private void Land(float impact, float yImpact)
     {
-        s.Effects.CameraLand(LandVel(lastMagVel, lastYVel));
-        if (Math.Abs(rb.velocity.magnitude * 0.5f) + Math.Abs(rb.velocity.y) > 40f) Instantiate(landEffect, transform.position + -transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
+        float impactForce = LandVel(impact, yImpact);
+
+        s.Effects.CameraLand(impactForce);
+        if (impactForce > 60f) Instantiate(landEffect, transform.position + -transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
         rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
     }
 
@@ -251,7 +233,7 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.3f) + Math.Abs(yMag * 2f);
+        return (mag * 0.5f) + Math.Abs(yMag * 2.1f);
     }
 
     void ResetWallJump()

@@ -15,29 +15,14 @@ public class CameraEffects : MonoBehaviour
 	private float magnitude;
 	private float duration;
 
-	private float maxFov, currentFov;
 	Vector3 offsetPos = Vector3.zero;
-
-	[Header("Fov")]
-	public float fov;
-	public float wallFovSpeed;
-	public float returnFovSpeed;
-
-	[Header("Assignables")]
-	public Transform playerHead;
-	public Transform orientation;
-	public Camera cam { get; private set; }
-
 	public bool landed { get; private set; }
 
 	void Start()
 	{
-		//Save 4.6
-		currentFov = fov;
-		maxFov = currentFov + 20f;
+		//Save 4.8
 		landed = false;
 		setSmoothTime = offsetSmoothTime;
-		cam = GetComponent<Camera>();
 	}
 
 	void Update()
@@ -54,8 +39,6 @@ public class CameraEffects : MonoBehaviour
 		if (!landed && transform.localPosition.y < -0.01f)
 			transform.localPosition = new Vector3(0, Mathf.SmoothDamp(transform.localPosition.y, 0, ref vel, backSmoothTime, maxSpeed, Time.smoothDeltaTime), 0);
 		#endregion
-
-		cam.fieldOfView = fov;
 	}
 
 	public void CameraLand(float mag)
@@ -85,16 +68,5 @@ public class CameraEffects : MonoBehaviour
 			magnitude = 0f;
 			landed = false;
 		}
-	}
-
-	public void CameraWallRun()
-	{
-		fov = Mathf.Lerp(fov, maxFov, wallFovSpeed * Time.smoothDeltaTime);
-	}
-
-	public void ResetCameraWallRun()
-	{
-		fov = Mathf.Lerp(fov, currentFov, returnFovSpeed * Time.smoothDeltaTime);
-		if (fov <= 81f) fov = 80f;
 	}
 }
