@@ -39,7 +39,8 @@ public class InputManager : MonoBehaviour
     public bool stopCrouch { get; private set; }
 
     bool fast = false;
-    bool readyToWallJump = true;
+    bool landed = false;
+    float wallTimer = 0f;
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -63,7 +64,6 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
-        //Save 1.4
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
     }
@@ -76,7 +76,10 @@ public class InputManager : MonoBehaviour
 
         if (grounded)
             if (!Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
+            {
+                landed = false;
                 grounded = false;
+            }
 
         jumping = Input.GetKeyDown(jumpKey);
         crouching = Input.GetKey(crouchKey) && !wallRunning;
@@ -103,7 +106,7 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | (1 << layer))) return;
 
-        grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) && !reachedMaxSlope;
+        grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
         if (grounded && !jumping) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
     }
 
@@ -111,7 +114,7 @@ public class InputManager : MonoBehaviour
 
     private void CalcSlope()
     {
-        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 2.5f, Ground))
+        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 2.7f, Ground))
         {
             if (hit.normal != Vector3.up)
             {
@@ -131,29 +134,24 @@ public class InputManager : MonoBehaviour
     private void CheckForWall()
     {
         RaycastHit hit;
-        nearWall = Physics.Raycast(transform.position + Vector3.down, moveDir.normalized, out hit, 1f, Environment);
+        nearWall = Physics.Raycast(transform.position - Vector3.up, moveDir.normalized, out hit, 1f, Environment);
 
         isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.2f, Environment) && !isWallRight;
         isWallRight = Physics.Raycast(transform.position, orientation.right, 1.2f, Environment) && !isWallLeft;
 
-        if (nearWall && !crouching)
+        if (nearWall && !crouching && !grounded)
         {
-            if (readyToWallJump && !grounded) 
-            {
-                readyToWallJump = false;
-                Invoke("ResetWallJump", 0.1f);
-            }
-
+            canWallJump = true;
             wallJump = hit.normal;
         }
 
         if (!nearWall && !isWallRight && !isWallLeft || grounded)
         {
+            wallTimer = 0f;
             canWallJump = false;
             wallJump = Vector3.zero;
             wallRunning = false;
             canAddWallRunForce = true;
-            readyToWallJump = true;
             rb.useGravity = true;
         }    
     }
@@ -182,7 +180,7 @@ public class InputManager : MonoBehaviour
             if (s.PlayerInput.wallRunning)
             {
                 multiplier = 0.01f; 
-                multiplierV = 25f;
+                multiplierV = 30f;
             }
         }
     }
@@ -203,11 +201,16 @@ public class InputManager : MonoBehaviour
 
     private void Land(float impact, float yImpact)
     {
+        grounded = true;
+        if (landed) return;
+
         float impactForce = LandVel(impact, yImpact);
 
         s.Effects.CameraLand(impactForce);
         if (impactForce > 60f) Instantiate(landEffect, transform.position + -transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
         rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
+
+        landed = true;
     }
 
     private void SprintEffect()
@@ -233,11 +236,6 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.5f) + Math.Abs(yMag * 2.1f);
-    }
-
-    void ResetWallJump()
-    {
-        if (!grounded) canWallJump = true;
+        return (mag * 0.6f) + Math.Abs(yMag * 2f);
     }
 }

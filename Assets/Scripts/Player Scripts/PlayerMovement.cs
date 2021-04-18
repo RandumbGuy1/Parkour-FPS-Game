@@ -47,7 +47,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        //Save 3.8
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
 
@@ -73,7 +72,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(-transform.up * s.PlayerInput.angle * 0.5f);
         
-        //Movement Control
         CounterMovement(new Vector3(-rb.velocity.x, 0, -rb.velocity.z));
 
         if (Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2))) > maxSpeed)
@@ -82,7 +80,6 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector3(n.x, rb.velocity.y, n.z);
         }
 
-        //Input
         if (s.PlayerInput.grounded && s.PlayerInput.jumping) Jump();
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
 
@@ -92,7 +89,6 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.startCrouch && !s.PlayerInput.wallRunning) StartCrouch(s.PlayerInput.moveDir);
         if (s.PlayerInput.stopCrouch && crouched) StopCrouch();
 
-        //Move Player
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
     }
 
@@ -139,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.2f);
-        rb.AddForce(-transform.up * wallRunForce * 0.3f);
+        rb.AddForce(-transform.up * wallRunForce * 0.5f);
     }
 
     private void StopWallRun()

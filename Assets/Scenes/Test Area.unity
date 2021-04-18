@@ -1684,7 +1684,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 838078163}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 335552ddfaccd6e4caeb7bb0ebe435e7, type: 3}
   m_Name: 
@@ -1766,13 +1766,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 907979589}
-  m_LocalRotation: {x: 0, y: 0, z: -0.5, w: 0.8660254}
+  m_LocalRotation: {x: 0, y: 0, z: 0.5, w: 0.8660254}
   m_LocalPosition: {x: -22.3, y: 1.1, z: 35.2}
   m_LocalScale: {x: 20, y: 1, z: 10}
   m_Children: []
   m_Father: {fileID: 492395354}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -60}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 60}
 --- !u!65 &907979591
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2906,7 +2906,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.6
+  m_Name: Save 1.61
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3287,7 +3287,7 @@ MonoBehaviour:
   crouchScale: {x: 1, y: 1, z: 1}
   slideForce: 125
   crouchJumpForce: 20
-  slideCounterMovement: 0.9
+  slideCounterMovement: 1.2
   maxSlideSpeed: 50
   crouchMulti: 0.01
   wallJumpForce: 20
