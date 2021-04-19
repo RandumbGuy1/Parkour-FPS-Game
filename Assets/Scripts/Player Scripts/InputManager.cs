@@ -50,7 +50,6 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
 
     public float groundRadius;
-    public int groundCheckTimes;
 
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
@@ -105,10 +104,9 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | (1 << layer))) return;
 
-        for (int i = 0; i < groundCheckTimes; i++) 
-            grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
+        grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
 
-        if (grounded && !jumping) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
+        if (grounded && !landed) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
     }
 
     #region Movement Calculations
@@ -201,9 +199,6 @@ public class InputManager : MonoBehaviour
 
     private void Land(float impact, float yImpact)
     {
-        grounded = true;
-        if (landed) return;
-
         float impactForce = LandVel(impact, yImpact);
 
         s.Effects.CameraLand(impactForce);
