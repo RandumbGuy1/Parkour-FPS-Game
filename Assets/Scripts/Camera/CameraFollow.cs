@@ -99,7 +99,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
     {
-		camera.localRotation = Quaternion.Euler(xSmoothRotation, ySmoothRotation, CameraTilt);
+		camera.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, CameraTilt + Shake.offset.z);
 		player.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
 	}
 

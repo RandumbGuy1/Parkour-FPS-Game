@@ -19,11 +19,6 @@ public class CameraShaker : MonoBehaviour
     private float lastMagnitude = 0f;
     private float lastDuration = 0f;
 
-    void LateUpdate()
-    {
-        transform.rotation = Quaternion.Euler(offset.x, offset.y, offset.z);
-    }
-
     public void ShakeOnce(float magnitude, float frequency, float duration)
     {
         if (isShaking)
@@ -42,8 +37,6 @@ public class CameraShaker : MonoBehaviour
 
     IEnumerator Shake(float magitude, float frequency, float duration)
     {
-        float vel = 0f;
-
         float timeRemaining = duration;
         float trama = 0f;
         float agePercent;

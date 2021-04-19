@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Ground Movement")]
     public float moveSpeed;
     public float maxGroundSpeed;
-    private float multiplier = 1f;
 
     [Header("Air Movement")]
     public float jumpForce;
@@ -134,7 +133,7 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = (s.orientation.forward * s.PlayerInput.input.y * (wallRunForce * 0.5f)) + new Vector3(0, wallClimbForce, 0);
         }
 
-        rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.2f);
+        rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.4f);
         rb.AddForce(-transform.up * wallRunForce * 0.5f);
     }
 

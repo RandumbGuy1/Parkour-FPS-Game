@@ -40,7 +40,6 @@ public class InputManager : MonoBehaviour
 
     bool fast = false;
     bool landed = false;
-    float wallTimer = 0f;
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -51,9 +50,9 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
 
     public float groundRadius;
+    public int groundCheckTimes;
 
     [Header("Assignables")]
-    public GameObject landEffect;
     public ParticleSystem sprintEffect;
     public Transform orientation;
     
@@ -106,7 +105,9 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | (1 << layer))) return;
 
-        grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
+        for (int i = 0; i < groundCheckTimes; i++) 
+            grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
+
         if (grounded && !jumping) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
     }
 
@@ -136,8 +137,8 @@ public class InputManager : MonoBehaviour
         RaycastHit hit;
         nearWall = Physics.Raycast(transform.position - Vector3.up, moveDir.normalized, out hit, 1f, Environment);
 
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.2f, Environment) && !isWallRight;
-        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.2f, Environment) && !isWallLeft;
+        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.3f, Environment) && !isWallRight;
+        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.3f, Environment) && !isWallLeft;
 
         if (nearWall && !crouching && !grounded)
         {
@@ -147,7 +148,6 @@ public class InputManager : MonoBehaviour
 
         if (!nearWall && !isWallRight && !isWallLeft || grounded)
         {
-            wallTimer = 0f;
             canWallJump = false;
             wallJump = Vector3.zero;
             wallRunning = false;
@@ -207,7 +207,7 @@ public class InputManager : MonoBehaviour
         float impactForce = LandVel(impact, yImpact);
 
         s.Effects.CameraLand(impactForce);
-        if (impactForce > 60f) Instantiate(landEffect, transform.position + -transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
+        if (impactForce > 60f) ObjectPooler.Instance.Spawn("Land Effects", transform.position - transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
         rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
 
         landed = true;
@@ -236,6 +236,6 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.6f) + Math.Abs(yMag * 2f);
+        return (mag * 0.5f) + Math.Abs(yMag * 2f);
     }
 }
