@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 3
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 1, g: 1, b: 1, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: e19adf50a9d4b374d99ba1eaa1497e60, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 32be28fd0faea1641aff7ddbf194bb6a, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -1460,7 +1460,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.9941571, b: 0.9481132, a: 1}
-  m_Intensity: 0.8
+  m_Intensity: 0.6
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1664,13 +1664,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxWallRunCameraTilt: 20
   maxSlideCameraTilt: 5
-  tiltSmoothTime: 0.25
+  tiltSmoothTime: 0.3
   fov: 80
   wallFovSpeed: 0.9
   returnFovSpeed: 0.8
   playerTurnSpeed: 20
   sensitivity: 80
-  cameraTurnSpeed: {x: 15, y: 15}
+  cameraTurnSpeed: {x: 20, y: 20}
   upClampAngle: 80
   downClampAngle: 70
   player: {fileID: 1277575616}
@@ -2118,7 +2118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.08
+  offsetSmoothTime: 0.2
   backSmoothTime: 0.3
   maxSpeed: 100
 --- !u!114 &963194230
@@ -7718,7 +7718,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.62
+  m_Name: Save 1.64
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8136,22 +8136,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 60
+  moveSpeed: 65
   maxGroundSpeed: 20
   jumpForce: 23
   jumpCooldown: 0.06
-  airMulti: 0.5
   maxAirSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
   slideForce: 125
   crouchJumpForce: 20
   slideCounterMovement: 1.2
   maxSlideSpeed: 50
-  crouchMulti: 0.01
   wallJumpForce: 20
-  wallRunForce: 15
-  wallClimbForce: 10
-  wallMulti: 0.05
+  wallRunForce: 20
+  wallClimbForce: 15
   counterMovement: 8
   threshold: 0.05
 --- !u!114 &1650519437
@@ -8471,7 +8468,7 @@ ParticleSystem:
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0

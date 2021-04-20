@@ -124,7 +124,7 @@ public class CameraFollow : MonoBehaviour
 
 	public void ResetCameraTilt()
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, tiltSmoothTime);
+		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, tiltSmoothTime + 0.05f);
 		fov = Mathf.Lerp(fov, currentFov, returnFovSpeed * Time.smoothDeltaTime);
 
 		if (Math.Abs(CameraTilt) < 0.1f) CameraTilt = 0f;

@@ -135,8 +135,8 @@ public class InputManager : MonoBehaviour
         RaycastHit hit;
         nearWall = Physics.Raycast(transform.position - Vector3.up, moveDir.normalized, out hit, 1f, Environment);
 
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.3f, Environment) && !isWallRight;
-        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.3f, Environment) && !isWallLeft;
+        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.2f, Environment) && !isWallRight;
+        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.2f, Environment) && !isWallLeft;
 
         if (nearWall && !crouching && !grounded)
         {
@@ -158,24 +158,24 @@ public class InputManager : MonoBehaviour
     {
         if (grounded)
         {
-            multiplierV = 1f;
-            if (!crouching && !wallRunning) multiplier = 1f;
-            if (crouching && !wallRunning) multiplier = 0.05f;
+            multiplierV = 1.05f;
+            if (!crouching && !wallRunning && multiplier != 1f) multiplier = 1f;
+            if (crouching && !wallRunning && multiplier != 0.05f) multiplier = 0.05f;
         }
 
         if (!grounded)
         {
-            if (!wallRunning && !crouching)
+            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.7f)
             {
-                multiplier = 0.6f;
-                multiplierV = 0.7f;
+                multiplier = 0.5f;
+                multiplierV = 0.8f;
             }
-            if (!wallRunning && crouching)
+            if (!wallRunning && crouching && multiplier != 0.6f && multiplierV != 0.6f)
             {
-                multiplier = 0.6f; 
-                multiplierV = 0.6f;
+                multiplier = 0.5f; 
+                multiplierV = 0.5f;
             }
-            if (s.PlayerInput.wallRunning)
+            if (s.PlayerInput.wallRunning && multiplier != 0.01f && multiplierV != 0.30f)
             {
                 multiplier = 0.01f; 
                 multiplierV = 30f;
@@ -231,6 +231,6 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.5f) + Math.Abs(yMag * 2f);
+        return (mag * 0.6f) + Math.Abs(yMag * 2f);
     }
 }

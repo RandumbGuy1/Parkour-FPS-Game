@@ -12,7 +12,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Air Movement")]
     public float jumpForce;
     public float jumpCooldown;
-    public float airMulti;
     public float maxAirSpeed;
 
     [Header("Sliding")]
@@ -21,7 +20,6 @@ public class PlayerMovement : MonoBehaviour
     public float crouchJumpForce;
     public float slideCounterMovement;
     public float maxSlideSpeed;
-    public float crouchMulti;
     private float crouchOffset;
     private Vector3 playerScale;
 
@@ -29,7 +27,6 @@ public class PlayerMovement : MonoBehaviour
     public float wallJumpForce;
     public float wallRunForce;
     public float wallClimbForce;
-    public float wallMulti;
     private float setClimbForce;
 
     [Header("Movement Control")]
@@ -123,17 +120,17 @@ public class PlayerMovement : MonoBehaviour
             cancelWallRun = true;
             s.PlayerInput.canAddWallRunForce = false;
             rb.useGravity = false;
-            rb.AddForce(s.orientation.forward * s.PlayerInput.input.y * wallRunForce * 100f);
 
-            float wallMagnitude = (rb.velocity.y * 0.8f);
+            float wallMagnitude = (rb.velocity.y * 2f);
+            rb.AddForce(s.orientation.forward * s.PlayerInput.input.y * wallRunForce * 100f);
 
             wallClimbForce = setClimbForce;
             wallClimbForce = wallMagnitude + wallClimbForce;
-            wallClimbForce = Mathf.Clamp(wallClimbForce, -10f, 10f);
+            wallClimbForce = Mathf.Clamp(wallClimbForce, -15f, 10f);
             rb.velocity = (s.orientation.forward * s.PlayerInput.input.y * (wallRunForce * 0.5f)) + new Vector3(0, wallClimbForce, 0);
         }
 
-        rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.4f);
+        rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.8f);
         rb.AddForce(-transform.up * wallRunForce * 0.5f);
     }
 
@@ -185,15 +182,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (s.PlayerInput.grounded)
         {
-            if (!crouched && !s.PlayerInput.wallRunning) maxSpeed = maxGroundSpeed;            
-            if (crouched && !s.PlayerInput.wallRunning) maxSpeed = maxSlideSpeed;
+            if (!crouched && !s.PlayerInput.wallRunning && maxSpeed != maxGroundSpeed) maxSpeed = maxGroundSpeed;            
+            if (crouched && !s.PlayerInput.wallRunning && maxSpeed != maxSlideSpeed) maxSpeed = maxSlideSpeed;
         }
 
         if (!s.PlayerInput.grounded)
         {
-            if (!s.PlayerInput.wallRunning && !crouched) maxSpeed = maxAirSpeed;
-            if (!s.PlayerInput.wallRunning && crouched) maxSpeed = maxSlideSpeed;
-            if (s.PlayerInput.wallRunning) maxSpeed = maxAirSpeed;
+            if (!s.PlayerInput.wallRunning && !crouched && maxSpeed != maxAirSpeed) maxSpeed = maxAirSpeed;
+            if (!s.PlayerInput.wallRunning && crouched && maxSpeed != maxSlideSpeed) maxSpeed = maxSlideSpeed;
+            if (s.PlayerInput.wallRunning && maxSpeed != maxAirSpeed) maxSpeed = maxAirSpeed;
         }
     }
 }

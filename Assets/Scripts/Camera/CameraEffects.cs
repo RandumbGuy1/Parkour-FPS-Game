@@ -20,7 +20,6 @@ public class CameraEffects : MonoBehaviour
 
 	void Start()
 	{
-		//Save 4.8
 		landed = false;
 		setSmoothTime = offsetSmoothTime;
 	}
@@ -45,17 +44,17 @@ public class CameraEffects : MonoBehaviour
 	{
 		if (!landed)
 		{
-			magnitude = mag * 0.04f;
+			magnitude = (mag * 0.04f);
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
 			magnitude = Mathf.Clamp(magnitude, 0f, 2.5f);
 
 			if (magnitude < 0.5f) magnitude = 0f;
 			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 1f;
 
-			offsetSmoothTime = setSmoothTime / magnitude;
-			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
+			offsetSmoothTime = setSmoothTime / magnitude - 0.1f;
+			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 100.0f) * 0.01f;
 			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.05f, 0.06f);
-			
+
 			landed = true;
 		}
 	}
