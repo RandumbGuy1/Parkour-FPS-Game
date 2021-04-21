@@ -8,12 +8,12 @@ public class CameraEffects : MonoBehaviour
 	[Header("Offset Variables")]
 	public float offsetSmoothTime;
 	public float backSmoothTime;
-	public float maxSpeed;
-	private float setSmoothTime;
 
+	private float maxSpeed;
 	private float vel = 0;
 	private float magnitude;
 	private float duration;
+	private float setSmoothTime;
 
 	Vector3 offsetPos = Vector3.zero;
 	public bool landed { get; private set; }
@@ -21,6 +21,7 @@ public class CameraEffects : MonoBehaviour
 	void Start()
 	{
 		landed = false;
+		maxSpeed = Mathf.Infinity;
 		setSmoothTime = offsetSmoothTime;
 	}
 
@@ -50,11 +51,11 @@ public class CameraEffects : MonoBehaviour
 
 			if (magnitude < 0.5f) magnitude = 0f;
 			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 1f;
-
-			offsetSmoothTime = setSmoothTime / magnitude - 0.1f;
-			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 100.0f) * 0.01f;
-			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.05f, 0.06f);
-
+			
+			offsetSmoothTime = setSmoothTime / magnitude;
+			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
+			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.045f, 0.06f);
+			
 			landed = true;
 		}
 	}

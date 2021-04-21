@@ -18,8 +18,9 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 crouchScale;
     public float slideForce;
     public float crouchJumpForce;
-    public float slideCounterMovement;
+    public float slideFriction;
     public float maxSlideSpeed;
+
     private float crouchOffset;
     private Vector3 playerScale;
 
@@ -27,10 +28,13 @@ public class PlayerMovement : MonoBehaviour
     public float wallJumpForce;
     public float wallRunForce;
     public float wallClimbForce;
+    public float wallTime;
+
+    private float wallElapsed = 0f;
     private float setClimbForce;
 
     [Header("Movement Control")]
-    public float counterMovement;
+    public float friction;
     public float threshold;
     private float maxSpeed;
 
@@ -50,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.5f;
+        crouchOffset = crouchScale.y * 0.49f;
         setClimbForce = wallClimbForce;
     }
 
@@ -120,6 +124,7 @@ public class PlayerMovement : MonoBehaviour
             cancelWallRun = true;
             s.PlayerInput.canAddWallRunForce = false;
             rb.useGravity = false;
+            wallElapsed = 0f;
 
             float wallMagnitude = (rb.velocity.y * 2f);
             rb.AddForce(s.orientation.forward * s.PlayerInput.input.y * wallRunForce * 100f);
@@ -130,8 +135,13 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = (s.orientation.forward * s.PlayerInput.input.y * (wallRunForce * 0.5f)) + new Vector3(0, wallClimbForce, 0);
         }
 
+        wallElapsed += Time.deltaTime;
+
+        if (wallElapsed >= wallTime * 0.6f)
+            rb.AddForce(-transform.up * wallRunForce * 0.3f);
+
         rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.8f);
-        rb.AddForce(-transform.up * wallRunForce * 0.5f);
+        rb.AddForce(-transform.up * wallRunForce * 0.3f);
     }
 
     private void StopWallRun()
@@ -141,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
             s.PlayerInput.wallRunning = false;
             s.PlayerInput.stopWallRun = false;
 
-            rb.AddForce(s.PlayerInput.wallJump * wallJumpForce * 0.6f, ForceMode.Impulse);
+            rb.AddForce(s.PlayerInput.wallJump * wallJumpForce * 0.8f, ForceMode.Impulse);
 
             cancelWallRun = false;
         }
@@ -169,13 +179,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (crouched && s.PlayerInput.grounded)
         {
-            if (s.PlayerInput.grounded) rb.AddForce(dir * slideCounterMovement);
+            if (s.PlayerInput.grounded) rb.AddForce(dir * slideFriction);
             return;
         }
 
         if (!s.PlayerInput.grounded || s.PlayerInput.moving) return;
 
-        if (rb.velocity.magnitude >= threshold) rb.AddForce(dir * counterMovement);
+        if (rb.velocity.magnitude >= threshold) rb.AddForce(dir * friction);
     }
 
     private void MovementControl()

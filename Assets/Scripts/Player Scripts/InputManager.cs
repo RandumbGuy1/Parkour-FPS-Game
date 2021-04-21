@@ -48,8 +48,10 @@ public class InputManager : MonoBehaviour
     [Header("Collision")]
     public LayerMask Ground;
     public LayerMask Environment;
-
     public float groundRadius;
+
+    float lastVel;
+    float lastYVel;
 
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
@@ -66,18 +68,21 @@ public class InputManager : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    void FixedUpdate()
+    {
+        grounded = Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) && !reachedMaxSlope;
+        if (grounded && !landed) Land(LandVel(lastVel, Math.Abs(lastYVel)));
+        if (!grounded && landed) landed = false;
+
+        lastVel = rb.velocity.magnitude;
+        lastYVel = rb.velocity.y;
+    }
+
     void Update()
     {
         input.x = Input.GetAxisRaw("Horizontal");
         input.y = Input.GetAxisRaw("Vertical");
         input.Normalize();
-
-        if (grounded)
-            if (!Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
-            {
-                landed = false;
-                grounded = false;
-            }
 
         jumping = Input.GetKeyDown(jumpKey);
         crouching = Input.GetKey(crouchKey) && !wallRunning;
@@ -99,6 +104,7 @@ public class InputManager : MonoBehaviour
         SprintEffect();
     }
 
+    /*
     void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
@@ -106,8 +112,9 @@ public class InputManager : MonoBehaviour
 
         grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
 
-        if (grounded && !landed) Land(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y));
+        if (grounded && !landed) Land(LandVel(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y)));
     }
+    */
 
     #region Movement Calculations
 
@@ -197,12 +204,11 @@ public class InputManager : MonoBehaviour
             s.CamInput.ResetCameraTilt();
     }
 
-    private void Land(float impact, float yImpact)
+    private void Land(float impactForce)
     {
-        float impactForce = LandVel(impact, yImpact);
-
         s.Effects.CameraLand(impactForce);
-        if (impactForce > 60f) ObjectPooler.Instance.Spawn("Land Effects", transform.position - transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
+        if (impactForce > 55f) ObjectPooler.Instance.Spawn("Land Effects", transform.position - transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
+        
         rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
 
         landed = true;
@@ -231,6 +237,6 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.6f) + Math.Abs(yMag * 2f);
+        return (mag * 0.5f) + Math.Abs(yMag * 2f);
     }
 }

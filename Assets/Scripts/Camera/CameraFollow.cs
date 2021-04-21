@@ -113,7 +113,7 @@ public class CameraFollow : MonoBehaviour
 
 	public void CameraWallRun(int i)
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime);
+		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime - 0.1f);
 		fov = Mathf.Lerp(fov, maxFov, wallFovSpeed * Time.smoothDeltaTime);
 	}
 
