@@ -1761,8 +1761,8 @@ MonoBehaviour:
   maxSlideCameraTilt: 10
   tiltSmoothTime: 0.3
   fov: 80
-  wallFovSpeed: 0.9
-  returnFovSpeed: 0.8
+  wallFovTime: 0.3
+  returnFovTime: 0.5
   playerTurnSpeed: 20
   sensitivity: 80
   cameraTurnSpeed: {x: 20, y: 20}
@@ -1801,36 +1801,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39d572476ad42843b5ab94208d1dd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMagnitude: 40
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 9.36564
-      outSlope: 9.36564
+      inSlope: 0
+      outSlope: 12.566371
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.08362716
+      outWeight: 0
     - serializedVersion: 3
-      time: 0.3020934
-      value: 0.9955552
-      inSlope: -0.28742513
-      outSlope: -0.28742513
+      time: 0.2
+      value: 1
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.04025287
-      outWeight: 0.07433766
+      inWeight: 0
+      outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0.16172372
-      outSlope: 0.16172372
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.06256262
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -2213,7 +2212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.1
+  offsetSmoothTime: 0.05
   backSmoothTime: 0.3
 --- !u!114 &963194230
 MonoBehaviour:
@@ -7905,7 +7904,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.65
+  m_Name: Save 1.66
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8352,10 +8351,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grabRange: 5
-  throwForce: 15
+  throwForce: 14
   grabRadius: 0.3
   objSpeed: 0.1
-  maxGrabDistance: 5
+  maxGrabDistance: 4
   grabPos: {fileID: 493642731}
   camera: {fileID: 963194228}
 --- !u!114 &1650519438

@@ -5,8 +5,6 @@ using UnityEngine;
 public class CameraShaker : MonoBehaviour
 {
     [Header("Shake Settings")]
-    public float maxMagnitude;
-
     public AnimationCurve blendOverLifetime = new AnimationCurve(
 
       new Keyframe(0.0f, 0.0f, Mathf.Deg2Rad * 0.0f, Mathf.Deg2Rad * 720.0f),
@@ -15,62 +13,81 @@ public class CameraShaker : MonoBehaviour
 
     public Vector3 offset { get; private set; }
 
-    private bool isShaking = false;
-    private float lastMagnitude = 0f;
-    private float lastDuration = 0f;
-
-    public void ShakeOnce(float magnitude, float frequency, float duration)
+    public class ShakeEvent
     {
-        if (isShaking)
-        {
-            magnitude += (lastMagnitude * 0.9f);
-            duration += (lastDuration * 0.6f);
-            magnitude = Mathf.Clamp(magnitude, 0, maxMagnitude);
+        AnimationCurve blendOverLifetime;
 
-            StopAllCoroutines();
-            StartCoroutine(Shake(magnitude, frequency, duration));
-        }
-        else if (!isShaking) StartCoroutine(Shake(magnitude, frequency, duration));
-
-        isShaking = true;
-    }
-
-    IEnumerator Shake(float magitude, float frequency, float duration)
-    {
-        float timeRemaining = duration;
+        float timeRemaining;
+        float duration;
+        float magnitude;
+        float frequency;
         float trama = 0f;
-        float agePercent;
 
         float scroller = 0f;
-        float seed = Random.value;
-        Vector3 noise = Vector3.zero;
+        Vector3 noise;
+        public Vector3 displacement;
 
-        lastMagnitude = magitude;
-
-        while (timeRemaining > 0f)
+        public ShakeEvent(float magnitude, float frequency, float duration, AnimationCurve blendOverLifetime)
         {
-            timeRemaining -= Time.deltaTime;
-            scroller += Time.deltaTime * frequency;
-            lastDuration = timeRemaining;
+            this.blendOverLifetime = blendOverLifetime;
+            this.magnitude = magnitude;
+            this.frequency = frequency;
+            this.duration = duration;
+            timeRemaining = this.duration;
+        }
 
-            noise.x = Mathf.PerlinNoise(seed, scroller);
-            noise.y = Mathf.PerlinNoise(seed + 1f, scroller);
-            noise.z = Mathf.PerlinNoise(seed + 2f, scroller);
+        public void UpdateShake()
+        {
+            float offsetDelta = Time.deltaTime * frequency;
+
+            timeRemaining -= Time.deltaTime;
+            scroller += offsetDelta;
+
+            noise.x = Mathf.PerlinNoise(0f, scroller);
+            noise.y = Mathf.PerlinNoise(1f, scroller);
+            noise.z = Mathf.PerlinNoise(2f, scroller);
 
             noise -= Vector3.one * 0.5f;
-            noise *= magitude;
+            noise *= magnitude;
 
-            agePercent = 1f - (timeRemaining / duration);
+            float agePercent = 1f - (timeRemaining / duration);
             trama = blendOverLifetime.Evaluate(agePercent);
             trama = Mathf.Clamp(trama, 0f, 1f);
             noise *= trama;
 
-            offset = noise;
-
-            yield return null;
+            displacement = noise;
         }
 
-        offset = Vector3.zero;
-        isShaking = false;
+        public bool Alive()
+        {
+            return timeRemaining > 0f;
+        }
+    }
+
+    List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
+
+    public void ShakeOnce(float magnitude, float frequency, float duration)
+    {
+        shakeEvents.Add(new ShakeEvent(magnitude, frequency, duration, blendOverLifetime));
+    }
+
+    void LateUpdate()
+    {
+        Vector3 rotationOffset = Vector3.zero;
+
+        if (shakeEvents.Count > 0)
+        {
+            for (int i = shakeEvents.Count - 1; i != -1; i--)
+            {
+                ShakeEvent shake = shakeEvents[i]; 
+                shake.UpdateShake();
+
+                rotationOffset += shake.displacement;
+
+                if (!shake.Alive()) shakeEvents.RemoveAt(i);
+            }
+        }
+
+        offset = rotationOffset;
     }
 }

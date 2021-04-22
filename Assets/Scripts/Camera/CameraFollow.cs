@@ -15,10 +15,11 @@ public class CameraFollow : MonoBehaviour
 
 	[Header("Fov")]
 	public float fov;
-	public float wallFovSpeed;
-	public float returnFovSpeed;
+	public float wallFovTime;
+	public float returnFovTime;
 
-	private float maxFov, currentFov;
+	private float fovVel = 0f;
+	private float maxFov, setFov;
 
 	[Header("Sensitivity")]
 	public float playerTurnSpeed;
@@ -55,10 +56,9 @@ public class CameraFollow : MonoBehaviour
 
 	void Start()
     {
-		//Save 3.2
 		CameraTilt = 0f;
-		currentFov = fov;
-		maxFov = currentFov + 20f;
+		setFov = fov;
+		maxFov = setFov + 20f;
 		cam = GetComponentInChildren<Camera>();
 	}
 
@@ -69,7 +69,7 @@ public class CameraFollow : MonoBehaviour
 		mouseX = Input.GetAxisRaw("Mouse X");
 		mouseY = Input.GetAxisRaw("Mouse Y");
 
-		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(6f, 10f, 1.5f);
+		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(4f, 8f, 0.8f);
 	}
 
 	void LateUpdate()
@@ -114,7 +114,7 @@ public class CameraFollow : MonoBehaviour
 	public void CameraWallRun(int i)
 	{
 		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime - 0.1f);
-		fov = Mathf.Lerp(fov, maxFov, wallFovSpeed * Time.smoothDeltaTime);
+		fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, wallFovTime);
 	}
 
 	public void CameraSlide()
@@ -125,7 +125,7 @@ public class CameraFollow : MonoBehaviour
 	public void ResetCameraTilt()
 	{
 		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, tiltSmoothTime + 0.05f);
-		fov = Mathf.Lerp(fov, currentFov, returnFovSpeed * Time.smoothDeltaTime);
+		fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
 
 		if (Math.Abs(CameraTilt) < 0.1f) CameraTilt = 0f;
 		if (fov <= 80.1f) fov = 80f;
