@@ -74,13 +74,14 @@ public class PlayerMovement : MonoBehaviour
         
         CounterMovement(new Vector3(-rb.velocity.x, 0, -rb.velocity.z));
 
-        if (Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2))) > maxSpeed)
+        float vel = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
+        if (vel > maxSpeed)
         {
-            Vector3 n = (rb.velocity.normalized * maxSpeed);
-            rb.velocity = new Vector3(n.x, rb.velocity.y, n.z);
+            Vector3 n = new Vector3(-rb.velocity.x, 0, -rb.velocity.z);
+            rb.AddForce(n * (vel * 0.3f));
         }
 
-        if (s.PlayerInput.grounded && s.PlayerInput.jumping) Jump();
+        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
 
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();

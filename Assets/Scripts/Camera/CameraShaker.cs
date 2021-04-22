@@ -79,12 +79,14 @@ public class CameraShaker : MonoBehaviour
         {
             for (int i = shakeEvents.Count - 1; i != -1; i--)
             {
-                ShakeEvent shake = shakeEvents[i]; 
-                shake.UpdateShake();
-
-                rotationOffset += shake.displacement;
+                ShakeEvent shake = shakeEvents[i];
 
                 if (!shake.Alive()) shakeEvents.RemoveAt(i);
+                else
+                {
+                    shake.UpdateShake();
+                    rotationOffset += shake.displacement;
+                }
             }
         }
 

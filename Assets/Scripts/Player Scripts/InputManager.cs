@@ -104,18 +104,6 @@ public class InputManager : MonoBehaviour
         SprintEffect();
     }
 
-    /*
-    void OnCollisionEnter(Collision col)
-    {
-        int layer = col.gameObject.layer;
-        if (Ground != (Ground | (1 << layer))) return;
-
-        grounded = Physics.CheckCapsule(transform.position, s.groundCheck.position, groundRadius, Ground);
-
-        if (grounded && !landed) Land(LandVel(col.relativeVelocity.magnitude, Math.Abs(col.relativeVelocity.y)));
-    }
-    */
-
     #region Movement Calculations
 
     private void CalcSlope()
@@ -165,7 +153,7 @@ public class InputManager : MonoBehaviour
     {
         if (grounded)
         {
-            multiplierV = 1.05f;
+            if (multiplierV != 1.05f) multiplierV = 1.05f;
             if (!crouching && !wallRunning && multiplier != 1f) multiplier = 1f;
             if (crouching && !wallRunning && multiplier != 0.05f) multiplier = 0.05f;
         }

@@ -12,7 +12,6 @@ public class CameraEffects : MonoBehaviour
 	private float maxSpeed;
 	private float vel = 0;
 	private float magnitude;
-	private float duration;
 	private float setSmoothTime;
 
 	Vector3 offsetPos = Vector3.zero;
