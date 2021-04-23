@@ -50,6 +50,11 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
     public float groundRadius;
 
+    [Header("Stairs")]
+    public float stepHeight;
+    public float stepOffset;
+    public float stepSpeed;
+
     float lastVel;
     float lastYVel;
 
@@ -125,15 +130,27 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    private void CheckForStep()
+    {
+        if (wallRunning) return;
+             
+        if (Physics.Raycast(s.groundCheck.position + (Vector3.down * 0.4f), orientation.forward, 1f, Environment))
+            if (!Physics.Raycast(s.groundCheck.position + (Vector3.up * stepHeight), orientation.forward, 1.5f, Environment) && input.y > 0f)
+            {
+                rb.MovePosition(Vector3.Lerp(rb.position, rb.position + (Vector3.up * stepOffset), stepSpeed));
+                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            }
+    }
+
     private void CheckForWall()
     {
         RaycastHit hit;
         nearWall = Physics.Raycast(transform.position - Vector3.up, moveDir.normalized, out hit, 1f, Environment);
 
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1.2f, Environment) && !isWallRight;
-        isWallRight = Physics.Raycast(transform.position, orientation.right, 1.2f, Environment) && !isWallLeft;
+        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
+        isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
 
-        if (nearWall && !crouching && !grounded)
+        if (nearWall && !crouching && !grounded && !reachedMaxSlope)
         {
             canWallJump = true;
             wallJump = hit.normal;

@@ -30,9 +30,6 @@ public class PlayerMovement : MonoBehaviour
     public float wallClimbForce;
     public float wallTime;
 
-    private float wallElapsed = 0f;
-    private float setClimbForce;
-
     [Header("Movement Control")]
     public float friction;
     public float threshold;
@@ -54,8 +51,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.49f;
-        setClimbForce = wallClimbForce;
+        crouchOffset = crouchScale.y * 0.499f;
     }
 
     void FixedUpdate()
@@ -120,29 +116,24 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallRun()
     {
+        float wallClimb = 0f;
+
         if (s.PlayerInput.canAddWallRunForce)
         {
             cancelWallRun = true;
             s.PlayerInput.canAddWallRunForce = false;
             rb.useGravity = false;
-            wallElapsed = 0f;
 
             float wallMagnitude = (rb.velocity.y * 2f);
-            rb.AddForce(s.orientation.forward * s.PlayerInput.input.y * wallRunForce * 100f);
+            if (wallMagnitude < 0) wallMagnitude *= 1.3f;
 
-            wallClimbForce = setClimbForce;
-            wallClimbForce = wallMagnitude + wallClimbForce;
-            wallClimbForce = Mathf.Clamp(wallClimbForce, -15f, 10f);
-            rb.velocity = new Vector3(rb.velocity.x, wallClimbForce, rb.velocity.z);
+            wallClimb = wallMagnitude + wallClimbForce;
+            wallClimb = Mathf.Clamp(wallClimb, -25f, 15f);
+            rb.velocity = new Vector3(rb.velocity.x, wallClimb, rb.velocity.z);
         }
 
-        wallElapsed += Time.deltaTime;
-
-        if (wallElapsed >= wallTime * 0.6f)
-            rb.AddForce(-transform.up * wallRunForce * 0.3f);
-
         rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.8f);
-        rb.AddForce(-transform.up * wallRunForce * 0.3f);
+        rb.AddForce(-transform.up * wallRunForce * 0.6f);
     }
 
     private void StopWallRun()
@@ -162,7 +153,7 @@ public class PlayerMovement : MonoBehaviour
     {
         crouched = true;
         transform.localScale = crouchScale;
-        transform.position = new Vector3(transform.position.x, transform.position.y - crouchOffset, transform.position.z);
+        rb.position += (Vector3.down * crouchOffset);
 
         if (s.PlayerInput.grounded) if (rb.velocity.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(rb.velocity.magnitude) / 2);
     }
@@ -170,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
     private void StopCrouch()
     {
         crouched = false;
-        transform.position = new Vector3(transform.position.x, transform.position.y + (crouchOffset), transform.position.z);
+        rb.position += (Vector3.up * crouchOffset);
         transform.localScale = playerScale;
 
         if (s.PlayerInput.grounded) rb.velocity *= 0.8f;
