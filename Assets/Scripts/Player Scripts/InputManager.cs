@@ -22,6 +22,8 @@ public class InputManager : MonoBehaviour
     public bool grounded;
     public bool crouching;
     public bool nearWall;
+    public bool onSlope;
+    public bool reachedMaxSlope;
 
     [HideInInspector] public bool wallRunning;
     [HideInInspector] public bool canWallJump;
@@ -30,10 +32,11 @@ public class InputManager : MonoBehaviour
     public bool isWallLeft { get; private set; }
     public bool isWallRight { get; private set; }
 
-    public bool onSlope;
-    public bool reachedMaxSlope;
     public bool jumping { get; private set; }
     public bool moving { get; private set; }
+
+    public bool hitGround { get; private set; }
+    public int stepsSinceLastGrounded { get; private set; }
 
     public bool startCrouch { get; private set; }
     public bool stopCrouch { get; private set; }
@@ -79,6 +82,9 @@ public class InputManager : MonoBehaviour
         if (grounded && !landed) Land(LandVel(lastVel, Math.Abs(lastYVel)));
         if (!grounded && landed) landed = false;
 
+        if (!grounded && stepsSinceLastGrounded < 6) stepsSinceLastGrounded += 1;
+        else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
+
         lastVel = rb.velocity.magnitude;
         lastYVel = rb.velocity.y;
     }
@@ -113,8 +119,9 @@ public class InputManager : MonoBehaviour
 
     private void CalcSlope()
     {
-        if (Physics.Raycast(transform.position, -Vector3.up, out hit, 2.7f, Ground))
+        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground))
         {
+            hitGround = true;
             if (hit.normal != Vector3.up)
             {
                 onSlope = true;
@@ -128,6 +135,7 @@ public class InputManager : MonoBehaviour
                 reachedMaxSlope = false;
             }
         }
+        else hitGround = false;
     }
 
     private void CheckForStep()

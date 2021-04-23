@@ -14,6 +14,8 @@ public class PlayerMovement : MonoBehaviour
     public float jumpCooldown;
     public float maxAirSpeed;
 
+    bool jumped = false;
+
     [Header("Sliding")]
     public Vector3 crouchScale;
     public float slideForce;
@@ -77,7 +79,14 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(n * (vel * 0.3f));
         }
 
-        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
+        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump)
+        {
+            jumped = true;
+            Jump();
+        }
+
+        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded) SnapToGround();
+
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
 
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
@@ -89,14 +98,25 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
     }
 
+    private void SnapToGround()
+    {
+        if (jumped || s.PlayerInput.stepsSinceLastGrounded > 5) return;
+
+        Vector3 vel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+        rb.AddForce(Vector3.down * 1.7f, ForceMode.VelocityChange);
+        rb.AddForce(-vel * 10f);
+    }
+
     private void Jump()
     {
         if (s.PlayerInput.grounded)
         {
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
             if (!crouched) rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
             else if (crouched) rb.AddForce(transform.up * crouchJumpForce * 0.7f, ForceMode.Impulse);
+
+            Invoke("ResetJump", 0.3f);
         }
     }
 
@@ -128,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
             if (wallMagnitude < 0) wallMagnitude *= 1.3f;
 
             wallClimb = wallMagnitude + wallClimbForce;
-            wallClimb = Mathf.Clamp(wallClimb, -25f, 15f);
+            wallClimb = Mathf.Clamp(wallClimb, -15f, 15f);
             rb.velocity = new Vector3(rb.velocity.x, wallClimb, rb.velocity.z);
         }
 
@@ -194,5 +214,10 @@ public class PlayerMovement : MonoBehaviour
             if (!s.PlayerInput.wallRunning && crouched && maxSpeed != maxSlideSpeed) maxSpeed = maxSlideSpeed;
             if (s.PlayerInput.wallRunning && maxSpeed != maxAirSpeed) maxSpeed = maxAirSpeed;
         }
+    }
+
+    void ResetJump()
+    {
+        jumped = false;
     }
 }
