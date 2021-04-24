@@ -69,26 +69,18 @@ public class PlayerMovement : MonoBehaviour
     private void Movement()
     {
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(-transform.up * s.PlayerInput.angle * 0.5f);
-        
-        CounterMovement(new Vector3(-rb.velocity.x, 0, -rb.velocity.z));
 
-        float vel = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
-        if (vel > maxSpeed)
-        {
-            Vector3 n = new Vector3(-rb.velocity.x, 0, -rb.velocity.z);
-            rb.AddForce(n * (vel * 0.3f));
-        }
+        float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
+        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
 
-        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump)
-        {
-            jumped = true;
-            Jump();
-        }
+        CounterMovement(vel);
+        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.45f));
 
-        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded) SnapToGround();
+        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
+
+        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded && !jumped) SnapToGround(vel);
 
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
-
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
         if (s.PlayerInput.stopWallRun && cancelWallRun) StopWallRun();
 
@@ -98,21 +90,22 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
     }
 
-    private void SnapToGround()
+    private void SnapToGround(Vector3 vel)
     {
-        if (jumped || s.PlayerInput.stepsSinceLastGrounded > 5) return;
+        if (s.PlayerInput.stepsSinceLastGrounded > 5) return;
 
-        Vector3 vel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
-        rb.AddForce(Vector3.down * 1.7f, ForceMode.VelocityChange);
-        rb.AddForce(-vel * 10f);
+        rb.AddForce(Vector3.down * 1.8f, ForceMode.VelocityChange);
+        rb.AddForce(-vel * 13f);
     }
 
     private void Jump()
     {
+        jumped = true;
+
         if (s.PlayerInput.grounded)
         {
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
             if (!crouched) rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
             else if (crouched) rb.AddForce(transform.up * crouchJumpForce * 0.7f, ForceMode.Impulse);
 
@@ -191,13 +184,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (crouched && s.PlayerInput.grounded)
         {
-            if (s.PlayerInput.grounded) rb.AddForce(dir * slideFriction);
+            if (s.PlayerInput.grounded) rb.AddForce(-dir * slideFriction);
             return;
         }
 
         if (!s.PlayerInput.grounded || s.PlayerInput.moving) return;
 
-        if (rb.velocity.magnitude >= threshold) rb.AddForce(dir * friction);
+        if (rb.velocity.magnitude >= threshold) rb.AddForce(-dir * friction);
     }
 
     private void MovementControl()

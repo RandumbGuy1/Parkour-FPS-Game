@@ -217,16 +217,6 @@ public class InputManager : MonoBehaviour
             s.CamInput.ResetCameraTilt();
     }
 
-    private void Land(float impactForce)
-    {
-        s.Effects.CameraLand(impactForce);
-        if (impactForce > 55f) ObjectPooler.Instance.Spawn("Land Effects", transform.position - transform.up * 1.5f, Quaternion.Euler(-90, 0, 0));
-        
-        rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
-
-        landed = true;
-    }
-
     private void SprintEffect()
     {
         if (rb.velocity.magnitude >= 25f && !fast)
@@ -248,8 +238,18 @@ public class InputManager : MonoBehaviour
     }
     #endregion
 
+    private void Land(float impactForce)
+    {
+        s.Effects.CameraLand(impactForce);
+        if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
+
+        rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
+
+        landed = true;
+    }
+
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.5f) + Math.Abs(yMag * 2f);
+        return (mag * 0.5f) + Math.Abs(yMag * 3f);
     }
 }

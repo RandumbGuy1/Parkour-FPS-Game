@@ -44,7 +44,7 @@ public class CameraEffects : MonoBehaviour
 	{
 		if (!landed)
 		{
-			magnitude = (mag * 0.041f);
+			magnitude = (mag * 0.03f);
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
 			magnitude = Mathf.Clamp(magnitude, 0f, 2.5f);
 
@@ -53,8 +53,8 @@ public class CameraEffects : MonoBehaviour
 			
 			offsetSmoothTime = setSmoothTime / magnitude;
 			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
-			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.04f, 0.06f);
-	
+			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.046f, 0.06f);
+			
 			landed = true;
 		}
 	}
