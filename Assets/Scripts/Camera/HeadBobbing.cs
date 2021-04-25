@@ -7,41 +7,49 @@ public class HeadBobbing : MonoBehaviour
 {
     [Header("View Bobbing")]
     public float bobSpeed;
-    public float bobAmount;
-    public float returnSmoothTime;
+    public float bobAmountHoriz;
+    public float bobAmountVert;
+    public float bobSmoothTime;
 
-    private float waveSlice;
     private float timer;
-    private float vel = 0;
-    private float newPos;
-    private bool bobbedLastFrame;
+    private bool shouldBob = false;
+    private Vector3 vel = Vector3.zero;
+
+    private Vector3 newPos;
+    private Vector3 smoothOffset = Vector3.zero;
 
     [Header("Assignables")]
     public ScriptManager s;
     public Transform playerHead;
+    public Transform orientation;
 
     void Update()
     {
-        newPos = waveSlice;
-        transform.position = playerHead.position + (Vector3.up * waveSlice);
+        shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && s.rb.velocity.magnitude > 10f;
 
-        if (s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && s.rb.velocity.magnitude > 20f && s.cam.localPosition.y >= -0.1f && !bobbedLastFrame)
-        {
-            timer += bobSpeed * Time.smoothDeltaTime;
-            waveSlice = Mathf.Sin(timer) * bobAmount;
-        }
-        else
-        {
-            timer = 0f;
-            waveSlice = Mathf.SmoothDamp(waveSlice, 0, ref vel, returnSmoothTime);
-            bobbedLastFrame = !InRange(waveSlice, -0.1f, 0.1f);
-        }
+        if (!shouldBob) timer = 0f;
+        else timer += Time.deltaTime;
 
-        if (timer > Mathf.PI * 2) timer = 0f;
+        smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(timer), ref vel, bobSmoothTime);
+        newPos = playerHead.position + smoothOffset;
+
+        transform.position = newPos;
     }
 
-    private bool InRange(float x, float min, float max)
+    private Vector3 HeadBob(float t)
     {
-        return x >= min && x <= max;
+        float horizOffset = 0f;
+        float vertOffset = 0f;
+        Vector3 offset = Vector3.zero;
+
+        if (t > 0)
+        {
+            horizOffset = Mathf.Cos(t * bobSpeed) * bobAmountHoriz;
+            vertOffset = Mathf.Sin(t * bobSpeed * 2) * bobAmountVert;
+
+            offset = orientation.right * horizOffset + Vector3.up * vertOffset;
+        }
+
+        return offset;
     }
 }

@@ -2069,16 +2069,18 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 838078163}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 335552ddfaccd6e4caeb7bb0ebe435e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bobSpeed: 12
-  bobAmount: 0.25
-  returnSmoothTime: 0.1
+  bobSpeed: 8
+  bobAmountHoriz: 0.6
+  bobAmountVert: 0.8
+  bobSmoothTime: 0.3
   s: {fileID: 1650519438}
   playerHead: {fileID: 32658971}
+  orientation: {fileID: 1277575616}
 --- !u!114 &838078167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8752,7 +8754,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.69
+  m_Name: Save 1.7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
