@@ -2075,9 +2075,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bobSpeed: 8
-  bobAmountHoriz: 0.6
-  bobAmountVert: 0.8
-  bobSmoothTime: 0.3
+  bobAmountHoriz: 0.3
+  bobAmountVert: 0.5
+  bobSmoothTime: 0.2
   s: {fileID: 1650519438}
   playerHead: {fileID: 32658971}
   orientation: {fileID: 1277575616}
