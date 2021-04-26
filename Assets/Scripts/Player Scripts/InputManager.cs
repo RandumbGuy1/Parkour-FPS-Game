@@ -9,20 +9,19 @@ public class InputManager : MonoBehaviour
     [HideInInspector] public Vector2 input = Vector3.zero;
     public Vector3 moveDir { get; private set; }
     public Vector3 inputDir { get; private set; }
-    public Vector3 wallJump { get; private set; }
+
+    public Vector3 groundNormal { get; private set; }
+    public Vector3 wallNormal { get; private set; }
 
     float multiplier, multiplierV;
 
     [Header("Thresholds")]
-    [Range(0f, 90f)]
-    public float maxSlopeAngle;
-    public float angle { get; private set; }
+    [Range(0f, 90f)] public float maxSlopeAngle;
 
     [Header("States")]
     public bool grounded;
     public bool crouching;
     public bool nearWall;
-    public bool onSlope;
     public bool reachedMaxSlope;
 
     [HideInInspector] public bool wallRunning;
@@ -37,9 +36,6 @@ public class InputManager : MonoBehaviour
 
     public bool hitGround { get; private set; }
     public int stepsSinceLastGrounded { get; private set; }
-
-    public bool startCrouch { get; private set; }
-    public bool stopCrouch { get; private set; }
 
     bool fast = false;
     bool landed = false;
@@ -58,14 +54,14 @@ public class InputManager : MonoBehaviour
     public float stepOffset;
     public float stepSpeed;
 
-    float lastVel;
-    float lastYVel;
+    public float magnitude { get; private set; }
+    public float yMagnitude { get; private set; }
 
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
     public Transform orientation;
-    
-    public RaycastHit hit;
+
+    private RaycastHit hit;
 
     private ScriptManager s;
     private Rigidbody rb;
@@ -78,15 +74,19 @@ public class InputManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        grounded = Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) && !reachedMaxSlope;
-        if (grounded && !landed) Land(LandVel(lastVel, Math.Abs(lastYVel)));
-        if (!grounded && landed) landed = false;
+        if (grounded) 
+            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
+            {
+                groundNormal = Vector3.zero;
+                landed = false;
+                grounded = false;
+            }
 
         if (!grounded && stepsSinceLastGrounded < 6) stepsSinceLastGrounded += 1;
         else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
 
-        lastVel = rb.velocity.magnitude;
-        lastYVel = rb.velocity.y;
+        magnitude = rb.velocity.magnitude;
+        yMagnitude = rb.velocity.y;
     }
 
     void Update()
@@ -97,15 +97,13 @@ public class InputManager : MonoBehaviour
 
         jumping = Input.GetKeyDown(jumpKey);
         crouching = Input.GetKey(crouchKey) && !wallRunning;
-        startCrouch = Input.GetKeyDown(crouchKey) && !wallRunning;
-        stopCrouch = Input.GetKeyUp(crouchKey) && !wallRunning;
         moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && !grounded && !crouching || nearWall && isWallRight && !grounded && !crouching) wallRunning = true;
         stopWallRun = input.x > 0 && isWallLeft && wallRunning && canWallJump || input.x < 0 && isWallRight && wallRunning && canWallJump;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
-        moveDir = Vector3.ProjectOnPlane(inputDir, hit.normal);
+        moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
         CalcSlope();
         CheckForWall();
@@ -119,23 +117,14 @@ public class InputManager : MonoBehaviour
 
     private void CalcSlope()
     {
-        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground))
+        hitGround = Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground);
+
+        if (hitGround)
         {
-            hitGround = true;
-            if (hit.normal != Vector3.up)
-            {
-                onSlope = true;
-                angle = Vector3.Angle(Vector3.up, hit.normal);
-                reachedMaxSlope = (angle > maxSlopeAngle);
-            }
-            else
-            {
-                angle = 0f;
-                onSlope = false;
-                reachedMaxSlope = false;
-            }
+            float angle = Vector3.Angle(Vector3.up, hit.normal);
+            reachedMaxSlope = angle > maxSlopeAngle;
         }
-        else hitGround = false;
+        else reachedMaxSlope = false;
     }
 
     private void CheckForStep()
@@ -161,13 +150,13 @@ public class InputManager : MonoBehaviour
         if (nearWall && !crouching && !grounded && !reachedMaxSlope)
         {
             canWallJump = true;
-            wallJump = hit.normal;
+            wallNormal = hit.normal;
         }
 
         if (!nearWall && !isWallRight && !isWallLeft || grounded)
         {
             canWallJump = false;
-            wallJump = Vector3.zero;
+            wallNormal = Vector3.zero;
             wallRunning = false;
             canAddWallRunForce = true;
             rb.useGravity = true;
@@ -219,31 +208,55 @@ public class InputManager : MonoBehaviour
 
     private void SprintEffect()
     {
-        if (rb.velocity.magnitude >= 25f && !fast)
+        if (magnitude >= 25f && !fast)
         {
             sprintEffect.Play();
             fast = true;
         }
-        else if (rb.velocity.magnitude < 25f && fast)
+        else if (magnitude < 25f && fast)
         {
             sprintEffect.Stop();
             fast = false;
         }
 
-        if (rb.velocity.magnitude >= 25f)
+        if (magnitude >= 25f)
         {
             var em = sprintEffect.emission;
-            em.rateOverTime = rb.velocity.magnitude;
+            em.rateOverTime = magnitude;
         }
     }
     #endregion
 
+    void OnCollisionEnter(Collision col)
+    {
+        int layer = col.gameObject.layer;
+        if (Ground != (Ground | 1 << layer)) return;
+
+        Vector3 normal = col.GetContact(0).normal;
+
+        if (IsFloor(normal)) if (!landed) Land(LandVel(magnitude, Math.Abs(yMagnitude)));
+    }
+
+    void OnCollisionStay(Collision col)
+    {
+        int layer = col.gameObject.layer;
+        if (Ground != (Ground | 1 << layer)) return;
+
+        Vector3 normal = col.GetContact(0).normal;
+
+        if (IsFloor(normal))
+        {
+            grounded = true;
+            groundNormal = normal;
+        }
+    }
+
     private void Land(float impactForce)
     {
         s.Effects.CameraLand(impactForce);
-        if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
 
-        rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
+        if (impactForce > 70f) 
+            ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
 
         landed = true;
     }
@@ -251,5 +264,11 @@ public class InputManager : MonoBehaviour
     float LandVel(float mag, float yMag)
     {
         return (mag * 0.5f) + Math.Abs(yMag * 3f);
+    }
+
+    bool IsFloor(Vector3 normal)
+    {
+        float angle = Vector3.Angle(Vector3.up, normal);
+        return angle < maxSlopeAngle;
     }
 }

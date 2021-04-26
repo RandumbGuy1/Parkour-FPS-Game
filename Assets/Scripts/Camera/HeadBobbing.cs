@@ -9,7 +9,7 @@ public class HeadBobbing : MonoBehaviour
     public float bobSpeed;
     public float bobAmountHoriz;
     public float bobAmountVert;
-    public float bobSmoothTime;
+    [Range(0f, 0.2f)] public float bobSmoothTime;
 
     private float timer;
     private bool shouldBob = false;
@@ -25,7 +25,7 @@ public class HeadBobbing : MonoBehaviour
 
     void Update()
     {
-        shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && s.rb.velocity.magnitude > 10f;
+        shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && s.PlayerInput.magnitude > 10f;
 
         if (!shouldBob) timer = 0f;
         else timer += Time.deltaTime;

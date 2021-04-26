@@ -2597,7 +2597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.05
+  offsetSmoothTime: 0.1
   backSmoothTime: 0.3
 --- !u!114 &963194230
 MonoBehaviour:
@@ -8754,7 +8754,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.7
+  m_Name: Save 1.71
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9143,7 +9143,6 @@ MonoBehaviour:
   grounded: 1
   crouching: 0
   nearWall: 0
-  onSlope: 0
   reachedMaxSlope: 0
   wallRunning: 0
   canWallJump: 0
@@ -9181,9 +9180,9 @@ MonoBehaviour:
   jumpCooldown: 0.06
   maxAirSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
-  slideForce: 125
+  slideForce: 175
   crouchJumpForce: 20
-  slideFriction: 1.3
+  slideFriction: 1
   maxSlideSpeed: 50
   wallJumpForce: 20
   wallRunForce: 20

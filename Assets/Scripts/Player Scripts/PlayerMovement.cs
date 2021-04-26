@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.499f;
+        crouchOffset = crouchScale.y * 0.5f;
     }
 
     void FixedUpdate()
@@ -68,10 +68,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(-transform.up * s.PlayerInput.angle * 0.5f);
+        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 75f);
 
-        float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+        float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
 
         CounterMovement(vel);
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.45f));
@@ -84,8 +84,8 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
         if (s.PlayerInput.stopWallRun && cancelWallRun) StopWallRun();
 
-        if (s.PlayerInput.startCrouch && !s.PlayerInput.wallRunning) StartCrouch(s.PlayerInput.moveDir);
-        if (s.PlayerInput.stopCrouch && crouched) StopCrouch();
+        if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir);
+        if (!s.PlayerInput.crouching && crouched) StopCrouch();
 
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
     }
@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
-        rb.AddForce(s.PlayerInput.wallJump * wallJumpForce, ForceMode.Impulse);
+        rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
         rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
 
         cancelWallRun = false;
@@ -138,14 +138,14 @@ public class PlayerMovement : MonoBehaviour
             rb.useGravity = false;
 
             float wallMagnitude = (rb.velocity.y * 2f);
-            if (wallMagnitude < 0) wallMagnitude *= 1.3f;
+            if (wallMagnitude < 0) wallMagnitude *= 1.2f;
 
             wallClimb = wallMagnitude + wallClimbForce;
             wallClimb = Mathf.Clamp(wallClimb, -15f, 15f);
             rb.velocity = new Vector3(rb.velocity.x, wallClimb, rb.velocity.z);
         }
 
-        rb.AddForce(-s.PlayerInput.wallJump * wallRunForce * 0.8f);
+        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 0.8f);
         rb.AddForce(-transform.up * wallRunForce * 0.6f);
     }
 
@@ -156,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
             s.PlayerInput.wallRunning = false;
             s.PlayerInput.stopWallRun = false;
 
-            rb.AddForce(s.PlayerInput.wallJump * wallJumpForce * 0.8f, ForceMode.Impulse);
+            rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
 
             cancelWallRun = false;
         }
@@ -165,10 +165,11 @@ public class PlayerMovement : MonoBehaviour
     private void StartCrouch(Vector3 dir)
     {
         crouched = true;
+
+        if (s.PlayerInput.grounded) if (s.PlayerInput.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.PlayerInput.magnitude));
+
         transform.localScale = crouchScale;
         rb.position += (Vector3.down * crouchOffset);
-
-        if (s.PlayerInput.grounded) if (rb.velocity.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(rb.velocity.magnitude) / 2);
     }
 
     private void StopCrouch()
@@ -190,7 +191,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!s.PlayerInput.grounded || s.PlayerInput.moving) return;
 
-        if (rb.velocity.magnitude >= threshold) rb.AddForce(-dir * friction);
+        if (s.PlayerInput.magnitude >= threshold) rb.AddForce(-dir * friction);
     }
 
     private void MovementControl()
