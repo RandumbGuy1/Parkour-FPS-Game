@@ -17,10 +17,10 @@ public class InputManager : MonoBehaviour
 
     [Header("Thresholds")]
     [Range(0f, 90f)] public float maxSlopeAngle;
+    public float minimumJumpHeight;
 
     [Header("States")]
     public bool grounded;
-    public bool crouching;
     public bool nearWall;
     public bool reachedMaxSlope;
 
@@ -31,6 +31,7 @@ public class InputManager : MonoBehaviour
     public bool isWallLeft { get; private set; }
     public bool isWallRight { get; private set; }
 
+    public bool crouching { get; private set; }
     public bool jumping { get; private set; }
     public bool moving { get; private set; }
 
@@ -48,6 +49,7 @@ public class InputManager : MonoBehaviour
     public LayerMask Ground;
     public LayerMask Environment;
     public float groundRadius;
+    public float wallRadius;
 
     [Header("Stairs")]
     public float stepHeight;
@@ -74,16 +76,7 @@ public class InputManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (grounded) 
-            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
-            {
-                groundNormal = Vector3.zero;
-                landed = false;
-                grounded = false;
-            }
-
-        if (!grounded && stepsSinceLastGrounded < 6) stepsSinceLastGrounded += 1;
-        else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
+        GroundDetection();
 
         magnitude = rb.velocity.magnitude;
         yMagnitude = rb.velocity.y;
@@ -91,21 +84,21 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        input.x = Input.GetAxisRaw("Horizontal");
-        input.y = Input.GetAxisRaw("Vertical");
-        input.Normalize();
+        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
 
         jumping = Input.GetKeyDown(jumpKey);
         crouching = Input.GetKey(crouchKey) && !wallRunning;
         moving = input.x != 0f || input.y != 0f;
 
-        if (nearWall && isWallLeft && !grounded && !crouching || nearWall && isWallRight && !grounded && !crouching) wallRunning = true;
+        if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
         stopWallRun = input.x > 0 && isWallLeft && wallRunning && canWallJump || input.x < 0 && isWallRight && wallRunning && canWallJump;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
-        CalcSlope();
+        hitGround = Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground);
+        reachedMaxSlope = Vector3.Angle(Vector3.up, hit.normal) > maxSlopeAngle && hitGround;
+
         CheckForWall();
         MovementControl();
 
@@ -115,48 +108,41 @@ public class InputManager : MonoBehaviour
 
     #region Movement Calculations
 
-    private void CalcSlope()
+    private void GroundDetection()
     {
-        hitGround = Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground);
-
-        if (hitGround)
-        {
-            float angle = Vector3.Angle(Vector3.up, hit.normal);
-            reachedMaxSlope = angle > maxSlopeAngle;
-        }
-        else reachedMaxSlope = false;
-    }
-
-    private void CheckForStep()
-    {
-        if (wallRunning) return;
-             
-        if (Physics.Raycast(s.groundCheck.position + (Vector3.down * 0.4f), orientation.forward, 1f, Environment))
-            if (!Physics.Raycast(s.groundCheck.position + (Vector3.up * stepHeight), orientation.forward, 1.5f, Environment) && input.y > 0f)
+        if (grounded)
+            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
             {
-                rb.MovePosition(Vector3.Lerp(rb.position, rb.position + (Vector3.up * stepOffset), stepSpeed));
-                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+                groundNormal = Vector3.zero;
+                landed = false;
+                grounded = false;
             }
+
+        if (!grounded && stepsSinceLastGrounded < 6) stepsSinceLastGrounded += 1;
+        else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
     }
 
     private void CheckForWall()
     {
-        RaycastHit hit;
-        nearWall = Physics.Raycast(transform.position - Vector3.up, moveDir.normalized, out hit, 1f, Environment);
-
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
-        isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
-
-        if (nearWall && !crouching && !grounded && !reachedMaxSlope)
+        if (nearWall)
         {
-            canWallJump = true;
-            wallNormal = hit.normal;
+            isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
+            isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
+
+            canWallJump = !crouching && !reachedMaxSlope && !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
+
+            if (!Physics.CheckSphere(transform.position, wallRadius, Environment))
+            {
+                wallNormal = Vector3.zero;
+                isWallLeft = false;
+                isWallRight = false;
+                canWallJump = false;
+                nearWall = false;
+            }
         }
 
-        if (!nearWall && !isWallRight && !isWallLeft || grounded)
+        if (!nearWall || !isWallRight && !isWallLeft || !canWallJump)
         {
-            canWallJump = false;
-            wallNormal = Vector3.zero;
             wallRunning = false;
             canAddWallRunForce = true;
             rb.useGravity = true;
@@ -249,6 +235,12 @@ public class InputManager : MonoBehaviour
             grounded = true;
             groundNormal = normal;
         }
+
+        if (IsWall(normal))
+        {
+            nearWall = true;
+            wallNormal = normal;
+        }
     }
 
     private void Land(float impactForce)
@@ -270,5 +262,10 @@ public class InputManager : MonoBehaviour
     {
         float angle = Vector3.Angle(Vector3.up, normal);
         return angle < maxSlopeAngle;
+    }
+
+    bool IsWall(Vector3 normal)
+    {
+        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.1f;
     }
 }
