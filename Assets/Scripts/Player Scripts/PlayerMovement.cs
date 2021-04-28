@@ -84,7 +84,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
         if (s.PlayerInput.stopWallRun && cancelWallRun) StopWallRun();
 
-        if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir);
+        if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir.normalized);
         if (!s.PlayerInput.crouching && crouched) StopCrouch();
 
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
@@ -92,10 +92,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void SnapToGround(Vector3 vel)
     {
-        if (s.PlayerInput.stepsSinceLastGrounded > 5) return;
+        if (s.PlayerInput.stepsSinceLastGrounded > 4) return;
 
-        rb.AddForce(Vector3.down * 1.8f, ForceMode.VelocityChange);
-        rb.AddForce(-vel * 13f);
+        rb.AddForce(Vector3.down * 2f, ForceMode.VelocityChange);
+        rb.AddForce(-vel * 15f);
     }
 
     private void Jump()

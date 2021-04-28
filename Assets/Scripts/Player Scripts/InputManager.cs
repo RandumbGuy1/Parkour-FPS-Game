@@ -50,11 +50,7 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
     public float groundRadius;
     public float wallRadius;
-
-    [Header("Stairs")]
-    public float stepHeight;
     public float stepOffset;
-    public float stepSpeed;
 
     public float magnitude { get; private set; }
     public float yMagnitude { get; private set; }
@@ -91,7 +87,7 @@ public class InputManager : MonoBehaviour
         moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
-        stopWallRun = input.x > 0 && isWallLeft && wallRunning && canWallJump || input.x < 0 && isWallRight && wallRunning && canWallJump;
+        stopWallRun = Vector3.Dot(moveDir.normalized, wallNormal) > 0.5f && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
@@ -118,7 +114,7 @@ public class InputManager : MonoBehaviour
                 grounded = false;
             }
 
-        if (!grounded && stepsSinceLastGrounded < 6) stepsSinceLastGrounded += 1;
+        if (!grounded && stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
         else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
     }
 
@@ -126,12 +122,15 @@ public class InputManager : MonoBehaviour
     {
         if (nearWall)
         {
+            Vector3 point1 = transform.position + (Vector3.up * 0.5f);
+            Vector3 point2 = transform.position + (Vector3.down * 0.6f);
+
             isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
             isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
 
             canWallJump = !crouching && !reachedMaxSlope && !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
 
-            if (!Physics.CheckSphere(transform.position, wallRadius, Environment))
+            if (!Physics.CheckCapsule(point1, point2, wallRadius, Environment))
             {
                 wallNormal = Vector3.zero;
                 isWallLeft = false;
@@ -160,15 +159,15 @@ public class InputManager : MonoBehaviour
 
         if (!grounded)
         {
-            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.7f)
+            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.8f)
             {
                 multiplier = 0.5f;
                 multiplierV = 0.8f;
             }
-            if (!wallRunning && crouching && multiplier != 0.6f && multiplierV != 0.6f)
+            if (!wallRunning && crouching && multiplier != 0.3f && multiplierV != 0.8f)
             {
-                multiplier = 0.5f; 
-                multiplierV = 0.5f;
+                multiplier = 0.3f; 
+                multiplierV = 0.8f;
             }
             if (s.PlayerInput.wallRunning && multiplier != 0.01f && multiplierV != 0.30f)
             {
@@ -221,6 +220,24 @@ public class InputManager : MonoBehaviour
         Vector3 normal = col.GetContact(0).normal;
 
         if (IsFloor(normal)) if (!landed) Land(LandVel(magnitude, Math.Abs(yMagnitude)));
+
+        if (col.transform.GetComponent<Rigidbody>()) return;
+
+        if (IsWall(normal))
+        {
+            Vector3 dir = moveDir;
+            Vector3 vaultCheck = s.playerHead.position;
+
+            if (Vector3.Dot(dir.normalized, normal) > -0.4f) return;
+
+            if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment)) return;
+
+            RaycastHit hit;
+            if (!Physics.Raycast(vaultCheck + dir.normalized * 2f, Vector3.down, out hit, 3f, Environment)) return;
+
+            Vector3 vaultPoint = hit.point + (Vector3.up * 2f);
+            rb.position = vaultPoint;
+        }
     }
 
     void OnCollisionStay(Collision col)

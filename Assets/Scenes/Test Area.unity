@@ -8755,7 +8755,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.72
+  m_Name: Save 1.73
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9141,7 +9141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   input: {x: 0, y: 0}
   maxSlopeAngle: 55
-  minimumJumpHeight: 1.4
+  minimumJumpHeight: 1.3
   grounded: 1
   nearWall: 0
   reachedMaxSlope: 0
@@ -9159,9 +9159,7 @@ MonoBehaviour:
     m_Bits: 256
   groundRadius: 0.45
   wallRadius: 0.8
-  stepHeight: 1.5
   stepOffset: 0.1
-  stepSpeed: 100
   sprintEffect: {fileID: 2080955619}
   orientation: {fileID: 1277575616}
 --- !u!114 &1650519436
