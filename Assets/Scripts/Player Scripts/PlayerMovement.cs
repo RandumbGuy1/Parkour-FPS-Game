@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
 
-        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded && !jumped) SnapToGround(vel);
+        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded && !jumped && !s.PlayerInput.vaulting) SnapToGround(vel);
 
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
@@ -116,7 +116,6 @@ public class PlayerMovement : MonoBehaviour
     private void WallJump()
     {
         s.PlayerInput.wallRunning = false;
-        s.PlayerInput.canWallJump = false;
         s.PlayerInput.grounded = false;
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
@@ -166,7 +165,7 @@ public class PlayerMovement : MonoBehaviour
     {
         crouched = true;
 
-        if (s.PlayerInput.grounded) if (s.PlayerInput.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.PlayerInput.magnitude));
+        if (s.PlayerInput.grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.magnitude));
 
         transform.localScale = crouchScale;
         rb.position += (Vector3.down * crouchOffset);
@@ -191,7 +190,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!s.PlayerInput.grounded || s.PlayerInput.moving) return;
 
-        if (s.PlayerInput.magnitude >= threshold) rb.AddForce(-dir * friction);
+        if (s.magnitude >= threshold) rb.AddForce(-dir * friction);
     }
 
     private void MovementControl()

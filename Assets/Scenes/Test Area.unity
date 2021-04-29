@@ -2598,7 +2598,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.08
+  offsetSmoothTime: 0.07
   backSmoothTime: 0.3
 --- !u!114 &963194230
 MonoBehaviour:
@@ -8755,7 +8755,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.73
+  m_Name: Save 1.74
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9146,7 +9146,6 @@ MonoBehaviour:
   nearWall: 0
   reachedMaxSlope: 0
   wallRunning: 0
-  canWallJump: 0
   canAddWallRunForce: 0
   stopWallRun: 0
   jumpKey: 32
@@ -9159,7 +9158,7 @@ MonoBehaviour:
     m_Bits: 256
   groundRadius: 0.45
   wallRadius: 0.8
-  stepOffset: 0.1
+  vaultDuration: 0.035
   sprintEffect: {fileID: 2080955619}
   orientation: {fileID: 1277575616}
 --- !u!114 &1650519436

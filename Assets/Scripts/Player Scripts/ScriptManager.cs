@@ -17,4 +17,13 @@ public class ScriptManager : MonoBehaviour
     public Transform groundCheck;
     public Transform cam;
     public Rigidbody rb;
+
+    public float magnitude { get; private set; }
+    public Vector3 velocity { get; private set; }
+
+    void FixedUpdate()
+    {
+        magnitude = rb.velocity.magnitude;
+        velocity = rb.velocity;
+    }
 }

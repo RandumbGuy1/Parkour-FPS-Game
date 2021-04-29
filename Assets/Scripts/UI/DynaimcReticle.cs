@@ -24,7 +24,7 @@ public class DynaimcReticle : MonoBehaviour
 
     private void Reticle()
     {
-        newSize = Mathf.Pow((s.rb.velocity.magnitude * 5f) + (s.CamInput.camVel * 0.5f), 1.3f);
+        newSize = Mathf.Pow((s.magnitude * 5f) + (s.CamInput.camVel * 0.5f), 1.3f);
         newSize = Mathf.Clamp(newSize, minSize, maxSize);
         size = Mathf.SmoothDamp(size, newSize, ref vel, smoothTime);
         reticle.sizeDelta = new Vector2(size, size);

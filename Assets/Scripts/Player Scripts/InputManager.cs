@@ -25,15 +25,18 @@ public class InputManager : MonoBehaviour
     public bool reachedMaxSlope;
 
     [HideInInspector] public bool wallRunning;
-    [HideInInspector] public bool canWallJump;
     [HideInInspector] public bool canAddWallRunForce;
     [HideInInspector] public bool stopWallRun;
+
     public bool isWallLeft { get; private set; }
     public bool isWallRight { get; private set; }
+    public bool canWallRun { get; private set; }
+    public bool canWallJump { get; private set; }
 
     public bool crouching { get; private set; }
     public bool jumping { get; private set; }
     public bool moving { get; private set; }
+    public bool vaulting { get; private set; }
 
     public bool hitGround { get; private set; }
     public int stepsSinceLastGrounded { get; private set; }
@@ -50,10 +53,9 @@ public class InputManager : MonoBehaviour
     public LayerMask Environment;
     public float groundRadius;
     public float wallRadius;
-    public float stepOffset;
 
-    public float magnitude { get; private set; }
-    public float yMagnitude { get; private set; }
+    [Header("Vaulting")]
+    public float vaultDuration;
 
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
@@ -62,20 +64,16 @@ public class InputManager : MonoBehaviour
     private RaycastHit hit;
 
     private ScriptManager s;
-    private Rigidbody rb;
 
     void Awake()
     {
         s = GetComponent<ScriptManager>();
-        rb = GetComponent<Rigidbody>();
+        vaulting = false;
     }
 
     void FixedUpdate()
     {
         GroundDetection();
-
-        magnitude = rb.velocity.magnitude;
-        yMagnitude = rb.velocity.y;
     }
 
     void Update()
@@ -87,13 +85,14 @@ public class InputManager : MonoBehaviour
         moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
-        stopWallRun = Vector3.Dot(moveDir.normalized, wallNormal) > 0.5f && wallRunning;
+        stopWallRun = Vector3.Dot(moveDir.normalized, wallNormal) > 0.3f && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
         hitGround = Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground);
-        reachedMaxSlope = Vector3.Angle(Vector3.up, hit.normal) > maxSlopeAngle && hitGround;
+        if (hitGround) reachedMaxSlope = Vector3.Angle(Vector3.up, hit.normal) > maxSlopeAngle;
+        else reachedMaxSlope = false;
 
         CheckForWall();
         MovementControl();
@@ -128,7 +127,8 @@ public class InputManager : MonoBehaviour
             isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
             isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
 
-            canWallJump = !crouching && !reachedMaxSlope && !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
+            canWallRun = !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
+            canWallJump = !crouching && !reachedMaxSlope && !vaulting && canWallRun;
 
             if (!Physics.CheckCapsule(point1, point2, wallRadius, Environment))
             {
@@ -136,16 +136,45 @@ public class InputManager : MonoBehaviour
                 isWallLeft = false;
                 isWallRight = false;
                 canWallJump = false;
+                canWallRun = false;
                 nearWall = false;
             }
         }
 
-        if (!nearWall || !isWallRight && !isWallLeft || !canWallJump)
+        if (!nearWall || !isWallRight && !isWallLeft || !canWallRun)
         {
             wallRunning = false;
             canAddWallRunForce = true;
-            rb.useGravity = true;
+            s.rb.useGravity = true;
         }    
+    }
+
+    private IEnumerator vaultMovement(Vector3 newPos, Vector3 extraForce)
+    {
+        s.rb.useGravity = false;
+
+        Vector3 vel = Vector3.zero;
+        float elapsed = 0f;
+
+        float distance = Vector3.Distance(s.rb.position, newPos) * 0.01f;
+        distance = Mathf.Round(distance * 1000.0f) * 0.001f;
+
+        float duration = vaultDuration + distance;
+
+        while (elapsed < (duration * 2f))
+        {
+            vaulting = true;
+            s.rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration));
+            elapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        s.rb.useGravity = true;
+        s.rb.AddForce(extraForce * 10f, ForceMode.VelocityChange);
+        s.rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
+
+        vaulting = false;
     }
 
     private void MovementControl()
@@ -159,9 +188,9 @@ public class InputManager : MonoBehaviour
 
         if (!grounded)
         {
-            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.8f)
+            if (!wallRunning && !crouching && multiplier != 0.6f && multiplierV != 0.8f)
             {
-                multiplier = 0.5f;
+                multiplier = 0.6f;
                 multiplierV = 0.8f;
             }
             if (!wallRunning && crouching && multiplier != 0.3f && multiplierV != 0.8f)
@@ -193,21 +222,21 @@ public class InputManager : MonoBehaviour
 
     private void SprintEffect()
     {
-        if (magnitude >= 25f && !fast)
+        if (s.magnitude >= 25f && !fast)
         {
             sprintEffect.Play();
             fast = true;
         }
-        else if (magnitude < 25f && fast)
+        else if (s.magnitude < 25f && fast)
         {
             sprintEffect.Stop();
             fast = false;
         }
 
-        if (magnitude >= 25f)
+        if (s.magnitude >= 25f)
         {
             var em = sprintEffect.emission;
-            em.rateOverTime = magnitude;
+            em.rateOverTime = s.magnitude;
         }
     }
     #endregion
@@ -219,25 +248,24 @@ public class InputManager : MonoBehaviour
 
         Vector3 normal = col.GetContact(0).normal;
 
-        if (IsFloor(normal)) if (!landed) Land(LandVel(magnitude, Math.Abs(yMagnitude)));
-
-        if (col.transform.GetComponent<Rigidbody>()) return;
+        if (IsFloor(normal)) if (!landed) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
 
         if (IsWall(normal))
         {
+            if (col.transform.GetComponent<Rigidbody>() || wallRunning) return;
+
             Vector3 dir = moveDir;
-            Vector3 vaultCheck = s.playerHead.position;
+            Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.4f) return;
-
+            if (Vector3.Dot(dir.normalized, normal) > -0.3f) return;
             if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment)) return;
 
             RaycastHit hit;
-            if (!Physics.Raycast(vaultCheck + dir.normalized * 2f, Vector3.down, out hit, 3f, Environment)) return;
+            if (!Physics.Raycast(vaultCheck + (dir.normalized), Vector3.down, out hit, 3f, Environment)) return;
 
-            Vector3 vaultPoint = hit.point + (Vector3.up * 2f);
-            rb.position = vaultPoint;
-        }
+            Vector3 vaultPoint = hit.point + (Vector3.up * 2.6f);
+            if (!vaulting) StartCoroutine(vaultMovement(vaultPoint, dir));
+        }   
     }
 
     void OnCollisionStay(Collision col)
