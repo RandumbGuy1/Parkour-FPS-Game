@@ -6,7 +6,7 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    [HideInInspector] public Vector2 input = Vector3.zero;
+    public Vector2 input { get; private set; }
     public Vector3 moveDir { get; private set; }
     public Vector3 inputDir { get; private set; }
 
@@ -85,7 +85,7 @@ public class InputManager : MonoBehaviour
         moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
-        stopWallRun = Vector3.Dot(moveDir.normalized, wallNormal) > 0.4f && wallRunning;
+        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallLeft && input.x < 0 && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
@@ -151,6 +151,7 @@ public class InputManager : MonoBehaviour
     private IEnumerator vaultMovement(Vector3 newPos, float distance, Vector3 dir)
     {
         s.rb.useGravity = false;
+        s.rb.velocity = Vector3.zero;
 
         Vector3 vel = Vector3.zero;
         float elapsed = 0f;
@@ -163,7 +164,7 @@ public class InputManager : MonoBehaviour
         while (elapsed < (duration * 2f))
         {
             vaulting = true;
-            s.rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration));
+            s.rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
             elapsed += Time.fixedDeltaTime;
 
             yield return new WaitForFixedUpdate();
@@ -256,7 +257,7 @@ public class InputManager : MonoBehaviour
             Vector3 dir = moveDir;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.1f) return;
+            if (Vector3.Dot(dir.normalized, normal) > -0.3f) return;
             if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -normal, 1.3f, Environment)) return;
 
             RaycastHit hit;
