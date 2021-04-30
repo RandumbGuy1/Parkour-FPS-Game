@@ -30,7 +30,6 @@ public class PlayerMovement : MonoBehaviour
     public float wallJumpForce;
     public float wallRunForce;
     public float wallClimbForce;
-    public float wallTime;
 
     [Header("Movement Control")]
     public float friction;
@@ -74,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
 
         CounterMovement(vel);
-        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.45f));
+        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.3f));
 
         if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
 
@@ -92,9 +91,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void SnapToGround(Vector3 vel)
     {
-        if (s.PlayerInput.stepsSinceLastGrounded > 4) return;
+        if (s.PlayerInput.stepsSinceLastGrounded > 5) return;
 
-        rb.AddForce(Vector3.down * 2f, ForceMode.VelocityChange);
+        rb.AddForce(Vector3.down * 2.3f, ForceMode.VelocityChange);
         rb.AddForce(-vel * 15f);
     }
 

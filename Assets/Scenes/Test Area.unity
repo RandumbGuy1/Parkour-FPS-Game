@@ -2154,7 +2154,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 907979589}
   m_LocalRotation: {x: 0, y: 0, z: 0.5, w: 0.8660254}
-  m_LocalPosition: {x: -22.3, y: 1.1, z: 35.2}
+  m_LocalPosition: {x: -8.2, y: 5.41, z: 52.47}
   m_LocalScale: {x: 20, y: 1, z: 10}
   m_Children: []
   m_Father: {fileID: 492395354}
@@ -2598,7 +2598,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.07
+  offsetSmoothTime: 0.1
   backSmoothTime: 0.3
 --- !u!114 &963194230
 MonoBehaviour:
@@ -8755,7 +8755,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.74
+  m_Name: Save 1.75
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9183,10 +9183,9 @@ MonoBehaviour:
   crouchJumpForce: 20
   slideFriction: 1
   maxSlideSpeed: 50
-  wallJumpForce: 20
+  wallJumpForce: 15
   wallRunForce: 20
   wallClimbForce: 10
-  wallTime: 3
   friction: 8
   threshold: 0.05
 --- !u!114 &1650519437

@@ -28,7 +28,6 @@ public class PickupObj : MonoBehaviour
 
     void Awake()
     {
-        //Save 1.5
         s = GetComponent<ScriptManager>();
         setThrowForce = throwForce;
     }
@@ -39,9 +38,7 @@ public class PickupObj : MonoBehaviour
         {
             RaycastHit hit;
             if (Physics.SphereCast(camera.position, grabRadius, camera.forward, out hit, grabRange))
-            {
                 StartCoroutine(Pickup(hit.transform.gameObject));
-            }
         }
 
         if (heldObj != null) CheckObject();
@@ -50,9 +47,7 @@ public class PickupObj : MonoBehaviour
     private void CheckObject()
     {
         if (Vector3.Distance(heldObj.transform.position, grabPos.position) > 0.1f)
-        {
             heldObj.transform.position = Vector3.SmoothDamp(heldObj.transform.position, grabPos.position, ref vel, objSpeed);
-        }
 
         objRb.velocity = Vector3.zero;
 
@@ -88,7 +83,7 @@ public class PickupObj : MonoBehaviour
         objRb.useGravity = true;
         objRb.velocity = Vector3.zero;
 
-        throwForce = setThrowForce + (s.rb.velocity.magnitude * 0.3f);
+        throwForce = setThrowForce + (s.velocity.magnitude * 0.3f);
 
         objRb.velocity = throwForce * (grabPos.position - heldObj.transform.position);
         objRb.drag = storedDrag;
