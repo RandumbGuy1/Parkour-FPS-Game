@@ -85,7 +85,7 @@ public class InputManager : MonoBehaviour
         moving = input.x != 0f || input.y != 0f;
 
         if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
-        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallLeft && input.x < 0 && wallRunning;
+        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
@@ -304,7 +304,7 @@ public class InputManager : MonoBehaviour
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.4f) + Math.Abs(yMag * 2.5f);
+        return (mag * 0.4f) + Math.Abs(yMag * 2.8f);
     }
 
     bool IsFloor(Vector3 normal)

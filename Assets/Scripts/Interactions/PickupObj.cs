@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PickupObj : MonoBehaviour
 {
-    [Header("Grab Variables")]
+    [Header("Grab detection")]
+    public LayerMask Objects;
     public float grabRange;
     public float throwForce;
     public float grabRadius;
@@ -37,7 +38,7 @@ public class PickupObj : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
-            if (Physics.SphereCast(camera.position, grabRadius, camera.forward, out hit, grabRange))
+            if (Physics.SphereCast(camera.position, grabRadius, camera.forward, out hit, grabRange, Objects))
                 StartCoroutine(Pickup(hit.transform.gameObject));
         }
 

@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
 
-        CounterMovement(vel);
+        CounterMovement(s.PlayerInput.input.x, s.PlayerInput.input.y, vel);
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.3f));
 
         if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
@@ -119,8 +119,8 @@ public class PlayerMovement : MonoBehaviour
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
-        rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
         rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
+        rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
 
         cancelWallRun = false;
     }
@@ -179,17 +179,23 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded) rb.velocity *= 0.8f;
     }
 
-    private void CounterMovement(Vector3 dir)
+    private void CounterMovement(float x, float z, Vector3 slideDir)
     {
-        if (crouched && s.PlayerInput.grounded)
+        if (!s.PlayerInput.grounded) return;
+
+        if (crouched)
         {
-            if (s.PlayerInput.grounded) rb.AddForce(-dir * slideFriction);
+            if (s.PlayerInput.grounded) rb.AddForce(-slideDir * slideFriction);
             return;
         }
 
-        if (!s.PlayerInput.grounded || s.PlayerInput.moving) return;
+        Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
 
-        if (s.magnitude >= threshold) rb.AddForce(-dir * friction);
+        if (x == 0 && Math.Abs(mag.x) > threshold || x > 0 && mag.x < -threshold || x < 0 && mag.x > threshold)
+            rb.AddForce(s.orientation.right * -mag.x * friction);
+
+        if (z == 0 && Math.Abs(mag.z) > threshold || z > 0 && mag.z < -threshold || z < 0 && mag.z > threshold)
+            rb.AddForce(s.orientation.forward * -mag.z * friction);
     }
 
     private void MovementControl()
