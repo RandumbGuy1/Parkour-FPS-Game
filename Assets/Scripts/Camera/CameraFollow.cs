@@ -41,7 +41,7 @@ public class CameraFollow : MonoBehaviour
 	private float ySmoothRotation;
 	private float xSmoothRotation;
 
-	public Vector3 rotationDelta { get; private set; }
+	Vector3 rotationDelta;
 	Vector3 rotationLast;
 
 	public float camVel { get; private set; }
@@ -106,7 +106,7 @@ public class CameraFollow : MonoBehaviour
 		rotationDelta = camera.rotation.eulerAngles - rotationLast;
 		rotationLast = camera.rotation.eulerAngles;
 
-		camVel = (Math.Abs(rotationDelta.x) + Math.Abs(rotationDelta.y) + Math.Abs(rotationDelta.z)) * 35f;
+		camVel = rotationDelta.sqrMagnitude;
 	}
 
 	public void CameraWallRun(int i)

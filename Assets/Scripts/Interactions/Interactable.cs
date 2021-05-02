@@ -6,12 +6,12 @@ public abstract class Interactable : MonoBehaviour
 {
     public enum InteractionType
     {
-        pickup,
-        button,
+        WeaponPickup,
+        Button,
     }
 
     public InteractionType type;
 
     public abstract string GetDiscription();
-    public abstract string OnInteract();
+    public abstract void OnInteract();
 }

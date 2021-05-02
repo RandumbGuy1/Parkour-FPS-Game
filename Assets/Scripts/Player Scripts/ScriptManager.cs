@@ -9,6 +9,7 @@ public class ScriptManager : MonoBehaviour
     public InputManager PlayerInput;
     public CameraFollow CamInput;
     public CameraEffects Effects;
+    public HeadBobbing MoveCamera;
     public CameraShaker Shake;
 
     [Header("Assignables")]

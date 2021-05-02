@@ -16,7 +16,6 @@ public class PickupObj : MonoBehaviour
 
     [Header("Assignables")]
     public Transform grabPos;
-    public Transform camera;
     private GameObject heldObj;
     private Rigidbody objRb;
 
@@ -38,7 +37,7 @@ public class PickupObj : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
-            if (Physics.SphereCast(camera.position, grabRadius, camera.forward, out hit, grabRange, Objects))
+            if (Physics.SphereCast(s.cam.position, grabRadius, s.cam.forward, out hit, grabRange, Objects))
                 StartCoroutine(Pickup(hit.transform.gameObject));
         }
 
@@ -58,25 +57,25 @@ public class PickupObj : MonoBehaviour
 
     private IEnumerator Pickup(GameObject obj)
     {
-        if (obj.transform.GetComponent<Rigidbody>())
+        objRb = obj.transform.GetComponent<Rigidbody>();
+        if (objRb == null) yield return null;
+
+        if (objRb.mass <= 3f)
         {
-            objRb = obj.transform.GetComponent<Rigidbody>();
-            if (objRb.mass <= 3f)
-            {
-                storedDrag = objRb.drag;
-                storedAngularDrag = objRb.angularDrag;
+            storedDrag = objRb.drag;
+            storedAngularDrag = objRb.angularDrag;
 
-                objRb.useGravity = false;
-                objRb.drag = 0f;
-                objRb.angularDrag = 1f;
+            objRb.useGravity = false;
+            objRb.drag = 0f;
+            objRb.angularDrag = 1f;
+            heldObj = obj;
 
-                heldObj = obj;
-            }
+            yield return new WaitForSeconds(0.5f);
+
+            grabbing = true;
         }
 
-        yield return new WaitForSeconds(0.5f);
-
-        grabbing = true;
+        yield return null;
     }
 
     private void Drop()

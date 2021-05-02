@@ -37,6 +37,7 @@ public class InputManager : MonoBehaviour
     public bool jumping { get; private set; }
     public bool moving { get; private set; }
     public bool vaulting { get; private set; }
+    public bool interacting { get; private set; }
 
     public bool hitGround { get; private set; }
     public int stepsSinceLastGrounded { get; private set; }
@@ -47,6 +48,7 @@ public class InputManager : MonoBehaviour
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode crouchKey = KeyCode.LeftControl;
+    public KeyCode interactKey = KeyCode.E;
 
     [Header("Collision")]
     public LayerMask Ground;
@@ -60,9 +62,7 @@ public class InputManager : MonoBehaviour
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
     public Transform orientation;
-
     private RaycastHit hit;
-
     private ScriptManager s;
 
     void Awake()
@@ -81,11 +81,12 @@ public class InputManager : MonoBehaviour
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
 
         jumping = Input.GetKeyDown(jumpKey);
-        crouching = Input.GetKey(crouchKey) && !wallRunning;
+        crouching = Input.GetKey(crouchKey);
         moving = input.x != 0f || input.y != 0f;
+        interacting = Input.GetKeyDown(interactKey);
 
         if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
-        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
+        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning || crouching && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
@@ -171,7 +172,8 @@ public class InputManager : MonoBehaviour
         }
 
         s.rb.AddForce(dir * 9f, ForceMode.VelocityChange);
-        s.rb.AddForce(Vector3.down * (1 / distance) * 0.05f, ForceMode.VelocityChange);
+        s.rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
+
         s.rb.useGravity = true;
         vaulting = false;
     }
@@ -209,13 +211,12 @@ public class InputManager : MonoBehaviour
     #region Visual Effects
     private void CameraTilt()
     {
-        if (crouching && grounded) s.CamInput.CameraSlide();
-        if (!crouching && !wallRunning) s.CamInput.ResetCameraTilt();
+        if (crouching) s.CamInput.CameraSlide();
 
         if (wallRunning && isWallLeft) s.CamInput.CameraWallRun(-1);
         if (wallRunning && isWallRight) s.CamInput.CameraWallRun(1);
 
-        if (!wallRunning && Math.Abs(s.CamInput.CameraTilt) > 0f || !wallRunning && s.CamInput.fov > 80f)
+        if (!wallRunning && Math.Abs(s.CamInput.CameraTilt) > 0f && !crouching || !wallRunning && s.CamInput.fov > 80f)
             s.CamInput.ResetCameraTilt();
     }
 
@@ -263,7 +264,7 @@ public class InputManager : MonoBehaviour
             RaycastHit hit;
             if (!Physics.Raycast(vaultCheck + (dir.normalized), Vector3.down, out hit, 3f, Environment)) return;
 
-            Vector3 vaultPoint = hit.point + (Vector3.up * 2f);
+            Vector3 vaultPoint = hit.point + (Vector3.up * 2.1f);
             float distance = Vector3.Distance(s.rb.position, vaultPoint);
             vaultPoint += (Vector3.up * (distance * 0.3f));
 

@@ -24,7 +24,7 @@ public class CameraEffects : MonoBehaviour
 		setSmoothTime = offsetSmoothTime;
 	}
 
-	void Update()
+	void LateUpdate()
 	{
 		#region Camera Land Bob
 		if (landed)

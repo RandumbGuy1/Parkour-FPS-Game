@@ -108,6 +108,7 @@ public class PlayerMovement : MonoBehaviour
             if (!crouched) rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
             else if (crouched) rb.AddForce(transform.up * crouchJumpForce * 0.7f, ForceMode.Impulse);
 
+            CancelInvoke("ResetJump");
             Invoke("ResetJump", 0.3f);
         }
     }
