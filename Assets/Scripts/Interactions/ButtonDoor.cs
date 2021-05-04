@@ -6,9 +6,15 @@ public class ButtonDoor : Interactable
 {
     [Header("Door Interaction")]
     public Transform door;
+    [Space(15)]
     public float openSmoothTime;
     public float doorOffset;
     public float buttonOffset;
+    public bool useOnce;
+
+    [Header("Interaction Hints")]
+    public string openHint;
+    public string closeHint;
 
     private Vector3 originalButtonPos;
     private Vector3 originalDoorPos;
@@ -21,6 +27,8 @@ public class ButtonDoor : Interactable
 
     void Start()
     {
+        elapsed = openSmoothTime;
+
         originalDoorPos = door.position;
         dOffset = originalDoorPos;
         dOffset.y += doorOffset;
@@ -51,8 +59,8 @@ public class ButtonDoor : Interactable
 
     public override string GetDiscription()
     {
-        if (!opened) return "E to open door";
-        else return "E to close door";
+        if (!opened) return openHint;
+        else return closeHint;
     }
 
     public override void OnInteract()

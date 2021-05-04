@@ -36,15 +36,20 @@ public class PlayerInteraction : MonoBehaviour
 
             if (obj != null)
             {
-                textDisplay.SetActive(true);
-                interactionText.text = obj.GetDiscription();
-                found = true;
+                string text = obj.GetDiscription();
+                found = text != null;
 
-                if (s.PlayerInput.interacting) Interact(obj);
+                if (found)
+                {
+                    textDisplay.SetActive(true);
+                    interactionText.text = text;
+
+                    if (s.PlayerInput.interacting) Interact(obj);
+                }
             } 
         }
 
-        if (!found)
+        if (!found && interactionText.text != " ")
         {
             textDisplay.SetActive(false);
             interactionText.text = " ";

@@ -20,7 +20,6 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 crouchScale;
     public float slideForce;
     public float crouchJumpForce;
-    public float slideFriction;
     public float maxSlideSpeed;
 
     private float crouchOffset;
@@ -33,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement Control")]
     public float friction;
+    public float slideFriction;
+    public float sharpness;
     public float threshold;
     private float maxSpeed;
 
@@ -192,11 +193,15 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
 
-        if (x == 0 && Math.Abs(mag.x) > threshold || x > 0 && mag.x < -threshold || x < 0 && mag.x > threshold)
+        if (x == 0 && Math.Abs(mag.x) > threshold)
             rb.AddForce(s.orientation.right * -mag.x * friction);
+        if (x > 0 && mag.x < -threshold || x < 0 && mag.x > threshold)
+            rb.AddForce(s.orientation.right * -mag.x * sharpness);
 
-        if (z == 0 && Math.Abs(mag.z) > threshold || z > 0 && mag.z < -threshold || z < 0 && mag.z > threshold)
+        if (z == 0 && Math.Abs(mag.z) > threshold)
             rb.AddForce(s.orientation.forward * -mag.z * friction);
+        if (z > 0 && mag.z < -threshold || z < 0 && mag.z > threshold)
+            rb.AddForce(s.orientation.forward * -mag.z * sharpness);
     }
 
     private void MovementControl()

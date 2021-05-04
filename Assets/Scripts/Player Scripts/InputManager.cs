@@ -251,9 +251,11 @@ public class InputManager : MonoBehaviour
         
         if (IsFloor(normal)) if (!landed) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
 
+        if (Environment != (Environment | 1 << layer)) return;
+
         if (IsVaultable(normal) && !nearWall)
         {
-            if (col.transform.GetComponent<Rigidbody>() || wallRunning || crouching) return;
+            if (wallRunning || crouching) return;
 
             Vector3 dir = moveDir;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
