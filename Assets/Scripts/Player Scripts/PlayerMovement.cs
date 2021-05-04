@@ -6,35 +6,35 @@ using System;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Ground Movement")]
-    public float moveSpeed;
-    public float maxGroundSpeed;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float maxGroundSpeed;
 
     [Header("Air Movement")]
-    public float jumpForce;
-    public float jumpCooldown;
-    public float maxAirSpeed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float jumpCooldown;
+    [SerializeField] private float maxAirSpeed;
 
     bool jumped = false;
 
     [Header("Sliding")]
-    public Vector3 crouchScale;
-    public float slideForce;
-    public float crouchJumpForce;
-    public float maxSlideSpeed;
+    [SerializeField] private Vector3 crouchScale;
+    [SerializeField] private float slideForce;
+    [SerializeField] private float crouchJumpForce;
+    [SerializeField] private float maxSlideSpeed;
 
     private float crouchOffset;
     private Vector3 playerScale;
 
     [Header("WallRunning")]
-    public float wallJumpForce;
-    public float wallRunForce;
-    public float wallClimbForce;
+    [SerializeField] private float wallJumpForce;
+    [SerializeField] private float wallRunForce;
+    [SerializeField] private float wallClimbForce;
 
     [Header("Movement Control")]
-    public float friction;
-    public float slideFriction;
-    public float sharpness;
-    public float threshold;
+    [SerializeField] private float friction;
+    [SerializeField] private float slideFriction;
+    [SerializeField] private float sharpness;
+    [SerializeField] private float threshold;
     private float maxSpeed;
 
     bool crouched = false;
@@ -68,13 +68,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 75f);
+        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
 
         CounterMovement(s.PlayerInput.input.x, s.PlayerInput.input.y, vel);
-        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.3f));
+        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
 
         if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
 
@@ -92,9 +92,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void SnapToGround(Vector3 vel)
     {
-        if (s.PlayerInput.stepsSinceLastGrounded > 5) return;
+        if (s.PlayerInput.stepsSinceLastGrounded > 6) return;
 
-        rb.AddForce(Vector3.down * 2.3f, ForceMode.VelocityChange);
+        rb.AddForce(Vector3.down * 2.5f, ForceMode.VelocityChange);
         rb.AddForce(-vel * 15f);
     }
 

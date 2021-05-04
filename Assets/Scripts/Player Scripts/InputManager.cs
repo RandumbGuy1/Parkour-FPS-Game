@@ -68,7 +68,6 @@ public class InputManager : MonoBehaviour
     void Awake()
     {
         s = GetComponent<ScriptManager>();
-        vaulting = false;
     }
 
     void FixedUpdate()
@@ -173,6 +172,7 @@ public class InputManager : MonoBehaviour
 
         s.rb.AddForce(dir * 9f, ForceMode.VelocityChange);
         s.rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
+        s.rb.velocity = new Vector3(s.rb.velocity.x, 0f, s.rb.velocity.y);
 
         s.rb.useGravity = true;
         vaulting = false;
@@ -257,14 +257,16 @@ public class InputManager : MonoBehaviour
         {
             if (wallRunning || crouching) return;
 
-            Vector3 dir = moveDir;
+            vaulting = false;
+            Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z);
+            Vector3 dir = inputDir;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.3f) return;
+            if (Vector3.Dot(dir.normalized, normal) > -0.6f) return;
             if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -normal, 1.3f, Environment)) return;
 
             RaycastHit hit;
-            if (!Physics.Raycast(vaultCheck + (dir.normalized), Vector3.down, out hit, 3f, Environment)) return;
+            if (!Physics.Raycast(vaultCheck + (dir + vaultDir).normalized, Vector3.down, out hit, 3f, Environment)) return;
 
             Vector3 vaultPoint = hit.point + (Vector3.up * 2.1f);
             float distance = Vector3.Distance(s.rb.position, vaultPoint);
