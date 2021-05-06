@@ -9526,7 +9526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.82
+  m_Name: Save 1.84
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9951,10 +9951,7 @@ MonoBehaviour:
   minimumJumpHeight: 1.3
   grounded: 1
   nearWall: 0
-  onSlope: 0
-  reachedMaxSlope: 0
   wallRunning: 0
-  canAddWallRunForce: 0
   stopWallRun: 0
   jumpKey: 32
   crouchKey: 306
@@ -9965,8 +9962,8 @@ MonoBehaviour:
   Environment:
     serializedVersion: 2
     m_Bits: 256
-  groundRadius: 0.45
-  wallRadius: 0.8
+  groundCancelDelay: 2
+  wallCancelDelay: 1
   vaultDuration: 0.035
   sprintEffect: {fileID: 2080955619}
   orientation: {fileID: 1277575616}
@@ -9984,11 +9981,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 65
   maxGroundSpeed: 20
-  jumpForce: 37
+  jumpForce: 40
   jumpCooldown: 0.06
   maxAirSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
-  slideForce: 175
+  slideForce: 160
   crouchJumpForce: 20
   maxSlideSpeed: 50
   wallJumpForce: 25

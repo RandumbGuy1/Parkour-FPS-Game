@@ -7,7 +7,8 @@ using System;
 public class InputManager : MonoBehaviour
 {
     public Vector2 input { get; private set; }
-    public Vector3 inputDir { get; private set; }
+    private Vector3 inputDir;
+    private Vector3 slopeDir;
     public Vector3 moveDir { get; private set; }
 
     public Vector3 groundNormal { get; private set; }
@@ -22,17 +23,12 @@ public class InputManager : MonoBehaviour
     [Header("States")]
     public bool grounded;
     public bool nearWall;
-    public bool onSlope = false;
-    public bool reachedMaxSlope = false;
 
     [HideInInspector] public bool wallRunning;
-    [HideInInspector] public bool canAddWallRunForce;
     [HideInInspector] public bool stopWallRun;
 
     public bool isWallLeft { get; private set; }
     public bool isWallRight { get; private set; }
-    public bool canWallRun { get; private set; }
-    public bool canWallJump { get; private set; }
 
     public bool crouching { get; private set; }
     public bool jumping { get; private set; }
@@ -44,18 +40,24 @@ public class InputManager : MonoBehaviour
     bool landed = false;
 
     [Header("KeyBinds")]
-    public KeyCode jumpKey = KeyCode.Space;
-    public KeyCode crouchKey = KeyCode.LeftControl;
-    public KeyCode interactKey = KeyCode.E;
+    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
+    [SerializeField] private KeyCode interactKey = KeyCode.E;
 
     [Header("Collision")]
     public LayerMask Ground;
     public LayerMask Environment;
-    public float groundRadius;
-    public float wallRadius;
+    [SerializeField] private float groundCancelDelay;
+    [SerializeField] private float wallCancelDelay;
+
+    private bool cancelWall = true;
+    private int wallCancelSteps = 0;
+
+    private bool cancelGround = false;
+    private int groundCancelSteps = 0;
 
     [Header("Vaulting")]
-    public float vaultDuration;
+    [SerializeField] private float vaultDuration;
 
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
@@ -70,7 +72,7 @@ public class InputManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        GroundDetection();
+        UpdateGroundCollision();
     }
 
     void Update()
@@ -82,13 +84,15 @@ public class InputManager : MonoBehaviour
         moving = input.x != 0f || input.y != 0f;
         interacting = Input.GetKeyDown(interactKey);
 
-        if (nearWall && isWallLeft && canWallJump && input.x < 0 || nearWall && isWallRight && canWallJump && input.x > 0) wallRunning = true;
+        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning || crouching && wallRunning;
 
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
-        moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
+        slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
-        CalcSlope();
+        float dot = Vector3.Dot(Vector3.up, slopeDir);
+        moveDir = dot < 0f ? slopeDir : inputDir;
+
         CheckForWall();
         MovementControl();
 
@@ -97,55 +101,62 @@ public class InputManager : MonoBehaviour
     }
 
     #region Movement Calculations
-    private void GroundDetection()
+    private void UpdateGroundCollision()
     {
-        if (grounded) {
-            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope) 
+        if (grounded) 
+        {
+            if (!cancelGround) cancelGround = true;
+            else 
             {
-                groundNormal = Vector3.up;
-                landed = false;
-                grounded = false;
+                groundCancelSteps++;
+                if ((float) groundCancelSteps > groundCancelDelay)
+                {
+                    groundNormal = Vector3.up;
+                    landed = false;
+                    grounded = false;
+                }
             }
         }
     }
 
-    private void CalcSlope()
+    public bool ReachedMaxSlope()
     {
-        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground)) {
-            if (slopeHit.normal != Vector3.up) reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
-            else reachedMaxSlope = false;
-        } 
-        else reachedMaxSlope = false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground)) return false;
+        if (slopeHit.normal == Vector3.up) return false;
+        return Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
+    }
+
+    public bool CanWallJump()
+    {
+        if (!nearWall || vaulting) return false;
+        if (ReachedMaxSlope()) return false;
+        return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }
 
     private void CheckForWall()
     {
         if (nearWall)
         {
-            Vector3 point1 = transform.position + (Vector3.up * 0.6f);
-            Vector3 point2 = transform.position + (Vector3.down * 0.5f);
-
             isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
             isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
 
-            canWallRun = !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
-            canWallJump = !crouching && !reachedMaxSlope && !vaulting && canWallRun;
-
-            if (!Physics.CheckCapsule(point1, point2, wallRadius, Environment))
+            if (!cancelWall) cancelWall = true;
+            else 
             {
-                wallNormal = Vector3.zero;
-                isWallLeft = false;
-                isWallRight = false;
-                canWallJump = false;
-                canWallRun = false;
-                nearWall = false;
+                wallCancelSteps++;
+                if ((float) wallCancelSteps > wallCancelDelay)
+                {
+                    wallNormal = Vector3.zero;
+                    isWallLeft = false;
+                    isWallRight = false;
+                    nearWall = false;
+                }
             }
         }
 
-        if (!nearWall || !isWallRight && !isWallLeft || !canWallRun)
+        if (!CanWallJump() || !isWallRight && !isWallLeft)
         {
             wallRunning = false;
-            canAddWallRunForce = true;
             s.rb.useGravity = true;
         }    
     }
@@ -191,10 +202,10 @@ public class InputManager : MonoBehaviour
 
         if (!grounded)
         {
-            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.9f)
+            if (!wallRunning && !crouching && multiplier != 0.4f && multiplierV != 0.8f)
             {
-                multiplier = 0.5f;
-                multiplierV = 0.9f;
+                multiplier = 0.4f;
+                multiplierV = 0.8f;
             }
             if (!wallRunning && crouching && multiplier != 0.3f && multiplierV != 0.8f)
             {
@@ -253,11 +264,9 @@ public class InputManager : MonoBehaviour
         
         if (IsFloor(normal)) if (!landed) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
 
-        if (Environment != (Environment | 1 << layer)) return;
-
-        if (IsVaultable(normal) && !nearWall)
+        if (IsVaultable(normal))
         {
-            if (wallRunning || crouching) return;
+            if (wallRunning || crouching || nearWall || ReachedMaxSlope() || Environment != (Environment | 1 << layer)) return;
 
             vaulting = false;
             Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z);
@@ -283,18 +292,25 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | 1 << layer)) return;
 
-        Vector3 normal = col.GetContact(0).normal;
-        
-        if (IsFloor(normal))
+        for (int i = 0; i < col.contactCount; i++)
         {
-            grounded = true;
-            groundNormal = normal;
-        }
+            Vector3 normal = col.GetContact(i).normal;
 
-        if (IsWall(normal))
-        {
-            nearWall = true;
-            wallNormal = normal;
+            if (IsFloor(normal))
+            {
+                grounded = true;
+                cancelGround = false;
+                groundCancelSteps = 0;
+                groundNormal = normal;
+            }
+
+            if (IsWall(normal))
+            {
+                nearWall = true;
+                wallCancelSteps = 0;
+                cancelWall = false;
+                wallNormal = normal;
+            }
         }
     }
     #endregion

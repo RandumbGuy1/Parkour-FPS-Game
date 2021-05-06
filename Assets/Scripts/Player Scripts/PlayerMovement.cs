@@ -28,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallJumpForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
+    private bool canAddWallRunForce = true;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
@@ -68,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
+        if (s.PlayerInput.ReachedMaxSlope()) rb.AddForce(Vector3.down * 70f);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
@@ -76,12 +77,13 @@ public class PlayerMovement : MonoBehaviour
         CounterMovement(s.PlayerInput.input.x, s.PlayerInput.input.y, vel);
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
 
-        if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
+        if (s.PlayerInput.grounded && s.PlayerInput.jumping) Jump();
 
         if (s.PlayerInput.grounded || SnapToGround(vel)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
-        if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
+        if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
+        if (s.PlayerInput.CanWallJump() && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
         if (s.PlayerInput.stopWallRun && cancelWallRun) StopWallRun();
 
@@ -97,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, 2f, s.PlayerInput.Ground)) return false;
 
-        rb.AddForce(Vector3.down * 2f, ForceMode.VelocityChange);
+        rb.AddForce(Vector3.down * 1.3f, ForceMode.VelocityChange);
         rb.AddForce(-vel * 5f);
 
         return true;
@@ -110,9 +112,10 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded)
         {
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            Vector3 jumpDir = (Vector3.up + s.PlayerInput.groundNormal).normalized;
 
-            if (!crouched) rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
-            else if (crouched) rb.AddForce(transform.up * crouchJumpForce * 0.7f, ForceMode.Impulse);
+            if (!crouched) rb.AddForce(jumpDir * jumpForce * 0.7f, ForceMode.Impulse);
+            else if (crouched) rb.AddForce(jumpDir * crouchJumpForce * 0.7f, ForceMode.Impulse);
 
             CancelInvoke("ResetJump");
             Invoke("ResetJump", 0.3f);
@@ -136,10 +139,10 @@ public class PlayerMovement : MonoBehaviour
     {
         float wallClimb = 0f;
 
-        if (s.PlayerInput.canAddWallRunForce)
+        if (canAddWallRunForce)
         {
             cancelWallRun = true;
-            s.PlayerInput.canAddWallRunForce = false;
+            canAddWallRunForce = false;
             rb.useGravity = false;
 
             float wallMagnitude = (rb.velocity.y * 2f);
