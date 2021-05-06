@@ -7,8 +7,8 @@ using System;
 public class InputManager : MonoBehaviour
 {
     public Vector2 input { get; private set; }
-    public Vector3 moveDir { get; private set; }
     public Vector3 inputDir { get; private set; }
+    public Vector3 moveDir { get; private set; }
 
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
@@ -22,7 +22,8 @@ public class InputManager : MonoBehaviour
     [Header("States")]
     public bool grounded;
     public bool nearWall;
-    public bool reachedMaxSlope;
+    public bool onSlope = false;
+    public bool reachedMaxSlope = false;
 
     [HideInInspector] public bool wallRunning;
     [HideInInspector] public bool canAddWallRunForce;
@@ -38,9 +39,6 @@ public class InputManager : MonoBehaviour
     public bool moving { get; private set; }
     public bool vaulting { get; private set; }
     public bool interacting { get; private set; }
-
-    public bool hitGround { get; private set; }
-    public int stepsSinceLastGrounded { get; private set; }
 
     bool fast = false;
     bool landed = false;
@@ -62,7 +60,7 @@ public class InputManager : MonoBehaviour
     [Header("Assignables")]
     public ParticleSystem sprintEffect;
     public Transform orientation;
-    private RaycastHit hit;
+    private RaycastHit slopeHit;
     private ScriptManager s;
 
     void Awake()
@@ -90,10 +88,7 @@ public class InputManager : MonoBehaviour
         inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
         moveDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
-        hitGround = Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, Ground);
-        if (hitGround) reachedMaxSlope = Vector3.Angle(Vector3.up, hit.normal) > maxSlopeAngle;
-        else reachedMaxSlope = false;
-
+        CalcSlope();
         CheckForWall();
         MovementControl();
 
@@ -104,16 +99,23 @@ public class InputManager : MonoBehaviour
     #region Movement Calculations
     private void GroundDetection()
     {
-        if (grounded)
-            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope)
+        if (grounded) {
+            if (!Physics.CheckSphere(s.groundCheck.position, groundRadius, Ground) || reachedMaxSlope) 
             {
-                groundNormal = Vector3.zero;
+                groundNormal = Vector3.up;
                 landed = false;
                 grounded = false;
             }
+        }
+    }
 
-        if (!grounded && stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
-        else if (grounded && stepsSinceLastGrounded > 0) stepsSinceLastGrounded = 0;
+    private void CalcSlope()
+    {
+        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground)) {
+            if (slopeHit.normal != Vector3.up) reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
+            else reachedMaxSlope = false;
+        } 
+        else reachedMaxSlope = false;
     }
 
     private void CheckForWall()
@@ -282,7 +284,7 @@ public class InputManager : MonoBehaviour
         if (Ground != (Ground | 1 << layer)) return;
 
         Vector3 normal = col.GetContact(0).normal;
-       
+        
         if (IsFloor(normal))
         {
             grounded = true;

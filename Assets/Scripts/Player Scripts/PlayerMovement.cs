@@ -21,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float slideForce;
     [SerializeField] private float crouchJumpForce;
     [SerializeField] private float maxSlideSpeed;
-
     private float crouchOffset;
     private Vector3 playerScale;
 
@@ -39,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
 
     bool crouched = false;
     bool cancelWallRun = true;
+    int stepsSinceLastGrounded = 0;
 
     [Header("Assignables")]
     private ScriptManager s;
@@ -78,7 +78,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.grounded && s.PlayerInput.jumping && !s.PlayerInput.canWallJump) Jump();
 
-        if (s.PlayerInput.hitGround && !s.PlayerInput.grounded && !jumped && !s.PlayerInput.vaulting) SnapToGround(vel);
+        if (s.PlayerInput.grounded || SnapToGround(vel)) stepsSinceLastGrounded = 0;
+        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
         if (s.PlayerInput.canWallJump && s.PlayerInput.jumping && !s.PlayerInput.grounded) WallJump();
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
@@ -90,12 +91,16 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
     }
 
-    private void SnapToGround(Vector3 vel)
+    private bool SnapToGround(Vector3 vel)
     {
-        if (s.PlayerInput.stepsSinceLastGrounded > 6) return;
+        if (stepsSinceLastGrounded > 2 || s.PlayerInput.vaulting || jumped || s.PlayerInput.grounded) return false;
 
-        rb.AddForce(Vector3.down * 2.5f, ForceMode.VelocityChange);
-        rb.AddForce(-vel * 15f);
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, 2f, s.PlayerInput.Ground)) return false;
+
+        rb.AddForce(Vector3.down * 2f, ForceMode.VelocityChange);
+        rb.AddForce(-vel * 5f);
+
+        return true;
     }
 
     private void Jump()
