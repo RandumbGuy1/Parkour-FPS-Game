@@ -33,7 +33,6 @@ public class InputManager : MonoBehaviour
     public bool crouching { get; private set; }
     public bool jumping { get; private set; }
     public bool moving { get; private set; }
-    public bool vaulting { get; private set; }
     public bool interacting { get; private set; }
 
     bool fast = false;
@@ -56,12 +55,9 @@ public class InputManager : MonoBehaviour
     private bool cancelGround = false;
     private int groundCancelSteps = 0;
 
-    [Header("Vaulting")]
-    [SerializeField] private float vaultDuration;
-
     [Header("Assignables")]
-    public ParticleSystem sprintEffect;
-    public Transform orientation;
+    [SerializeField] private ParticleSystem sprintEffect;
+    [SerializeField] private Transform orientation;
     private RaycastHit slopeHit;
     private ScriptManager s;
 
@@ -72,7 +68,7 @@ public class InputManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        UpdateGroundCollision();
+        UpdateCollisions();
     }
 
     void Update()
@@ -101,8 +97,10 @@ public class InputManager : MonoBehaviour
     }
 
     #region Movement Calculations
-    private void UpdateGroundCollision()
+    private void UpdateCollisions()
     {
+        if (s.rb.IsSleeping()) s.rb.WakeUp();
+
         if (grounded) 
         {
             if (!cancelGround) cancelGround = true;
@@ -117,6 +115,22 @@ public class InputManager : MonoBehaviour
                 }
             }
         }
+
+        if (nearWall)
+        {
+            if (!cancelWall) cancelWall = true;
+            else
+            {
+                wallCancelSteps++;
+                if ((float) wallCancelSteps > wallCancelDelay)
+                {
+                    nearWall = false;
+                    wallNormal = Vector3.zero;
+                    isWallLeft = false;
+                    isWallRight = false;
+                }
+            }
+        }
     }
 
     public bool ReachedMaxSlope()
@@ -128,7 +142,7 @@ public class InputManager : MonoBehaviour
 
     public bool CanWallJump()
     {
-        if (!nearWall || vaulting) return false;
+        if (!nearWall || s.PlayerMovement.vaulting) return false;
         if (ReachedMaxSlope()) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }
@@ -139,19 +153,6 @@ public class InputManager : MonoBehaviour
         {
             isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
             isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
-
-            if (!cancelWall) cancelWall = true;
-            else 
-            {
-                wallCancelSteps++;
-                if ((float) wallCancelSteps > wallCancelDelay)
-                {
-                    wallNormal = Vector3.zero;
-                    isWallLeft = false;
-                    isWallRight = false;
-                    nearWall = false;
-                }
-            }
         }
 
         if (!CanWallJump() || !isWallRight && !isWallLeft)
@@ -161,51 +162,21 @@ public class InputManager : MonoBehaviour
         }    
     }
 
-    private IEnumerator vaultMovement(Vector3 newPos, float distance, Vector3 dir)
-    {
-        s.rb.useGravity = false;
-        s.rb.velocity = Vector3.zero;
-
-        Vector3 vel = Vector3.zero;
-        float elapsed = 0f;
-
-        distance *= 0.01f;
-        distance = Mathf.Round(distance * 1000.0f) * 0.001f;
-
-        float duration = vaultDuration + distance;
-
-        while (elapsed < (duration * 2f))
-        {
-            vaulting = true;
-            s.rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
-            elapsed += Time.fixedDeltaTime;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        s.rb.AddForce(dir * 9f, ForceMode.VelocityChange);
-        s.rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
-        s.rb.velocity = new Vector3(s.rb.velocity.x, 0f, s.rb.velocity.y);
-
-        s.rb.useGravity = true;
-        vaulting = false;
-    }
-
     private void MovementControl()
     {
         if (grounded)
         {
-            if (multiplierV != 1.05f) multiplierV = 1.05f;
+            if (multiplierV != 1.05f) multiplierV = 1.1f;
             if (!crouching && !wallRunning && multiplier != 1f) multiplier = 1f;
             if (crouching && !wallRunning && multiplier != 0.05f) multiplier = 0.05f;
         }
 
         if (!grounded)
         {
-            if (!wallRunning && !crouching && multiplier != 0.4f && multiplierV != 0.8f)
+            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.9f)
             {
-                multiplier = 0.4f;
-                multiplierV = 0.8f;
+                multiplier = 0.5f;
+                multiplierV = 0.9f;
             }
             if (!wallRunning && crouching && multiplier != 0.3f && multiplierV != 0.8f)
             {
@@ -268,7 +239,6 @@ public class InputManager : MonoBehaviour
         {
             if (wallRunning || crouching || nearWall || ReachedMaxSlope() || Environment != (Environment | 1 << layer)) return;
 
-            vaulting = false;
             Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z);
             Vector3 dir = inputDir;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
@@ -283,14 +253,13 @@ public class InputManager : MonoBehaviour
             float distance = Vector3.Distance(s.rb.position, vaultPoint);
             vaultPoint += (Vector3.up * (distance * 0.3f));
 
-            if (!vaulting) StartCoroutine(vaultMovement(vaultPoint, distance, dir.normalized));
+            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, dir.normalized));
         }   
     }
 
     void OnCollisionStay(Collision col)
     {
         int layer = col.gameObject.layer;
-        if (Ground != (Ground | 1 << layer)) return;
 
         for (int i = 0; i < col.contactCount; i++)
         {
@@ -298,6 +267,8 @@ public class InputManager : MonoBehaviour
 
             if (IsFloor(normal))
             {
+                if (Ground != (Ground | 1 << layer)) continue;
+
                 grounded = true;
                 cancelGround = false;
                 groundCancelSteps = 0;
@@ -306,6 +277,8 @@ public class InputManager : MonoBehaviour
 
             if (IsWall(normal))
             {
+                if (Environment != (Environment | 1 << layer)) continue;
+
                 nearWall = true;
                 wallCancelSteps = 0;
                 cancelWall = false;

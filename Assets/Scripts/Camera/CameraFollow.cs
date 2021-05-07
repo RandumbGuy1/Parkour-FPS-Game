@@ -9,6 +9,7 @@ public class CameraFollow : MonoBehaviour
 	public float maxWallRunCameraTilt;
 	public float maxSlideCameraTilt;
 	public float tiltSmoothTime;
+	public float returnTiltSmoothTime;
 
 	private float tiltVel = 0f;
 	public float CameraTilt { get; private set; }
@@ -111,7 +112,7 @@ public class CameraFollow : MonoBehaviour
 
 	public void CameraWallRun(int i)
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime - 0.1f);
+		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime);
 		fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, wallFovTime);
 	}
 
@@ -122,7 +123,7 @@ public class CameraFollow : MonoBehaviour
 
 	public void ResetCameraTilt()
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, tiltSmoothTime + 0.05f);
+		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, returnTiltSmoothTime);
 		fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
 
 		if (Math.Abs(CameraTilt) < 0.1f) CameraTilt = 0f;
