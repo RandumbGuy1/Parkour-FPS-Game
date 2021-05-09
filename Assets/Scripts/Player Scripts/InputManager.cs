@@ -99,8 +99,6 @@ public class InputManager : MonoBehaviour
     #region Movement Calculations
     private void UpdateCollisions()
     {
-        if (s.rb.IsSleeping()) s.rb.WakeUp();
-
         if (grounded) 
         {
             if (!cancelGround) cancelGround = true;

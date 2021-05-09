@@ -73,6 +73,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
+        rb.AddForce(Vector3.down * 0.8f);
+
         if (s.PlayerInput.ReachedMaxSlope()) rb.AddForce(Vector3.down * 70f);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
