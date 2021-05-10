@@ -49,10 +49,8 @@ public class CameraFollow : MonoBehaviour
 
 	[Header("Assignables")]
 	public Transform player;
-	public Transform camera;
 	public Transform playerHead;
 	public CameraShaker Shake;
-
 	private Camera cam;
 
 	void Start()
@@ -68,7 +66,7 @@ public class CameraFollow : MonoBehaviour
 		mouseX = Input.GetAxisRaw("Mouse X");
 		mouseY = Input.GetAxisRaw("Mouse Y");
 
-		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(4f, 8f, 0.8f);
+		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(10f, 8f, 0.8f);
 	}
 
 	void LateUpdate()
@@ -98,14 +96,14 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
     {
-		camera.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, CameraTilt + Shake.offset.z);
+		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, CameraTilt + Shake.offset.z);
 		player.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
 	}
 
 	void CalcDelta()
 	{
-		rotationDelta = camera.rotation.eulerAngles - rotationLast;
-		rotationLast = camera.rotation.eulerAngles;
+		rotationDelta = cam.transform.rotation.eulerAngles - rotationLast;
+		rotationLast = cam.transform.rotation.eulerAngles;
 
 		camVel = rotationDelta.sqrMagnitude;
 	}

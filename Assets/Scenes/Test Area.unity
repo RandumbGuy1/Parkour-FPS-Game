@@ -2625,7 +2625,6 @@ MonoBehaviour:
   upClampAngle: 80
   downClampAngle: 70
   player: {fileID: 1277575616}
-  camera: {fileID: 963194228}
   playerHead: {fileID: 32658971}
   Shake: {fileID: 838078167}
 --- !u!114 &838078166
@@ -9527,7 +9526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.86
+  m_Name: Save 1.87
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9952,8 +9951,7 @@ MonoBehaviour:
   minimumJumpHeight: 1.3
   grounded: 1
   nearWall: 0
-  wallRunning: 0
-  stopWallRun: 0
+  reachedMaxSlope: 0
   jumpKey: 32
   crouchKey: 306
   interactKey: 101

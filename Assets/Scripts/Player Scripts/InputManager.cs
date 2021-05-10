@@ -6,37 +6,46 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    public Vector2 input { get; private set; }
-    private Vector3 inputDir;
-    private Vector3 slopeDir;
-    public Vector3 moveDir { get; private set; }
+    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized; } }
+    public Vector3 moveDir 
+    { 
+        get 
+        { 
+            Vector3 inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
+            Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
+
+            float dot = Vector3.Dot(Vector3.up, slopeDir);
+            return dot < 0f ? slopeDir : inputDir;
+        } 
+    }
 
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
 
-    float multiplier, multiplierV;
+    private float multiplier, multiplierV;
 
     [Header("Thresholds")]
-    [Range(0f, 90f)] public float maxSlopeAngle;
+    [Range(0f, 90f)] 
+    public float maxSlopeAngle;
     public float minimumJumpHeight;
 
     [Header("States")]
     public bool grounded;
     public bool nearWall;
+    public bool reachedMaxSlope;
 
-    [HideInInspector] public bool wallRunning;
-    [HideInInspector] public bool stopWallRun;
+    private bool isWallLeft = false;
+    private bool isWallRight = false;
+    public bool wallRunning { get; private set; }
+    public bool stopWallRun { get; private set; }
 
-    public bool isWallLeft { get; private set; }
-    public bool isWallRight { get; private set; }
+    public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
+    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
+    public bool crouching { get { return Input.GetKey(crouchKey); } }
+    public bool moving { get { return input.x != 0f || input.y != 0f; } }
 
-    public bool crouching { get; private set; }
-    public bool jumping { get; private set; }
-    public bool moving { get; private set; }
-    public bool interacting { get; private set; }
-
-    bool fast = false;
-    bool landed = false;
+    private bool fast = false;
+    private bool landed = false;
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
@@ -73,21 +82,12 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-
-        jumping = Input.GetKeyDown(jumpKey);
-        crouching = Input.GetKey(crouchKey);
-        moving = input.x != 0f || input.y != 0f;
-        interacting = Input.GetKeyDown(interactKey);
-
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning || crouching && wallRunning;
 
-        inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
-        slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
-
-        float dot = Vector3.Dot(Vector3.up, slopeDir);
-        moveDir = dot < 0f ? slopeDir : inputDir;
+        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
+            reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
+        else reachedMaxSlope = false;
 
         CheckForWall();
         MovementControl();
@@ -131,17 +131,10 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    public bool ReachedMaxSlope()
-    {
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground)) return false;
-        if (slopeHit.normal == Vector3.up) return false;
-        return Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
-    }
-
     public bool CanWallJump()
     {
         if (!nearWall || s.PlayerMovement.vaulting) return false;
-        if (ReachedMaxSlope()) return false;
+        if (reachedMaxSlope) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }
 
@@ -235,13 +228,13 @@ public class InputManager : MonoBehaviour
 
         if (IsVaultable(normal))
         {
-            if (wallRunning || crouching || nearWall || ReachedMaxSlope() || Environment != (Environment | 1 << layer)) return;
+            if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
 
             Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z);
-            Vector3 dir = inputDir;
-            Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.4f);
+            Vector3 dir = moveDir;
+            Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.5f);
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.6f) return;
+            if (Vector3.Dot(dir.normalized, normal) > -0.5f) return;
             if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -normal, 1.3f, Environment)) return;
 
             RaycastHit hit;
@@ -303,8 +296,7 @@ public class InputManager : MonoBehaviour
 
     bool IsFloor(Vector3 normal)
     {
-        float angle = Vector3.Angle(Vector3.up, normal);
-        return angle < maxSlopeAngle;
+        return Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     }
 
     bool IsWall(Vector3 normal)
@@ -314,6 +306,6 @@ public class InputManager : MonoBehaviour
 
     bool IsVaultable(Vector3 normal)
     {
-        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.3f;
+        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.33f;
     }
 }

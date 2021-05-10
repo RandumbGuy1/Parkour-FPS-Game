@@ -75,7 +75,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.AddForce(Vector3.down * 0.8f);
 
-        if (s.PlayerInput.ReachedMaxSlope()) rb.AddForce(Vector3.down * 70f);
+        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
@@ -144,7 +144,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = Vector3.zero;
         float elapsed = 0f;
 
-        distance *= 0.01f;
+        distance *= 0.018f;
         distance = Mathf.Round(distance * 1000.0f) * 0.001f;
 
         float duration = vaultDuration + distance;
@@ -168,14 +168,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallJump()
     {
-        cancelWallRun = false;
-        s.PlayerInput.wallRunning = false;
-        s.PlayerInput.grounded = false;
+        if (cancelWallRun)
+        {
+            cancelWallRun = false;
+            s.PlayerInput.grounded = false;
 
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
-        rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
-        rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
+            rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
+            rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
+        }
     }
 
     private void WallRun()
@@ -204,9 +206,6 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.wallRunning && cancelWallRun)
         {
             cancelWallRun = false;
-            s.PlayerInput.wallRunning = false;
-            s.PlayerInput.stopWallRun = false;
-
             rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
         }
     }
