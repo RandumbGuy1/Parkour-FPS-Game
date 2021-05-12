@@ -57,7 +57,7 @@ public class ButtonDoor : Interactable
             }
     }
 
-    public override string GetDiscription()
+    public override string GetDescription()
     {
         if (!opened) return openHint;
         else return closeHint;

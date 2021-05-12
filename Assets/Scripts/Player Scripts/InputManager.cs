@@ -40,21 +40,22 @@ public class InputManager : MonoBehaviour
     public bool stopWallRun { get; private set; }
 
     public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
-    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
     public bool crouching { get { return Input.GetKey(crouchKey); } }
+    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
+    public bool dropping { get { return Input.GetKeyDown(dropKey); } }
     public bool moving { get { return input.x != 0f || input.y != 0f; } }
 
     private bool fast = false;
-    private bool landed = false;
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
     [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
     [SerializeField] private KeyCode interactKey = KeyCode.E;
+    [SerializeField] private KeyCode dropKey = KeyCode.Q;
 
     [Header("Collision")]
     public LayerMask Ground;
-    public LayerMask Environment;
+    [SerializeField] private LayerMask Environment;
     [SerializeField] private float groundCancelDelay;
     [SerializeField] private float wallCancelDelay;
 
@@ -108,7 +109,6 @@ public class InputManager : MonoBehaviour
                 if ((float) groundCancelSteps > groundCancelDelay)
                 {
                     groundNormal = Vector3.up;
-                    landed = false;
                     grounded = false;
                 }
             }
@@ -224,8 +224,9 @@ public class InputManager : MonoBehaviour
 
         Vector3 normal = col.GetContact(0).normal;
         
-        if (IsFloor(normal)) if (!landed) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
+        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
 
+        #region Vaulting
         if (IsVaultable(normal))
         {
             if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
@@ -245,7 +246,8 @@ public class InputManager : MonoBehaviour
             vaultPoint += (Vector3.up * (distance * 0.3f));
 
             StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, dir.normalized));
-        }   
+        }
+        #endregion
     }
 
     void OnCollisionStay(Collision col)
@@ -282,11 +284,7 @@ public class InputManager : MonoBehaviour
     private void Land(float impactForce)
     {
         s.Effects.CameraLand(impactForce);
-
-        if (impactForce > 70f) 
-            ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
-
-        landed = true;
+        if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
 
     float LandVel(float mag, float yMag)

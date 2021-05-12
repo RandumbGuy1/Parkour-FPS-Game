@@ -6,12 +6,13 @@ using TMPro;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Interactions")]
-    public LayerMask Interactables;
-    public float interactionRange;
+    [SerializeField] private LayerMask Interactables;
+    [SerializeField] private float interactionRange;
 
     [Header("Assignables")]
-    public GameObject textDisplay;
-    public TextMeshProUGUI interactionText;
+    [SerializeField] private GameObject textDisplay;
+    [SerializeField] private TextMeshProUGUI interactionText;
+    [SerializeField] private WeaponController weaponController;
 
     private ScriptManager s;
 
@@ -32,19 +33,21 @@ public class PlayerInteraction : MonoBehaviour
 
         if (Physics.Raycast(s.cam.position, s.cam.forward, out hit, interactionRange, Interactables))
         {
-            Interactable obj = hit.transform.GetComponent<Interactable>();
+            Interactable interactable = hit.transform.GetComponent<Interactable>();
 
-            if (obj != null)
+            if (interactable != null)
             {
-                string text = obj.GetDiscription();
+                string text = interactable.GetDescription();
                 found = text != null;
 
                 if (found)
                 {
+                    GameObject obj = hit.transform.gameObject;
+
                     textDisplay.SetActive(true);
                     interactionText.text = text;
 
-                    if (s.PlayerInput.interacting) Interact(obj);
+                    if (s.PlayerInput.interacting) Interact(interactable, obj);
                 }
             } 
         }
@@ -56,17 +59,18 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    void Interact(Interactable obj)
+    void Interact(Interactable interactable, GameObject obj)
     {
-         switch (obj.type)
+         switch (interactable.type)
          {
             case Interactable.InteractionType.Button:
-                 obj.OnInteract();
+                interactable.OnInteract();
                  break;
 
             case Interactable.InteractionType.WeaponPickup:
-                 obj.OnInteract();
-                 break;
+                interactable.OnInteract();
+                weaponController.AddWeapon(obj);
+                break;
          }
     }
 }

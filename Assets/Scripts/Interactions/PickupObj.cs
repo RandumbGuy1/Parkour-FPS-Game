@@ -46,12 +46,12 @@ public class PickupObj : MonoBehaviour
 
     private void CheckObject()
     {
-        if (Vector3.Distance(heldObj.transform.position, grabPos.position) > 0.1f)
+        if ((grabPos.position - heldObj.transform.position).sqrMagnitude > 0.01f)
             heldObj.transform.position = Vector3.SmoothDamp(heldObj.transform.position, grabPos.position, ref vel, objSpeed);
 
         objRb.velocity = Vector3.zero;
 
-        if (Input.GetMouseButtonUp(0) || Vector3.Distance(grabPos.position, heldObj.transform.position) > maxGrabDistance && grabbing) 
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance && grabbing) 
             Drop();
     }
 
