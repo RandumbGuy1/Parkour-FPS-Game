@@ -14,9 +14,8 @@ public class WeaponPickup : Interactable
     [Header("Interaction Hint")]
     [SerializeField] private string description;
 
-    [Header("Assignables")]
-    [SerializeField] private Transform weaponPos;
-    [SerializeField] private Transform cam;
+    private Transform weaponRot;
+    private Transform weaponPos;
 
     void Update()
     {
@@ -27,7 +26,7 @@ public class WeaponPickup : Interactable
             if (transform.position != targetPos)
                 transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref vel, pickupPositionTime);
 
-            Quaternion targetRot = cam.rotation;
+            Quaternion targetRot = weaponRot.rotation;
 
             if (transform.rotation != targetRot)
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, pickupRotationSpeed * Time.deltaTime);
@@ -44,5 +43,11 @@ public class WeaponPickup : Interactable
     {
         transform.SetParent(weaponPos);
         pickedUp = true;
+    }
+
+    public void SetTransform(Transform weaponPos, Transform weaponRot)
+    {
+        this.weaponPos = weaponPos;
+        this.weaponRot = weaponPos;
     }
 }

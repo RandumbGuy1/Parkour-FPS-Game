@@ -45,6 +45,8 @@ public class InputManager : MonoBehaviour
     public bool dropping { get { return Input.GetKeyDown(dropKey); } }
     public bool moving { get { return input.x != 0f || input.y != 0f; } }
 
+    public float mouseScroll { get { return Input.GetAxis("Mouse ScrollWheel"); } }
+
     private bool fast = false;
 
     [Header("KeyBinds")]
@@ -133,7 +135,7 @@ public class InputManager : MonoBehaviour
 
     public bool CanWallJump()
     {
-        if (!nearWall || s.PlayerMovement.vaulting) return false;
+        if (!nearWall || s.PlayerMovement.vaulting || grounded) return false;
         if (reachedMaxSlope) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }

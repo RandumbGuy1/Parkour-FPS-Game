@@ -68,8 +68,8 @@ public class PlayerInteraction : MonoBehaviour
                  break;
 
             case Interactable.InteractionType.WeaponPickup:
-                interactable.OnInteract();
                 weaponController.AddWeapon(obj);
+                interactable.OnInteract();
                 break;
          }
     }
