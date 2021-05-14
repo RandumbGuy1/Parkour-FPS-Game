@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class ScriptManager : MonoBehaviour
 {
-    [Header("Scripts")]
+    [Header("Player Scripts")]
     public PlayerMovement PlayerMovement;
     public InputManager PlayerInput;
-    public CameraFollow CamInput;
-    public CameraEffects Effects;
-    public HeadBobbing MoveCamera;
-    public CameraShaker Shake;
+    public WeaponController WeaponControls;
+
+    [Header("Camera Scripts")]
+    public CameraFollow CameraInput;
+    public CameraEffects CameraLandBob;
+    public HeadBobbing CameraHeadBob;
+    public CameraShaker CameraShaker;
 
     [Header("Assignables")]
     public Transform orientation;

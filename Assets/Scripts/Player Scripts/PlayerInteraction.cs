@@ -12,7 +12,6 @@ public class PlayerInteraction : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private GameObject textDisplay;
     [SerializeField] private TextMeshProUGUI interactionText;
-    [SerializeField] private WeaponController weaponController;
 
     private ScriptManager s;
 
@@ -68,7 +67,7 @@ public class PlayerInteraction : MonoBehaviour
                  break;
 
             case Interactable.InteractionType.WeaponPickup:
-                weaponController.AddWeapon(obj);
+                s.WeaponControls.AddWeapon(obj);
                 interactable.OnInteract();
                 break;
          }

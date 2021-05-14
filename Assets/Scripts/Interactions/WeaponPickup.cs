@@ -9,17 +9,22 @@ public class WeaponPickup : Interactable
     [SerializeField] private float pickupRotationSpeed;
 
     private Vector3 vel;
-    public bool pickedUp = false;
 
     [Header("Interaction Hint")]
     [SerializeField] private string description;
 
     private Transform weaponRot;
     private Transform weaponPos;
+    private Rigidbody rb;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
 
     void Update()
     {
-        if (pickedUp)
+        if (rb.isKinematic)
         {
             Vector3 targetPos = weaponPos.position;
 
@@ -35,14 +40,13 @@ public class WeaponPickup : Interactable
 
     public override string GetDescription()
     {
-        if (!pickedUp) return description;
+        if (!rb.isKinematic) return description;
         else return null;
     }
 
     public override void OnInteract()
     {
         transform.SetParent(weaponPos);
-        pickedUp = true;
     }
 
     public void SetTransform(Transform weaponPos, Transform weaponRot)

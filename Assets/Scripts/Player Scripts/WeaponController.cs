@@ -73,7 +73,7 @@ public class WeaponController : MonoBehaviour
 
         rb.AddTorque(dir * throwForce, ForceMode.VelocityChange);
 
-        weapons[selectedWeapon].GetComponent<WeaponPickup>().pickedUp = false;
+        weapons[selectedWeapon].SetActive(true);
         weapons.RemoveAt(selectedWeapon);
 
         if (weapons.Count > 0)

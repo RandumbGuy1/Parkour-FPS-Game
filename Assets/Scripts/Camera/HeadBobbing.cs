@@ -25,7 +25,7 @@ public class HeadBobbing : MonoBehaviour
 
     void Update()
     {
-        shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.Effects.landed && s.magnitude > 10f;
+        shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.CameraLandBob.landed && s.magnitude > 10f;
 
         if (!shouldBob) timer = 0f;
         else timer += Time.deltaTime;

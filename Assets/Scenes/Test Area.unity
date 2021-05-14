@@ -1000,7 +1000,6 @@ MonoBehaviour:
   type: 0
   pickupPositionTime: 0.2
   pickupRotationSpeed: 3.5
-  pickedUp: 0
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -8700,7 +8699,6 @@ MonoBehaviour:
   type: 0
   pickupPositionTime: 0.2
   pickupRotationSpeed: 3.5
-  pickedUp: 0
   description: Pickup Gun
 --- !u!1 &1081612406
 GameObject:
@@ -9877,7 +9875,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.89
+  m_Name: Save 1.9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10315,7 +10313,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   groundCancelDelay: 2
-  wallCancelDelay: 2
+  wallCancelDelay: 1
   sprintEffect: {fileID: 2080955619}
   orientation: {fileID: 1277575616}
 --- !u!114 &1650519436
@@ -10344,7 +10342,7 @@ MonoBehaviour:
   wallClimbForce: 10
   vaultDuration: 0.03
   vaulting: 0
-  friction: 13
+  friction: 10
   slideFriction: 1.2
   sharpness: 35
   threshold: 0.05
@@ -10383,10 +10381,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerMovement: {fileID: 1650519436}
   PlayerInput: {fileID: 1650519435}
-  CamInput: {fileID: 838078165}
-  Effects: {fileID: 963194229}
-  MoveCamera: {fileID: 838078166}
-  Shake: {fileID: 838078167}
+  WeaponControls: {fileID: 1650519440}
+  CameraInput: {fileID: 838078165}
+  CameraLandBob: {fileID: 963194229}
+  CameraHeadBob: {fileID: 838078166}
+  CameraShaker: {fileID: 838078167}
   orientation: {fileID: 1277575616}
   playerHead: {fileID: 32658971}
   groundCheck: {fileID: 2073544792}
@@ -10410,7 +10409,6 @@ MonoBehaviour:
   interactionRange: 10
   textDisplay: {fileID: 1823617645}
   interactionText: {fileID: 2067588103}
-  weaponController: {fileID: 1650519440}
 --- !u!114 &1650519440
 MonoBehaviour:
   m_ObjectHideFlags: 0

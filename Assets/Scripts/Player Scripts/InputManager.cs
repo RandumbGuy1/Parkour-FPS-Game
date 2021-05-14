@@ -86,7 +86,7 @@ public class InputManager : MonoBehaviour
     void Update()
     {
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
-        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning || crouching && wallRunning;
+        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
 
         if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
@@ -135,7 +135,7 @@ public class InputManager : MonoBehaviour
 
     public bool CanWallJump()
     {
-        if (!nearWall || s.PlayerMovement.vaulting || grounded) return false;
+        if (!nearWall || s.PlayerMovement.vaulting || grounded || crouching) return false;
         if (reachedMaxSlope) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }
@@ -144,8 +144,10 @@ public class InputManager : MonoBehaviour
     {
         if (nearWall)
         {
-            isWallLeft = Physics.Raycast(transform.position, -orientation.right, 1f, Environment) && !isWallRight;
-            isWallRight = Physics.Raycast(transform.position, orientation.right, 1f, Environment) && !isWallLeft;
+            float dot = Vector3.Dot(s.orientation.right, wallNormal);
+
+            isWallLeft = dot > 0.6f;
+            isWallRight = dot < -0.6f;
         }
 
         if (!CanWallJump() || !isWallRight && !isWallLeft)
@@ -159,7 +161,7 @@ public class InputManager : MonoBehaviour
     {
         if (grounded)
         {
-            if (multiplierV != 1.05f) multiplierV = 1.1f;
+            if (multiplierV != 1.1f) multiplierV = 1.1f;
             if (!crouching && !wallRunning && multiplier != 1f) multiplier = 1f;
             if (crouching && !wallRunning && multiplier != 0.05f) multiplier = 0.05f;
         }
@@ -171,9 +173,9 @@ public class InputManager : MonoBehaviour
                 multiplier = 0.5f;
                 multiplierV = 0.9f;
             }
-            if (!wallRunning && crouching && multiplier != 0.3f && multiplierV != 0.8f)
+            if (!wallRunning && crouching && multiplier != 0.2f && multiplierV != 0.8f)
             {
-                multiplier = 0.3f; 
+                multiplier = 0.2f; 
                 multiplierV = 0.8f;
             }
             if (s.PlayerInput.wallRunning && multiplier != 0.01f && multiplierV != 0.30f)
@@ -188,13 +190,13 @@ public class InputManager : MonoBehaviour
     #region Visual Effects
     private void CameraTilt()
     {
-        if (crouching) s.CamInput.CameraSlide();
+        if (crouching) s.CameraInput.CameraSlide();
 
-        if (wallRunning && isWallLeft) s.CamInput.CameraWallRun(-1);
-        if (wallRunning && isWallRight) s.CamInput.CameraWallRun(1);
+        if (wallRunning && isWallLeft) s.CameraInput.CameraWallRun(-1);
+        if (wallRunning && isWallRight) s.CameraInput.CameraWallRun(1);
 
-        if (!wallRunning && Math.Abs(s.CamInput.CameraTilt) > 0f && !crouching || !wallRunning && s.CamInput.fov > 80f)
-            s.CamInput.ResetCameraTilt();
+        if (!wallRunning && Math.Abs(s.CameraInput.CameraTilt) > 0f && !crouching || !wallRunning && s.CameraInput.fov > 80f)
+            s.CameraInput.ResetCameraTilt();
     }
 
     private void SprintEffect()
@@ -285,7 +287,8 @@ public class InputManager : MonoBehaviour
 
     private void Land(float impactForce)
     {
-        s.Effects.CameraLand(impactForce);
+        s.CameraLandBob.CameraLand(impactForce);
+
         if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
 

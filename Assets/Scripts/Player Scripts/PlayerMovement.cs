@@ -42,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
     private float maxSpeed;
 
     bool crouched = false;
-    bool cancelWallRun = true;
+    bool readyToWallJump = true;
     int stepsSinceLastGrounded = 0;
 
     [Header("Assignables")]
@@ -88,15 +88,11 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded || SnapToGround(vel)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
-        if (!s.PlayerInput.CanWallJump())
-        {
-            cancelWallRun = true;
-            canAddWallRunForce = true;
-        }
+        if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
 
-        if (s.PlayerInput.CanWallJump() && s.PlayerInput.jumping && !s.PlayerInput.grounded && cancelWallRun) WallJump();
+        if (s.PlayerInput.CanWallJump() && s.PlayerInput.jumping && readyToWallJump) WallJump();
         if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
-        if (s.PlayerInput.stopWallRun && cancelWallRun) StopWallRun();
+        if (s.PlayerInput.stopWallRun && readyToWallJump) StopWallRun();
 
         if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir.normalized);
         if (!s.PlayerInput.crouching && crouched) StopCrouch();
@@ -113,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit hit;
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, s.PlayerInput.Ground)) return false;
 
-        rb.velocity = new Vector3(rb.velocity.x, -hit.distance * 20f, rb.velocity.z);
+        rb.velocity = new Vector3(rb.velocity.x, -hit.distance * 15f, rb.velocity.z);
         rb.AddForce(-vel * 5f);
 
         return true;
@@ -168,15 +164,19 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallJump()
     {
-        if (cancelWallRun)
+        if (readyToWallJump)
         {
-            cancelWallRun = false;
+            readyToWallJump = false;
             s.PlayerInput.grounded = false;
+            s.PlayerInput.nearWall = false;
 
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
             rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
             rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
+
+            CancelInvoke("ResetWallJump");
+            Invoke("ResetWallJump", 0.3f);
         }
     }
 
@@ -194,7 +194,7 @@ public class PlayerMovement : MonoBehaviour
 
             wallClimb = wallMagnitude + wallClimbForce;
             wallClimb = Mathf.Clamp(wallClimb, -20f, 10f);
-            rb.velocity = new Vector3(rb.velocity.x, wallClimb, rb.velocity.z);
+            rb.AddForce(Vector3.up * wallClimb);
         }
 
         rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 0.8f);
@@ -203,10 +203,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void StopWallRun()
     {
-        if (s.PlayerInput.wallRunning && cancelWallRun)
+        if (s.PlayerInput.wallRunning && readyToWallJump)
         {
-            cancelWallRun = false;
+            readyToWallJump = false;
+            s.PlayerInput.nearWall = false;
+
             rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
+
+            CancelInvoke("ResetWallJump");
+            Invoke("ResetWallJump", 0.3f);
         }
     }
 
@@ -235,7 +240,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouched)
         {
-            if (s.PlayerInput.grounded) rb.AddForce(-slideDir * slideFriction);
+            rb.AddForce(-slideDir * slideFriction);
             return;
         }
 
@@ -271,5 +276,10 @@ public class PlayerMovement : MonoBehaviour
     void ResetJump()
     {
         jumped = false;
+    }
+
+    void ResetWallJump()
+    {
+        readyToWallJump = true;
     }
 }
