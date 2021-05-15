@@ -13,8 +13,6 @@ public class WeaponPickup : Interactable
     [Header("Interaction Hint")]
     [SerializeField] private string description;
 
-    private Transform weaponRot;
-    private Transform weaponPos;
     private Rigidbody rb;
 
     void Awake()
@@ -26,15 +24,15 @@ public class WeaponPickup : Interactable
     {
         if (rb.isKinematic)
         {
-            Vector3 targetPos = weaponPos.position;
+            Vector3 targetPos = Vector3.zero;
 
-            if (transform.position != targetPos)
-                transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref vel, pickupPositionTime);
+            if (transform.localPosition != targetPos)
+                transform.localPosition = Vector3.SmoothDamp(transform.localPosition, targetPos, ref vel, pickupPositionTime);
 
-            Quaternion targetRot = weaponRot.rotation;
+            Quaternion targetRot = Quaternion.Euler(0, 0, 0);
 
-            if (transform.rotation != targetRot)
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, pickupRotationSpeed * Time.deltaTime);
+            if (transform.localRotation != targetRot)
+                transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRot, pickupRotationSpeed * Time.deltaTime);
         }
     }
 
@@ -46,12 +44,6 @@ public class WeaponPickup : Interactable
 
     public override void OnInteract()
     {
-        transform.SetParent(weaponPos);
-    }
-
-    public void SetTransform(Transform weaponPos, Transform weaponRot)
-    {
-        this.weaponPos = weaponPos;
-        this.weaponRot = weaponPos;
+        rb.isKinematic = true;
     }
 }

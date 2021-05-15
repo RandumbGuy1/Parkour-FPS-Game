@@ -6,8 +6,15 @@ public class WeaponController : MonoBehaviour
 {
     [Header("Equip Settings")]
     [SerializeField] private float throwForce;
-    [SerializeField] private float weaponSwitchDelay;
     [SerializeField] private int selectedWeapon;
+
+    private float vel = 0f;
+    private float smoothRot = 0f;
+
+    [Header("Sway Settings")]
+    [SerializeField] private float offsetRotY;
+    [SerializeField] private float sideRotAmount;
+    [SerializeField] private float rotateSmoothTime;
 
     [Header("Weapons Equipped")]
     [SerializeField] private List<GameObject> weapons = new List<GameObject>();
@@ -39,11 +46,21 @@ public class WeaponController : MonoBehaviour
         if (selectedWeapon != previousWeapon) SelectWeapon();
     }
 
+    void LateUpdate()
+    {
+        if (weapons.Count <= 0) return;
+
+        float newRot = (s.PlayerInput.input.x * -sideRotAmount) + offsetRotY;
+        smoothRot = Mathf.SmoothDamp(smoothRot, newRot, ref vel, rotateSmoothTime);
+        smoothRot = Mathf.Clamp(smoothRot, -25, 60);
+
+        weaponPos.localRotation = Quaternion.Euler(0, smoothRot, 0);
+    }
+
     public void AddWeapon(GameObject obj)
     {
         weapons.Add(obj);
-        obj.GetComponent<Rigidbody>().isKinematic = true;
-        obj.GetComponent<WeaponPickup>().SetTransform(weaponPos, s.cam);
+        obj.transform.SetParent(weaponPos);
 
         selectedWeapon = weapons.Count - 1;
         SelectWeapon();

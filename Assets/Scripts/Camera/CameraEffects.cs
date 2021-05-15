@@ -5,16 +5,19 @@ using System;
 
 public class CameraEffects : MonoBehaviour
 {
-	[Header("Offset Variables")]
-	public float offsetSmoothTime;
-	public float backSmoothTime;
+	[Header("Offset Settings")]
+	[SerializeField] private float offsetSmoothTime;
+	[SerializeField] private float backSmoothTime;
+
+	[Header("Offset Calculation Settings")]
+	[SerializeField] private float offsetMultiplier;
+	[SerializeField] private float maxOffset;
 
 	private float maxSpeed;
 	private float vel = 0;
 	private float magnitude;
 	private float setSmoothTime;
 
-	Vector3 offsetPos = Vector3.zero;
 	public bool landed { get; private set; }
 
 	void Start()
@@ -26,27 +29,32 @@ public class CameraEffects : MonoBehaviour
 
 	void LateUpdate()
 	{
-		#region Camera Land Bob
+		transform.localPosition = CalculateLandOffset();
+	}
+
+	private Vector3 CalculateLandOffset()
+    {
+		Vector3 offsetPos = Vector3.zero;
+		float threshold = -magnitude + 0.1f;
+
 		if (landed)
 		{
 			offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, -magnitude, ref vel, offsetSmoothTime, maxSpeed, Time.smoothDeltaTime);
-			transform.localPosition = offsetPos;
-
-			if (transform.localPosition.y <= -magnitude + 0.1f) Invoke("StopCameraLand", 0.05f);
+			if (transform.localPosition.y <= threshold) Invoke("StopCameraLand", 0.05f);
 		}
+		else if (transform.localPosition.y < -0.01f) 
+			offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, 0.01f, ref vel, backSmoothTime, maxSpeed, Time.smoothDeltaTime);
 
-		if (!landed && transform.localPosition.y < -0.01f)
-			transform.localPosition = new Vector3(0, Mathf.SmoothDamp(transform.localPosition.y, 0, ref vel, backSmoothTime, maxSpeed, Time.smoothDeltaTime), 0);
-		#endregion
+		return offsetPos;
 	}
 
 	public void CameraLand(float mag)
 	{
 		if (!landed)
 		{
-			magnitude = (mag * 0.03f);
+			magnitude = (mag * offsetMultiplier);
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
-			magnitude = Mathf.Clamp(magnitude, 0f, 2.5f);
+			magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 			if (magnitude < 0.6f) magnitude = 0f;
 			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 1f;
@@ -59,7 +67,7 @@ public class CameraEffects : MonoBehaviour
 		}
 	}
 
-	void StopCameraLand()
+	private void StopCameraLand()
 	{
 		if (landed)
 		{

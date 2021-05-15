@@ -6,12 +6,13 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized; } }
+    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
     public Vector3 moveDir 
     { 
         get 
-        { 
-            Vector3 inputDir = (orientation.forward * input.y * multiplier * multiplierV + orientation.right * input.x * multiplier);
+        {
+            Vector2 inputs = input.normalized;
+            Vector3 inputDir = (orientation.forward * inputs.y * multiplier * multiplierV + orientation.right * inputs.x * multiplier);
             Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
             float dot = Vector3.Dot(Vector3.up, slopeDir);
@@ -201,21 +202,18 @@ public class InputManager : MonoBehaviour
 
     private void SprintEffect()
     {
-        if (s.magnitude >= 25f && !fast)
+        if (s.magnitude >= 25f)
         {
-            sprintEffect.Play();
+            if (!fast) sprintEffect.Play();
+
             fast = true;
+            var em = sprintEffect.emission;
+            em.rateOverTime = s.magnitude;
         }
-        else if (s.magnitude < 25f && fast)
+        else if (fast)
         {
             sprintEffect.Stop();
             fast = false;
-        }
-
-        if (s.magnitude >= 25f)
-        {
-            var em = sprintEffect.emission;
-            em.rateOverTime = s.magnitude;
         }
     }
     #endregion

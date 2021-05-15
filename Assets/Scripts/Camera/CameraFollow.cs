@@ -49,7 +49,6 @@ public class CameraFollow : MonoBehaviour
 
 	[Header("Assignables")]
 	public Transform player;
-	public Transform playerHead;
 	public CameraShaker Shake;
 	private Camera cam;
 
@@ -66,7 +65,7 @@ public class CameraFollow : MonoBehaviour
 		mouseX = Input.GetAxisRaw("Mouse X");
 		mouseY = Input.GetAxisRaw("Mouse Y");
 
-		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(10f, 8f, 0.8f);
+		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(10f, 8f, 3f);
 	}
 
 	void LateUpdate()

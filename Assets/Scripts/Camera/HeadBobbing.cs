@@ -20,8 +20,6 @@ public class HeadBobbing : MonoBehaviour
 
     [Header("Assignables")]
     public ScriptManager s;
-    public Transform playerHead;
-    public Transform orientation;
 
     void Update()
     {
@@ -31,7 +29,7 @@ public class HeadBobbing : MonoBehaviour
         else timer += Time.deltaTime;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(timer), ref vel, bobSmoothTime);
-        newPos = playerHead.position + smoothOffset;
+        newPos = s.playerHead.position + smoothOffset;
 
         transform.position = newPos;
     }
@@ -47,7 +45,7 @@ public class HeadBobbing : MonoBehaviour
             horizOffset = Mathf.Cos(t * bobSpeed) * bobAmountHoriz;
             vertOffset = Mathf.Sin(t * bobSpeed * 2) * bobAmountVert;
 
-            offset = orientation.right * horizOffset + Vector3.up * vertOffset;
+            offset = s.orientation.right * horizOffset + Vector3.up * vertOffset;
         }
 
         return offset;
