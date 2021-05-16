@@ -42,9 +42,9 @@ public class CameraFollow : MonoBehaviour
 	private float ySmoothRotation;
 	private float xSmoothRotation;
 
-	Vector3 rotationDelta;
 	Vector3 rotationLast;
 
+	public Vector3 rotationDelta { get; private set; }
 	public float camVel { get; private set; }
 
 	[Header("Assignables")]
@@ -66,6 +66,8 @@ public class CameraFollow : MonoBehaviour
 		mouseY = Input.GetAxisRaw("Mouse Y");
 
 		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(10f, 8f, 3f);
+
+		CalcDelta();
 	}
 
 	void LateUpdate()
@@ -73,8 +75,6 @@ public class CameraFollow : MonoBehaviour
 		CalcRotation();
 		SmoothRotation();
 		ApplyRotation();
-
-		CalcDelta();
 
 		cam.fieldOfView = fov;
 	}

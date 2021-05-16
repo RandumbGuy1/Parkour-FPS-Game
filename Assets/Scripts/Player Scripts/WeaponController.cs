@@ -8,13 +8,26 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private float throwForce;
     [SerializeField] private int selectedWeapon;
 
-    private float vel = 0f;
-    private float smoothRot = 0f;
+    private Vector3 bobVel = Vector3.zero;
+    private Vector3 swayVel = Vector3.zero;
+
+    private float timer = 0f;
+    private bool shouldBobGun = false;
+
+    public Vector3 smoothBob = Vector3.zero;
+    private Vector3 smoothSway = Vector3.zero;
+
+    [Header("Bob Settings")]
+    [SerializeField] private Vector3 defaultPos;
+    [SerializeField] private float bobAmountHoriz;
+    [SerializeField] private float bobAmountVert;
+    [SerializeField] private float bobSpeed;
+    [SerializeField] private float bobSmoothTime;
 
     [Header("Sway Settings")]
-    [SerializeField] private float offsetRotY;
-    [SerializeField] private float sideRotAmount;
-    [SerializeField] private float rotateSmoothTime;
+    [SerializeField] private Vector3 defaultRot;
+    [SerializeField] private float swayAmount;
+    [SerializeField] private float swaySmoothTime;
 
     [Header("Weapons Equipped")]
     [SerializeField] private List<GameObject> weapons = new List<GameObject>();
@@ -48,13 +61,19 @@ public class WeaponController : MonoBehaviour
 
     void LateUpdate()
     {
-        if (weapons.Count <= 0) return;
+        shouldBobGun = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.magnitude > 10f;
 
-        float newRot = (s.PlayerInput.input.x * -sideRotAmount) + offsetRotY;
-        smoothRot = Mathf.SmoothDamp(smoothRot, newRot, ref vel, rotateSmoothTime);
-        smoothRot = Mathf.Clamp(smoothRot, -25, 60);
+        if (!shouldBobGun) timer = 0f;
+        else timer += Time.deltaTime;
 
-        weaponPos.localRotation = Quaternion.Euler(0, smoothRot, 0);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway(), ref swayVel, swaySmoothTime);
+
+        Vector3 newPos = defaultPos + smoothBob;
+        Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway);
+
+        weaponPos.localPosition = newPos;
+        weaponPos.localRotation = newRot;
     }
 
     public void AddWeapon(GameObject obj)
@@ -64,6 +83,43 @@ public class WeaponController : MonoBehaviour
 
         selectedWeapon = weapons.Count - 1;
         SelectWeapon();
+    }
+
+    private Vector3 CalculateBob()
+    {
+        Vector3 offset = Vector3.zero;
+
+        if (weapons.Count > 0)
+        {
+            if (timer > 0)
+            {
+                float horizOffset = 0f;
+                float vertOffset = 0f;
+
+                horizOffset = Mathf.Cos(timer * bobSpeed) * bobAmountHoriz;
+                vertOffset = Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert;
+
+                offset += weaponPos.forward * horizOffset + Vector3.up * vertOffset;
+            }
+        }
+
+        return offset;
+    }
+
+    private Vector3 CalculateSway()
+    {
+        Vector3 offset = Vector3.zero;
+
+        if (weapons.Count > 0)
+        {
+            float strafeRot = s.PlayerInput.input.x * swayAmount * 1.8f;
+            float camRot = s.CameraInput.rotationDelta.y * swayAmount;
+            camRot = Mathf.Clamp(camRot, -50, 80);
+
+            offset += (Vector3.up * (camRot - strafeRot));
+        }
+
+        return offset;
     }
 
     private void SelectWeapon()
