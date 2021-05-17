@@ -2883,10 +2883,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxWallRunCameraTilt: 20
   maxSlideCameraTilt: 10
-  tiltSmoothTime: 0.15
-  returnTiltSmoothTime: 0.2
+  tiltTime: 0.1
+  returnTiltTime: 0.2
   fov: 80
-  wallFovTime: 0.3
+  fovTime: 0.3
   returnFovTime: 0.5
   playerTurnSpeed: 20
   sensitivity: 80
@@ -9874,7 +9874,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.92
+  m_Name: Save 1.93
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10343,7 +10343,7 @@ MonoBehaviour:
   vaulting: 0
   friction: 10
   slideFriction: 1.2
-  sharpness: 35
+  sharpness: 30
   threshold: 0.05
 --- !u!114 &1650519437
 MonoBehaviour:
@@ -10426,7 +10426,7 @@ MonoBehaviour:
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
   bobAmountHoriz: 0.3
   bobAmountVert: 0.2
-  bobSpeed: 6
+  bobSpeed: 6.5
   bobSmoothTime: 0.2
   defaultRot: {x: 0, y: 18, z: 0}
   swayAmount: 13

@@ -58,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.5f;
+        crouchOffset = crouchScale.y * 0.6f;
     }
 
     void FixedUpdate()
@@ -106,11 +106,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (stepsSinceLastGrounded > 2 || vaulting || jumped || s.PlayerInput.grounded) return false;
 
-        RaycastHit hit;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out hit, 2f, s.PlayerInput.Ground)) return false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
 
-        rb.velocity = new Vector3(rb.velocity.x, -hit.distance * 15f, rb.velocity.z);
+        rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 15f, rb.velocity.z);
         rb.AddForce(-vel * 5f);
+        s.PlayerInput.grounded = true;
 
         return true;
     }
@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
         while (elapsed < (duration * 2f))
         {
             vaulting = true;
-            s.rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
+            rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
             elapsed += Time.fixedDeltaTime;
 
             yield return new WaitForFixedUpdate();
@@ -156,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
 
         rb.AddForce(dir * 9f, ForceMode.VelocityChange);
         rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
-        rb.velocity = new Vector3(s.rb.velocity.x, 0f, s.rb.velocity.y);
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.y);
 
         rb.useGravity = true;
         vaulting = false;
@@ -197,7 +197,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * wallClimb);
         }
 
-        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 0.8f);
+        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 1.5f);
         rb.AddForce(-transform.up * wallRunForce * 0.6f);
     }
 
@@ -234,25 +234,24 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded) rb.velocity *= 0.8f;
     }
 
-    private void CounterMovement(float x, float z, Vector3 slideDir)
+    private void CounterMovement(float x, float z, Vector3 dir)
     {
         if (!s.PlayerInput.grounded) return;
 
         if (crouched)
         {
-            rb.AddForce(-slideDir * slideFriction);
+            rb.AddForce(-dir * slideFriction);
             return;
         }
 
         Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
 
-        if (x == 0 && Math.Abs(mag.x) > threshold)
-            rb.AddForce(s.orientation.right * -mag.x * friction);
+        if (x == 0 && z == 0 && dir.sqrMagnitude > (threshold * threshold))
+            rb.AddForce(-dir * friction);
+
         if (x > 0 && mag.x < -threshold || x < 0 && mag.x > threshold)
             rb.AddForce(s.orientation.right * -mag.x * sharpness);
 
-        if (z == 0 && Math.Abs(mag.z) > threshold)
-            rb.AddForce(s.orientation.forward * -mag.z * friction);
         if (z > 0 && mag.z < -threshold || z < 0 && mag.z > threshold)
             rb.AddForce(s.orientation.forward * -mag.z * sharpness);
     }

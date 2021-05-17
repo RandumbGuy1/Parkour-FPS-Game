@@ -8,18 +8,19 @@ public class CameraFollow : MonoBehaviour
 	[Header("Camera Tilt Variables")]
 	public float maxWallRunCameraTilt;
 	public float maxSlideCameraTilt;
-	public float tiltSmoothTime;
-	public float returnTiltSmoothTime;
+	public float tiltTime;
+	public float returnTiltTime;
 
-	private float tiltVel = 0f;
-	public float CameraTilt { get; private set; }
+	private float cameraTilt;
+
+	float tiltVel = 0f;
+	float fovVel = 0f;
 
 	[Header("Fov")]
 	public float fov;
-	public float wallFovTime;
+	public float fovTime;
 	public float returnFovTime;
 
-	private float fovVel = 0f;
 	private float maxFov, setFov;
 
 	[Header("Sensitivity")]
@@ -54,7 +55,7 @@ public class CameraFollow : MonoBehaviour
 
 	void Start()
     {
-		CameraTilt = 0f;
+		cameraTilt = 0f;
 		setFov = fov;
 		maxFov = setFov + 20f;
 		cam = GetComponentInChildren<Camera>();
@@ -95,7 +96,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
     {
-		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, CameraTilt + Shake.offset.z);
+		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, cameraTilt + Shake.offset.z);
 		player.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
 	}
 
@@ -109,21 +110,23 @@ public class CameraFollow : MonoBehaviour
 
 	public void CameraWallRun(int i)
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltSmoothTime);
-		fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, wallFovTime);
+		cameraTilt = Mathf.SmoothDamp(cameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltTime + 0.05f);
+		fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, fovTime);
 	}
 
 	public void CameraSlide()
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, maxSlideCameraTilt, ref tiltVel, tiltSmoothTime);
+		cameraTilt = Mathf.SmoothDamp(cameraTilt, maxSlideCameraTilt, ref tiltVel, tiltTime + 0.1f);
 	}
 
 	public void ResetCameraTilt()
 	{
-		CameraTilt = Mathf.SmoothDamp(CameraTilt, 0, ref tiltVel, returnTiltSmoothTime);
-		fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
+		if (cameraTilt == 0 && fov == setFov) return;
 
-		if (Math.Abs(CameraTilt) < 0.1f) CameraTilt = 0f;
-		if (fov <= 80.1f) fov = 80f;
+		cameraTilt = Mathf.SmoothDamp(cameraTilt, 0, ref tiltVel, returnTiltTime);
+		fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
+		
+		if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
+		if (fov < setFov + 0.02f)  fov = setFov;
 	}
 }

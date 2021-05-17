@@ -6,7 +6,7 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
+    public Vector2 input { get; private set; }
     public Vector3 moveDir 
     { 
         get 
@@ -71,7 +71,6 @@ public class InputManager : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private ParticleSystem sprintEffect;
     [SerializeField] private Transform orientation;
-    private RaycastHit slopeHit;
     private ScriptManager s;
 
     void Awake()
@@ -86,10 +85,12 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        input = new Vector2 (Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
 
-        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
+        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground))
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
 
@@ -147,8 +148,8 @@ public class InputManager : MonoBehaviour
         {
             float dot = Vector3.Dot(s.orientation.right, wallNormal);
 
-            isWallLeft = dot > 0.6f;
-            isWallRight = dot < -0.6f;
+            isWallLeft = dot > 0.8f;
+            isWallRight = dot < -0.8f;
         }
 
         if (!CanWallJump() || !isWallRight && !isWallLeft)
@@ -196,7 +197,7 @@ public class InputManager : MonoBehaviour
         if (wallRunning && isWallLeft) s.CameraInput.CameraWallRun(-1);
         if (wallRunning && isWallRight) s.CameraInput.CameraWallRun(1);
 
-        if (!wallRunning && Math.Abs(s.CameraInput.CameraTilt) > 0f && !crouching || !wallRunning && s.CameraInput.fov > 80f)
+        if (!wallRunning)
             s.CameraInput.ResetCameraTilt();
     }
 
@@ -204,9 +205,12 @@ public class InputManager : MonoBehaviour
     {
         if (s.magnitude >= 25f)
         {
-            if (!fast) sprintEffect.Play();
+            if (!fast)
+            {
+                fast = true;
+                sprintEffect.Play();
+            }
 
-            fast = true;
             var em = sprintEffect.emission;
             em.rateOverTime = s.magnitude;
         }
@@ -286,7 +290,6 @@ public class InputManager : MonoBehaviour
     private void Land(float impactForce)
     {
         s.CameraLandBob.CameraLand(impactForce);
-
         if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
 
