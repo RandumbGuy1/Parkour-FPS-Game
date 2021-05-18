@@ -11,8 +11,9 @@ public class InputManager : MonoBehaviour
     { 
         get 
         {
+            Vector2 multi = s.PlayerMovement.Multiplier();
             Vector2 inputs = input.normalized;
-            Vector3 inputDir = (orientation.forward * inputs.y * multiplier * multiplierV + orientation.right * inputs.x * multiplier);
+            Vector3 inputDir = (orientation.forward * inputs.y * multi.x * multi.y + orientation.right * inputs.x * multi.x);
             Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
             float dot = Vector3.Dot(Vector3.up, slopeDir);
@@ -22,8 +23,6 @@ public class InputManager : MonoBehaviour
 
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
-
-    private float multiplier, multiplierV;
 
     [Header("Thresholds")]
     [Range(0f, 90f)] 
@@ -95,7 +94,6 @@ public class InputManager : MonoBehaviour
         else reachedMaxSlope = false;
 
         CheckForWall();
-        MovementControl();
 
         CameraTilt();
         SprintEffect();
@@ -158,35 +156,6 @@ public class InputManager : MonoBehaviour
             s.rb.useGravity = true;
         }    
     }
-
-    private void MovementControl()
-    {
-        if (grounded)
-        {
-            if (multiplierV != 1.1f) multiplierV = 1.1f;
-            if (!crouching && !wallRunning && multiplier != 1f) multiplier = 1f;
-            if (crouching && !wallRunning && multiplier != 0.05f) multiplier = 0.05f;
-        }
-
-        if (!grounded)
-        {
-            if (!wallRunning && !crouching && multiplier != 0.5f && multiplierV != 0.9f)
-            {
-                multiplier = 0.5f;
-                multiplierV = 0.9f;
-            }
-            if (!wallRunning && crouching && multiplier != 0.2f && multiplierV != 0.8f)
-            {
-                multiplier = 0.2f; 
-                multiplierV = 0.8f;
-            }
-            if (s.PlayerInput.wallRunning && multiplier != 0.01f && multiplierV != 0.30f)
-            {
-                multiplier = 0.01f; 
-                multiplierV = 30f;
-            }
-        }
-    }
     #endregion
 
     #region Visual Effects
@@ -237,21 +206,22 @@ public class InputManager : MonoBehaviour
         {
             if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
 
-            Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z);
-            Vector3 dir = moveDir;
+            Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z).normalized;
+            Vector3 dir = new Vector3(moveDir.x, 0, moveDir.z).normalized;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.5f);
 
             if (Vector3.Dot(dir.normalized, normal) > -0.5f) return;
-            if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -normal, 1.3f, Environment)) return;
+            if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
+            if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -vaultDir, 1.3f, Environment)) return;
 
             RaycastHit hit;
             if (!Physics.Raycast(vaultCheck + (dir + vaultDir).normalized, Vector3.down, out hit, 3f, Environment)) return;
 
             Vector3 vaultPoint = hit.point + (Vector3.up * 2.1f);
-            float distance = Vector3.Distance(s.rb.position, vaultPoint);
+            float distance = Vector3.Distance(transform.position, vaultPoint);
             vaultPoint += (Vector3.up * (distance * 0.3f));
 
-            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, dir.normalized));
+            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, vaultDir));
         }
         #endregion
     }

@@ -15,25 +15,25 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.34509805, g: 0.3529412, b: 0.43921572, a: 1}
+  m_FogColor: {r: 0.10196079, g: 0.3372549, b: 0.6117647, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.005
-  m_LinearFogStart: 0
-  m_LinearFogEnd: 600
+  m_LinearFogStart: 250
+  m_LinearFogEnd: 800
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 3
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 1, g: 1, b: 1, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 32be28fd0faea1641aff7ddbf194bb6a, type: 2}
-  m_HaloStrength: 0.5
+  m_SkyboxMaterial: {fileID: 2100000, guid: 1cc6e6796f833a94f94e6d794ca654c3, type: 2}
+  m_HaloStrength: 0.3
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
   m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
   m_DefaultReflectionMode: 0
-  m_DefaultReflectionResolution: 128
+  m_DefaultReflectionResolution: 64
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
@@ -588,7 +588,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 17c44fb3e5be9644586a0728a5f5a386, type: 2}
+  - {fileID: 2100000, guid: c181c23a6120fbe4aadd5bb53a58dd78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -848,7 +848,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 17c44fb3e5be9644586a0728a5f5a386, type: 2}
+  - {fileID: 2100000, guid: c181c23a6120fbe4aadd5bb53a58dd78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1416,7 +1416,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 17c44fb3e5be9644586a0728a5f5a386, type: 2}
+  - {fileID: 2100000, guid: c181c23a6120fbe4aadd5bb53a58dd78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2315,6 +2315,7 @@ GameObject:
   m_Component:
   - component: {fileID: 685652798}
   - component: {fileID: 685652799}
+  - component: {fileID: 685652800}
   m_Layer: 5
   m_Name: Reticle
   m_TagString: Untagged
@@ -2353,6 +2354,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 685652797}
   m_CullTransparentMesh: 0
+--- !u!114 &685652800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685652797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b787e50fbff2b8499c1bd59a71db6d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reticle: {fileID: 685652798}
+  s: {fileID: 1650519438}
+  smoothTime: 3
+  minSize: 30
+  maxSize: 250
 --- !u!1 &703298682
 GameObject:
   m_ObjectHideFlags: 0
@@ -2474,7 +2492,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.9941571, b: 0.9481132, a: 1}
+  m_Color: {r: 0.9764151, g: 0.9808844, b: 1, a: 1}
   m_Intensity: 0.7
   m_Range: 10
   m_SpotAngle: 30
@@ -8450,7 +8468,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 17c44fb3e5be9644586a0728a5f5a386, type: 2}
+  - {fileID: 2100000, guid: c181c23a6120fbe4aadd5bb53a58dd78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10333,7 +10351,7 @@ MonoBehaviour:
   jumpCooldown: 0.06
   maxAirSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
-  slideForce: 160
+  slideForce: 200
   crouchJumpForce: 30
   maxSlideSpeed: 50
   wallJumpForce: 40
@@ -10341,8 +10359,8 @@ MonoBehaviour:
   wallClimbForce: 10
   vaultDuration: 0.03
   vaulting: 0
-  friction: 10
-  slideFriction: 1.2
+  friction: 15
+  slideFriction: 1.5
   sharpness: 30
   threshold: 0.05
 --- !u!114 &1650519437
@@ -16560,7 +16578,6 @@ GameObject:
   - component: {fileID: 2028543020}
   - component: {fileID: 2028543019}
   - component: {fileID: 2028543018}
-  - component: {fileID: 2028543022}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -16649,23 +16666,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &2028543022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2028543017}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b787e50fbff2b8499c1bd59a71db6d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  reticle: {fileID: 685652798}
-  s: {fileID: 1650519438}
-  smoothTime: 0.3
-  minSize: 30
-  maxSize: 300
 --- !u!1 &2067588101
 GameObject:
   m_ObjectHideFlags: 0

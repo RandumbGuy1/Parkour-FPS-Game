@@ -66,9 +66,9 @@ public class PlayerMovement : MonoBehaviour
         Movement();
     }
 
-    void LateUpdate()
+    void Update()
     {
-        MovementControl();
+        maxSpeed = ControlMaxSpeed();
     }
 
     private void Movement()
@@ -97,7 +97,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir.normalized);
         if (!s.PlayerInput.crouching && crouched) StopCrouch();
 
-        rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 0.02f), ForceMode.VelocityChange);
+        rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 2.5f), ForceMode.Acceleration);
     }
 
     private bool SnapToGround(Vector3 vel)
@@ -108,7 +108,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
 
-        rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 15f, rb.velocity.z);
+        rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 10f, rb.velocity.z);
         rb.AddForce(-vel * 5f);
         s.PlayerInput.grounded = true;
 
@@ -154,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        rb.AddForce(dir * 9f, ForceMode.VelocityChange);
+        rb.AddForce(dir * 8f, ForceMode.VelocityChange);
         rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.y);
 
@@ -256,20 +256,26 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(s.orientation.forward * -mag.z * sharpness);
     }
 
-    private void MovementControl()
+    public Vector2 Multiplier()
     {
         if (s.PlayerInput.grounded)
         {
-            if (!crouched && !s.PlayerInput.wallRunning && maxSpeed != maxGroundSpeed) maxSpeed = maxGroundSpeed;            
-            if (crouched && !s.PlayerInput.wallRunning && maxSpeed != maxSlideSpeed) maxSpeed = maxSlideSpeed;
+            if (crouched) return new Vector2 (0.05f, 1f);
+            return new Vector2 (1f, 1.05f);
         }
 
-        if (!s.PlayerInput.grounded)
-        {
-            if (!s.PlayerInput.wallRunning && !crouched && maxSpeed != maxAirSpeed) maxSpeed = maxAirSpeed;
-            if (!s.PlayerInput.wallRunning && crouched && maxSpeed != maxSlideSpeed) maxSpeed = maxSlideSpeed;
-            if (s.PlayerInput.wallRunning && maxSpeed != maxAirSpeed) maxSpeed = maxAirSpeed;
-        }
+        if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 30f);
+
+        if (crouched) return new Vector2 (0.4f, 0.8f);
+
+        return new Vector2 (0.6f, 0.8f);
+    }
+
+    private float ControlMaxSpeed()
+    {
+        if (crouched) return maxSlideSpeed;
+        if (s.PlayerInput.grounded) return maxGroundSpeed;
+        return maxAirSpeed;
     }
 
     void ResetJump()

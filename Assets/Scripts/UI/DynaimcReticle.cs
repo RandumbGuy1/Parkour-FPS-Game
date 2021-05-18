@@ -12,10 +12,9 @@ public class DynaimcReticle : MonoBehaviour
     public float smoothTime;
     public float minSize;
     public float maxSize;
-    private float camMag;
+
     private float size;
     private float newSize;
-    private float vel = 0f;
 
     void LateUpdate()
     {
@@ -24,10 +23,10 @@ public class DynaimcReticle : MonoBehaviour
 
     private void Reticle()
     {
-        newSize = Mathf.Pow((s.magnitude + s.CameraInput.camVel) * 5f, 1.3f);
+        newSize = Mathf.Pow((s.magnitude + (s.CameraInput.camVel * 3.2f)) * 5f, 1.3f);
         newSize = Mathf.Clamp(newSize, minSize, maxSize);
 
-        size = Mathf.SmoothDamp(size, newSize, ref vel, smoothTime);
+        size = Mathf.Lerp(size, newSize, smoothTime * Time.deltaTime);
         reticle.sizeDelta = new Vector2(size, size);
     }
 }
