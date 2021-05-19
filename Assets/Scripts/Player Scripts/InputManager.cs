@@ -206,22 +206,23 @@ public class InputManager : MonoBehaviour
         {
             if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
 
-            Vector3 vaultDir = new Vector3(-normal.x, 0, -normal.z).normalized;
+            Vector3 vaultDir = new Vector3(normal.x, 0, normal.z).normalized;
             Vector3 dir = new Vector3(moveDir.x, 0, moveDir.z).normalized;
             Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.5f);
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.5f) return;
+            if (Vector3.Dot(dir.normalized, normal) > -0.6f) return;
             if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
             if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -vaultDir, 1.3f, Environment)) return;
 
             RaycastHit hit;
-            if (!Physics.Raycast(vaultCheck + (dir + vaultDir).normalized, Vector3.down, out hit, 3f, Environment)) return;
+            if (!Physics.Raycast(vaultCheck + (-vaultDir).normalized * 1.3f, Vector3.down, out hit, 3f, Environment)) return;
 
-            Vector3 vaultPoint = hit.point + (Vector3.up * 2.1f);
+            Vector3 vaultPoint = hit.point + (Vector3.up * 2.2f);
+
             float distance = Vector3.Distance(transform.position, vaultPoint);
             vaultPoint += (Vector3.up * (distance * 0.3f));
 
-            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, vaultDir));
+            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, -vaultDir));
         }
         #endregion
     }

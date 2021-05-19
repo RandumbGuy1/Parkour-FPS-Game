@@ -45,6 +45,8 @@ public class PlayerMovement : MonoBehaviour
     bool readyToWallJump = true;
     int stepsSinceLastGrounded = 0;
 
+    private Vector3 mag = Vector3.zero;
+
     [Header("Assignables")]
     private ScriptManager s;
     private Rigidbody rb;
@@ -73,12 +75,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        rb.AddForce(Vector3.down * 0.8f);
+        rb.AddForce(Vector3.down);
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
+
+        if (s.PlayerInput.grounded) mag = s.orientation.InverseTransformDirection(rb.velocity);
+        else if (mag != Vector3.zero) mag = Vector3.zero;
 
         CounterMovement(s.PlayerInput.input.x, s.PlayerInput.input.y, vel);
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
@@ -104,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (s.magnitude < 5f) return false;
 
-        if (stepsSinceLastGrounded > 2 || vaulting || jumped || s.PlayerInput.grounded) return false;
+        if (stepsSinceLastGrounded > 4 || vaulting || jumped || s.PlayerInput.grounded) return false;
 
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
 
@@ -132,36 +137,39 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    #region Vaulting
     public IEnumerator VaultMovement(Vector3 newPos, float distance, Vector3 dir)
     {
         rb.useGravity = false;
         rb.velocity = Vector3.zero;
+        vaulting = true;
 
         Vector3 vel = Vector3.zero;
         float elapsed = 0f;
 
-        distance *= 0.018f;
+        distance *= 0.025f;
         distance = Mathf.Round(distance * 1000.0f) * 0.001f;
 
         float duration = vaultDuration + distance;
 
-        while (elapsed < (duration * 2f))
+        while (elapsed < duration * 1.6f)
         {
-            vaulting = true;
-            rb.MovePosition(Vector3.SmoothDamp(s.rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
+            rb.MovePosition(Vector3.SmoothDamp(rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
+            rb.AddForce(Vector3.up);
             elapsed += Time.fixedDeltaTime;
 
             yield return new WaitForFixedUpdate();
         }
 
-        rb.AddForce(dir * 8f, ForceMode.VelocityChange);
-        rb.AddForce(Vector3.down * (1 / distance) * 0.06f, ForceMode.VelocityChange);
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.y);
+        rb.AddForce(dir * 5f, ForceMode.VelocityChange);
+        rb.velocity = new Vector3(rb.velocity.x, (1 / distance) * -0.02f, rb.velocity.z);
 
         rb.useGravity = true;
         vaulting = false;
     }
+    #endregion
 
+    #region Wall Movement
     private void WallJump()
     {
         if (readyToWallJump)
@@ -214,7 +222,9 @@ public class PlayerMovement : MonoBehaviour
             Invoke("ResetWallJump", 0.3f);
         }
     }
+    #endregion 
 
+    #region Sliding
     private void StartCrouch(Vector3 dir)
     {
         crouched = true;
@@ -233,6 +243,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.grounded) rb.velocity *= 0.8f;
     }
+    #endregion
 
     private void CounterMovement(float x, float z, Vector3 dir)
     {
@@ -244,16 +255,20 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
-
-        if (x == 0 && z == 0 && dir.sqrMagnitude > (threshold * threshold))
+        if (!s.PlayerInput.moving && dir.sqrMagnitude > (threshold * threshold))
             rb.AddForce(-dir * friction);
 
-        if (x > 0 && mag.x < -threshold || x < 0 && mag.x > threshold)
+        if (CounterMomentum(x, mag.x))
             rb.AddForce(s.orientation.right * -mag.x * sharpness);
 
-        if (z > 0 && mag.z < -threshold || z < 0 && mag.z > threshold)
+        if (CounterMomentum(z, mag.z))
             rb.AddForce(s.orientation.forward * -mag.z * sharpness);
+    }
+
+    private bool CounterMomentum(float input, float mag)
+    {
+        if (input > 0 && mag < -threshold || input < 0 && mag > threshold) return true;
+        else return false;
     }
 
     public Vector2 Multiplier()
@@ -265,7 +280,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 30f);
-
         if (crouched) return new Vector2 (0.4f, 0.8f);
 
         return new Vector2 (0.6f, 0.8f);

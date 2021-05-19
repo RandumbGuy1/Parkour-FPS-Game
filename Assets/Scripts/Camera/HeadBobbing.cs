@@ -14,7 +14,6 @@ public class HeadBobbing : MonoBehaviour
     private float timer;
     private bool shouldBob = false;
     private Vector3 vel = Vector3.zero;
-
     private Vector3 newPos;
     private Vector3 smoothOffset = Vector3.zero;
 
