@@ -32,7 +32,15 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
+    [SerializeField] private float vaultForce;
     public bool vaulting = false;
+
+    private float vaultMulti = 0f;
+    private float vaultTime = 0f;
+    private float setVaultDuration;
+    private Vector3 vaultPos = Vector3.zero;
+    private Vector3 vaultNormal = Vector3.zero;
+    private Vector3 vaultOriginalPos = Vector3.zero;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
@@ -61,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
 
         playerScale = transform.localScale;
         crouchOffset = crouchScale.y * 0.6f;
+        setVaultDuration = vaultDuration;
     }
 
     void FixedUpdate()
@@ -88,6 +97,20 @@ public class PlayerMovement : MonoBehaviour
         CounterMovement(s.PlayerInput.input.x, s.PlayerInput.input.y, vel);
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
 
+        if (vaulting)
+        {
+            rb.MovePosition(Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration));
+            vaultTime += Time.fixedDeltaTime * vaultMulti;
+
+            if (vaultTime >= vaultDuration)
+            {
+                vaulting = false;
+                rb.velocity = new Vector3(rb.velocity.x, -vaultForce * 0.05f, rb.velocity.z);
+                rb.AddForce(vaultNormal * vaultForce * 0.2f, ForceMode.VelocityChange);
+                rb.useGravity = true;
+            }
+        }
+
         if (s.PlayerInput.grounded && s.PlayerInput.jumping) Jump();
 
         if (s.PlayerInput.grounded || SnapToGround(vel)) stepsSinceLastGrounded = 0;
@@ -102,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(s.PlayerInput.moveDir.normalized);
         if (!s.PlayerInput.crouching && crouched) StopCrouch();
 
-        rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 2.5f), ForceMode.Acceleration);
+        rb.AddForce(s.PlayerInput.moveDir * (moveSpeed * 3f), ForceMode.Acceleration);
     }
 
     private bool SnapToGround(Vector3 vel)
@@ -138,34 +161,21 @@ public class PlayerMovement : MonoBehaviour
     }
 
     #region Vaulting
-    public IEnumerator VaultMovement(Vector3 newPos, float distance, Vector3 dir)
+    public void Vault(Vector3 pos, Vector3 normal, float distance)
     {
-        rb.useGravity = false;
-        rb.velocity = Vector3.zero;
-        vaulting = true;
-
-        Vector3 vel = Vector3.zero;
-        float elapsed = 0f;
+        vaultPos = pos + Vector3.up * 2.8f;
+        vaultNormal = normal;
+        vaultOriginalPos = transform.position;
+        vaultMulti = (1f / distance) * 25f;
 
         distance *= 0.025f;
-        distance = Mathf.Round(distance * 1000.0f) * 0.001f;
-
-        float duration = vaultDuration + distance;
-
-        while (elapsed < duration * 1.6f)
-        {
-            rb.MovePosition(Vector3.SmoothDamp(rb.position, newPos, ref vel, duration, 30f, Time.fixedDeltaTime));
-            rb.AddForce(Vector3.up);
-            elapsed += Time.fixedDeltaTime;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        rb.AddForce(dir * 5f, ForceMode.VelocityChange);
-        rb.velocity = new Vector3(rb.velocity.x, (1 / distance) * -0.02f, rb.velocity.z);
+        distance = Mathf.Round(distance * 100.0f) * 0.01f;
+        vaultDuration = setVaultDuration + distance;
+        vaultTime = 0f;
+        vaulting = true;
 
         rb.useGravity = true;
-        vaulting = false;
+        rb.velocity = new Vector3(0f, -7f, 0f);
     }
     #endregion
 

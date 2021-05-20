@@ -206,23 +206,34 @@ public class InputManager : MonoBehaviour
         {
             if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
 
-            Vector3 vaultDir = new Vector3(normal.x, 0, normal.z).normalized;
-            Vector3 dir = new Vector3(moveDir.x, 0, moveDir.z).normalized;
-            Vector3 vaultCheck = s.playerHead.position + (Vector3.down * 0.5f);
+            Vector3 vaultDir = normal;
+            vaultDir.y = 0f;
+            vaultDir.Normalize();
 
-            if (Vector3.Dot(dir.normalized, normal) > -0.6f) return;
-            if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
-            if (Physics.Raycast(vaultCheck, dir.normalized, 1.3f, Environment) || Physics.Raycast(vaultCheck, -vaultDir, 1.3f, Environment)) return;
+            Vector3 dir = moveDir;
+            dir.y = 0f;
+            dir.Normalize();
 
-            RaycastHit hit;
-            if (!Physics.Raycast(vaultCheck + (-vaultDir).normalized * 1.3f, Vector3.down, out hit, 3f, Environment)) return;
+            Vector3 vaultHeight = s.playerHead.position + (Vector3.down * 0.5f);
+            Vector3 vaultCheck = s.playerHead.position + Vector3.up * 0.5f + Vector3.down * 0.05f;
 
-            Vector3 vaultPoint = hit.point + (Vector3.up * 2.2f);
+            if (Vector3.Dot(dir.normalized, vaultDir) > -0.6f) return;
+            if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
+            if (Physics.Raycast(vaultHeight, dir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
 
-            float distance = Vector3.Distance(transform.position, vaultPoint);
-            vaultPoint += (Vector3.up * (distance * 0.3f));
+            while (!Physics.Raycast(vaultCheck, -vaultDir, out var checkHit, 1f, Environment))
+            {
+                vaultCheck += Vector3.down * 0.03f;
+                if (vaultCheck.y < s.playerHead.position.y - 3f) break;
+            }
 
-            StartCoroutine(s.PlayerMovement.VaultMovement(vaultPoint, distance, -vaultDir));
+            if (vaultCheck.y >= s.playerHead.position.y - 3f)
+            {
+                float distance = vaultCheck.y + 2.2f - s.groundCheck.position.y;
+                Vector3 vaultPoint = vaultCheck + vaultDir * 0.05f;
+
+                s.PlayerMovement.Vault(vaultCheck, -vaultDir, distance);
+            }
         }
         #endregion
     }
@@ -281,6 +292,6 @@ public class InputManager : MonoBehaviour
 
     bool IsVaultable(Vector3 normal)
     {
-        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.33f;
+        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.34f;
     }
 }
