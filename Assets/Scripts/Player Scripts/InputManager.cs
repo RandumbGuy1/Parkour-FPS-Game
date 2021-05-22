@@ -94,7 +94,6 @@ public class InputManager : MonoBehaviour
         else reachedMaxSlope = false;
 
         CheckForWall();
-
         CameraTilt();
         SprintEffect();
     }
@@ -204,7 +203,7 @@ public class InputManager : MonoBehaviour
         #region Vaulting
         if (IsVaultable(normal))
         {
-            if (wallRunning || crouching || nearWall || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
+            if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
 
             Vector3 vaultDir = normal;
             vaultDir.y = 0f;
@@ -217,23 +216,18 @@ public class InputManager : MonoBehaviour
             Vector3 vaultHeight = s.playerHead.position + (Vector3.down * 0.5f);
             Vector3 vaultCheck = s.playerHead.position + Vector3.up * 0.5f + Vector3.down * 0.05f;
 
-            if (Vector3.Dot(dir.normalized, vaultDir) > -0.6f) return;
+            if (Vector3.Dot(dir.normalized, -vaultDir) < 0.3f) return;
             if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
             if (Physics.Raycast(vaultHeight, dir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
 
-            while (!Physics.Raycast(vaultCheck, -vaultDir, out var checkHit, 1f, Environment))
-            {
-                vaultCheck += Vector3.down * 0.03f;
-                if (vaultCheck.y < s.playerHead.position.y - 3f) break;
-            }
+            if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3.8f, Environment)) return;
 
-            if (vaultCheck.y >= s.playerHead.position.y - 3f)
-            {
-                float distance = vaultCheck.y + 2.2f - s.groundCheck.position.y;
-                Vector3 vaultPoint = vaultCheck + vaultDir * 0.05f;
+            s.rb.AddForce(vaultDir * 10f, ForceMode.VelocityChange);
 
-                s.PlayerMovement.Vault(vaultCheck, -vaultDir, distance);
-            }
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 3f) + (vaultDir * 0.8f);
+            float distance = vaultPoint.y - s.groundCheck.position.y;
+
+            s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
         }
         #endregion
     }
@@ -261,8 +255,8 @@ public class InputManager : MonoBehaviour
                 if (Environment != (Environment | 1 << layer)) continue;
 
                 nearWall = true;
-                wallCancelSteps = 0;
                 cancelWall = false;
+                wallCancelSteps = 0;
                 wallNormal = normal;
             }
         }

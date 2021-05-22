@@ -9892,7 +9892,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.95
+  m_Name: Save 1.96
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10345,24 +10345,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 50
+  moveSpeed: 45
   maxGroundSpeed: 20
   jumpForce: 40
   jumpCooldown: 0.06
   maxAirSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
   slideForce: 200
-  crouchJumpForce: 30
   maxSlideSpeed: 50
   wallJumpForce: 40
   wallRunForce: 20
   wallClimbForce: 10
-  vaultDuration: 0.9
+  vaultDuration: 1.1
   vaultForce: 30
   vaulting: 0
-  friction: 15
+  friction: 13
   slideFriction: 1.5
-  sharpness: 30
+  sharpness: 20
   threshold: 0.05
 --- !u!114 &1650519437
 MonoBehaviour:

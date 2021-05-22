@@ -19,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Sliding")]
     [SerializeField] private Vector3 crouchScale;
     [SerializeField] private float slideForce;
-    [SerializeField] private float crouchJumpForce;
     [SerializeField] private float maxSlideSpeed;
     private float crouchOffset;
     private Vector3 playerScale;
@@ -35,7 +34,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float vaultForce;
     public bool vaulting = false;
 
-    private float vaultMulti = 0f;
     private float vaultTime = 0f;
     private float setVaultDuration;
     private Vector3 vaultPos = Vector3.zero;
@@ -100,14 +98,15 @@ public class PlayerMovement : MonoBehaviour
         if (vaulting)
         {
             rb.MovePosition(Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration));
-            vaultTime += Time.fixedDeltaTime * vaultMulti;
+            vaultTime += Time.fixedDeltaTime * 10f;
 
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
-                rb.velocity = new Vector3(rb.velocity.x, -vaultForce * 0.05f, rb.velocity.z);
-                rb.AddForce(vaultNormal * vaultForce * 0.2f, ForceMode.VelocityChange);
+                rb.AddForce(vaultNormal * vaultForce * 0.3f, ForceMode.VelocityChange);
                 rb.useGravity = true;
+
+                s.PlayerInput.grounded = true;
             }
         }
 
@@ -150,10 +149,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded)
         {
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            Vector3 jumpDir = (Vector3.up + s.PlayerInput.groundNormal).normalized;
-
-            if (!crouched) rb.AddForce(jumpDir * jumpForce * 0.7f, ForceMode.Impulse);
-            else if (crouched) rb.AddForce(jumpDir * crouchJumpForce * 0.7f, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
 
             CancelInvoke("ResetJump");
             Invoke("ResetJump", 0.3f);
@@ -163,19 +159,19 @@ public class PlayerMovement : MonoBehaviour
     #region Vaulting
     public void Vault(Vector3 pos, Vector3 normal, float distance)
     {
-        vaultPos = pos + Vector3.up * 2.8f;
+        vaultPos = pos;
         vaultNormal = normal;
         vaultOriginalPos = transform.position;
-        vaultMulti = (1f / distance) * 25f;
 
-        distance *= 0.025f;
+        distance *= 0.03f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
         vaulting = true;
 
         rb.useGravity = true;
-        rb.velocity = new Vector3(0f, -7f, 0f);
+        rb.velocity = Vector3.zero;
+        s.PlayerInput.grounded = false;
     }
     #endregion
 
@@ -266,13 +262,13 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (!s.PlayerInput.moving && dir.sqrMagnitude > (threshold * threshold))
-            rb.AddForce(-dir * friction);
+            rb.AddForce(-dir * friction, ForceMode.Acceleration);
 
         if (CounterMomentum(x, mag.x))
-            rb.AddForce(s.orientation.right * -mag.x * sharpness);
+            rb.AddForce(s.orientation.right * -mag.x * sharpness * 0.02f, ForceMode.VelocityChange);
 
         if (CounterMomentum(z, mag.z))
-            rb.AddForce(s.orientation.forward * -mag.z * sharpness);
+            rb.AddForce(s.orientation.forward * -mag.z * sharpness * 0.02f, ForceMode.VelocityChange);
     }
 
     private bool CounterMomentum(float input, float mag)
@@ -283,6 +279,8 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector2 Multiplier()
     {
+        if (vaulting) return new Vector2(0.6f, 1f);
+
         if (s.PlayerInput.grounded)
         {
             if (crouched) return new Vector2 (0.05f, 1f);
@@ -292,7 +290,7 @@ public class PlayerMovement : MonoBehaviour
         if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 30f);
         if (crouched) return new Vector2 (0.4f, 0.8f);
 
-        return new Vector2 (0.6f, 0.8f);
+        return new Vector2 (0.8f, 0.8f);
     }
 
     private float ControlMaxSpeed()
