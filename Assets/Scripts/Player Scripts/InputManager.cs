@@ -7,19 +7,6 @@ using System;
 public class InputManager : MonoBehaviour
 {
     public Vector2 input { get; private set; }
-    public Vector3 moveDir 
-    { 
-        get 
-        {
-            Vector2 multi = s.PlayerMovement.Multiplier();
-            Vector2 inputs = input.normalized;
-            Vector3 inputDir = (orientation.forward * inputs.y * multi.x * multi.y + orientation.right * inputs.x * multi.x);
-            Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
-
-            float dot = Vector3.Dot(Vector3.up, slopeDir);
-            return dot < 0f ? slopeDir : inputDir;
-        } 
-    }
 
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
@@ -84,7 +71,7 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
-        input = new Vector2 (Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
@@ -152,7 +139,7 @@ public class InputManager : MonoBehaviour
         if (!CanWallJump() || !isWallRight && !isWallLeft)
         {
             wallRunning = false;
-            s.rb.useGravity = true;
+            if (!s.PlayerMovement.vaulting) s.rb.useGravity = true;
         }    
     }
     #endregion
@@ -197,7 +184,7 @@ public class InputManager : MonoBehaviour
         if (Ground != (Ground | 1 << layer)) return;
 
         Vector3 normal = col.GetContact(0).normal;
-        
+
         if (IsFloor(normal)) if (!grounded) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
 
         #region Vaulting
@@ -209,7 +196,7 @@ public class InputManager : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 dir = moveDir;
+            Vector3 dir = s.PlayerMovement.moveDir;
             dir.y = 0f;
             dir.Normalize();
 
@@ -238,26 +225,26 @@ public class InputManager : MonoBehaviour
 
         for (int i = 0; i < col.contactCount; i++)
         {
-            Vector3 normal = col.GetContact(i).normal;
+            ContactPoint contact = col.GetContact(i);
 
-            if (IsFloor(normal))
+            if (IsFloor(contact.normal, contact.point))
             {
                 if (Ground != (Ground | 1 << layer)) continue;
 
                 grounded = true;
                 cancelGround = false;
                 groundCancelSteps = 0;
-                groundNormal = normal;
+                groundNormal = contact.normal;
             }
 
-            if (IsWall(normal))
+            if (IsWall(contact.normal))
             {
                 if (Environment != (Environment | 1 << layer)) continue;
 
                 nearWall = true;
                 cancelWall = false;
                 wallCancelSteps = 0;
-                wallNormal = normal;
+                wallNormal = contact.normal;
             }
         }
     }
@@ -272,6 +259,11 @@ public class InputManager : MonoBehaviour
     float LandVel(float mag, float yMag)
     {
         return (mag * 0.4f) + Math.Abs(yMag * 2.8f);
+    }
+
+    bool IsFloor(Vector3 normal, Vector3 point)
+    {
+        return Vector3.Angle(Vector3.up, normal) < maxSlopeAngle && point.y <= s.rb.position.y;
     }
 
     bool IsFloor(Vector3 normal)

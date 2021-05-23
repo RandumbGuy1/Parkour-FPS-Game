@@ -2908,7 +2908,7 @@ MonoBehaviour:
   returnFovTime: 0.5
   playerTurnSpeed: 20
   sensitivity: 80
-  cameraTurnSpeed: {x: 20, y: 20}
+  cameraTurnSpeed: {x: 18, y: 18}
   upClampAngle: 80
   downClampAngle: 70
   player: {fileID: 1277575616}
@@ -3447,9 +3447,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.092
+  offsetSmoothTime: 0.09
   backSmoothTime: 0.3
-  offsetMultiplier: 0.028
+  offsetMultiplier: 0.03
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -9892,7 +9892,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.96
+  m_Name: Save 1.97
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10345,23 +10345,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 45
-  maxGroundSpeed: 20
+  accelRate: 40
+  moveSpeed: 20
   jumpForce: 40
-  jumpCooldown: 0.06
-  maxAirSpeed: 30
+  jumpCooldown: 0.1
+  airMoveSpeed: 30
   crouchScale: {x: 1, y: 1, z: 1}
   slideForce: 200
-  maxSlideSpeed: 50
+  slideMoveSpeed: 40
   wallJumpForce: 40
   wallRunForce: 20
   wallClimbForce: 10
   vaultDuration: 1.1
   vaultForce: 30
   vaulting: 0
-  friction: 13
+  friction: 12
   slideFriction: 1.5
-  sharpness: 20
+  sharpness: 15
   threshold: 0.05
 --- !u!114 &1650519437
 MonoBehaviour:
@@ -10442,12 +10442,12 @@ MonoBehaviour:
   selectedWeapon: 0
   smoothBob: {x: 0, y: 0, z: 0}
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
-  bobAmountHoriz: 0.3
-  bobAmountVert: 0.2
-  bobSpeed: 6.5
+  bobAmountHoriz: 0.2
+  bobAmountVert: 0.1
+  bobSpeed: 7
   bobSmoothTime: 0.2
   defaultRot: {x: 0, y: 18, z: 0}
-  swayAmount: 13
+  swayAmount: 10
   swaySmoothTime: 0.5
   weapons: []
   weaponPos: {fileID: 2126912939}
