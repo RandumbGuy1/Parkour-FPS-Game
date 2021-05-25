@@ -80,6 +80,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        VaultMovement();
+    }
+
+    void LateUpdate()
+    {
         maxSpeed = ControlMaxSpeed();
         multiplier = CalculateMultiplier();
     }
@@ -90,31 +95,15 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
-        Vector2 input = s.PlayerInput.input;
-        input = Vector2.ClampMagnitude(input, 1f);
-
+        Vector2 input = s.PlayerInput.input.normalized;
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+
         CounterMovement(input.x, input.y, vel);
 
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
         if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
 
-        if (vaulting)
-        {
-            rb.MovePosition(Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration));
-            vaultTime += Time.fixedDeltaTime * 10f;
-
-            if (vaultTime >= vaultDuration)
-            {
-                vaulting = false;
-                rb.AddForce(vaultNormal * vaultForce * 0.3f, ForceMode.VelocityChange);
-                rb.useGravity = true;
-
-                s.PlayerInput.grounded = true;
-            }
-        }
-
-        if (s.PlayerInput.grounded && s.PlayerInput.jumping) Jump();
+        if (stepsSinceLastGrounded < 3 && s.PlayerInput.jumping) Jump();
 
         if (s.PlayerInput.grounded || SnapToGround(vel)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
@@ -128,24 +117,30 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(vel.normalized);
         if (!s.PlayerInput.crouching && crouched) StopCrouch();
 
-        Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y * multiplier.x + s.orientation.right * input.x * multiplier.x);
+        Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
         moveDir = dot < 0f ? slopeDir : inputDir;
 
-        rb.AddForce(moveDir * accelRate * 3f, ForceMode.Acceleration);
+        rb.AddForce(moveDir * accelRate * 5f, ForceMode.Acceleration);
     }
 
     private bool SnapToGround(Vector3 vel)
     {
-        if (s.magnitude < 5f) return false;
-        if (stepsSinceLastGrounded > 4 || vaulting || jumped || s.PlayerInput.grounded) return false;
+        float speed = s.magnitude;
+
+        if (speed < 5f) return false;
+        if (stepsSinceLastGrounded > 5 || vaulting || jumped || s.PlayerInput.grounded) return false;
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
 
-        rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 10f, rb.velocity.z);
-        rb.AddForce(-vel * 5f);
         s.PlayerInput.grounded = true;
+
+        float dot = Vector3.Dot(rb.velocity, Vector3.up);
+        if (dot > 0) rb.velocity = (rb.velocity - snapHit.normal * dot).normalized * speed;
+        else rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 10f, rb.velocity.z);
+
+        rb.AddForce(-vel * 5f);
 
         return true;
     }
@@ -182,6 +177,24 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
         s.PlayerInput.grounded = false;
+    }
+
+    private void VaultMovement()
+    {
+        if (vaulting)
+        {
+            transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration);
+            vaultTime += Time.deltaTime * 10f;
+
+            if (vaultTime >= vaultDuration)
+            {
+                vaulting = false;
+                rb.AddForce(vaultNormal * vaultForce * 0.4f, ForceMode.VelocityChange);
+                rb.useGravity = true;
+
+                s.PlayerInput.grounded = true;
+            }
+        }
     }
     #endregion
 
@@ -274,7 +287,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
 
-        if (!s.PlayerInput.moving && dir.sqrMagnitude > threshold * threshold)
+        if (x == 0 && z == 0 && dir.sqrMagnitude > threshold * threshold)
             rb.AddForce(-dir * friction, ForceMode.Acceleration);
 
         if (CounterMomentum(x, mag.x))
@@ -293,16 +306,16 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector2 CalculateMultiplier()
     {
-        if (vaulting) return new Vector2(0.6f, 1f);
+        if (vaulting) return new Vector2(0.6f, 0.6f);
         if (s.PlayerInput.grounded)
         {
-            if (crouched) return new Vector2 (0.05f, 1f);
+            if (crouched) return new Vector2 (0.01f, 0.01f);
             return new Vector2 (1f, 1.05f);
         }
 
-        if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 30f);
-        if (crouched) return new Vector2 (0.4f, 0.8f);
-        return new Vector2 (0.8f, 0.8f);
+        if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
+        if (crouched) return new Vector2 (0.4f, 0.3f);
+        return new Vector2 (0.8f, 0.6f);
     }
 
     private float ControlMaxSpeed()

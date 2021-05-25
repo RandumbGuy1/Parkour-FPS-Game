@@ -58,6 +58,7 @@ public class InputManager : MonoBehaviour
     [SerializeField] private ParticleSystem sprintEffect;
     [SerializeField] private Transform orientation;
     private ScriptManager s;
+    private RaycastHit slopeHit;
 
     void Awake()
     {
@@ -76,7 +77,7 @@ public class InputManager : MonoBehaviour
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
 
-        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground))
+        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
 
