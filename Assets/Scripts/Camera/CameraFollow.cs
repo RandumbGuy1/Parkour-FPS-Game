@@ -6,33 +6,30 @@ using System;
 public class CameraFollow : MonoBehaviour
 {
 	[Header("Camera Tilt Variables")]
-	public float maxWallRunCameraTilt;
-	public float maxSlideCameraTilt;
-	public float tiltTime;
-	public float returnTiltTime;
+	[SerializeField] private float returnTiltTime;
 
 	private float cameraTilt;
+	private float maxCameraTilt;
 
 	float tiltVel = 0f;
 	float fovVel = 0f;
 
 	[Header("Fov")]
-	public float fov;
-	public float fovTime;
-	public float returnFovTime;
+	[SerializeField] private float fov;
+	[SerializeField] private float returnFovTime;
 
 	private float maxFov, setFov;
 
 	[Header("Sensitivity")]
-	public float playerTurnSpeed;
-	public float sensitivity;
-	public Vector2 cameraTurnSpeed;
+	[SerializeField] private float playerTurnSpeed;
+	[SerializeField] private float sensitivity;
+	[SerializeField] private Vector2 cameraTurnSpeed;
 
 	float multiplier = 0.01f;
 
 	[Header("Clamp Rotation")]
-	public float upClampAngle;
-	public float downClampAngle;
+	[SerializeField] private float upClampAngle;
+	[SerializeField] private float downClampAngle;
 
 	private float mouseX;
 	private float mouseY;
@@ -43,14 +40,11 @@ public class CameraFollow : MonoBehaviour
 	private float ySmoothRotation;
 	private float xSmoothRotation;
 
-	Vector3 rotationLast;
-
-	public Vector3 rotationDelta { get; private set; }
+	public Vector2 rotationDelta { get; private set; }
 	public float camVel { get; private set; }
 
 	[Header("Assignables")]
-	public Transform player;
-	public CameraShaker Shake;
+	[SerializeField] private ScriptManager s;
 	private Camera cam;
 
 	void Start()
@@ -63,12 +57,8 @@ public class CameraFollow : MonoBehaviour
 
 	void Update()
 	{
-		mouseX = Input.GetAxisRaw("Mouse X");
-		mouseY = Input.GetAxisRaw("Mouse Y");
-
-		if (Input.GetMouseButtonDown(1)) Shake.ShakeOnce(10f, 8f, 3f);
-
-		CalcDelta();
+		mouseY = Input.GetAxisRaw("Mouse X");
+		mouseX = Input.GetAxisRaw("Mouse Y");
 	}
 
 	void LateUpdate()
@@ -82,8 +72,11 @@ public class CameraFollow : MonoBehaviour
 
 	void CalcRotation()
     {
-		yRotation += mouseX * sensitivity * multiplier;
-		xRotation -= mouseY * sensitivity * multiplier;
+		rotationDelta = new Vector2(mouseX * sensitivity * multiplier, mouseY * sensitivity * multiplier);
+		camVel = rotationDelta.sqrMagnitude;
+
+		yRotation += rotationDelta.y;
+		xRotation -= rotationDelta.x;
 
 		xRotation = Mathf.Clamp(xRotation, -upClampAngle, downClampAngle);
 	}
@@ -96,37 +89,38 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
     {
-		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + Shake.offset.x, ySmoothRotation + Shake.offset.y, cameraTilt + Shake.offset.z);
-		player.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
+		Vector3 shakeOffset = s.CameraShaker.offset;
+
+		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + shakeOffset.x, ySmoothRotation + shakeOffset.y, cameraTilt + shakeOffset.z);
+		s.orientation.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
 	}
 
-	void CalcDelta()
+	public void TiltCamera(bool reset, int i = 1, float extension = 0, float speed = 0)
 	{
-		rotationDelta = cam.transform.rotation.eulerAngles - rotationLast;
-		rotationLast = cam.transform.rotation.eulerAngles;
-
-		camVel = rotationDelta.sqrMagnitude;
+		if (!reset)
+        {
+			maxCameraTilt = extension;
+			cameraTilt = Mathf.SmoothDamp(cameraTilt, maxCameraTilt * i, ref tiltVel, speed + 0.05f);
+		}
+		else if (cameraTilt != 0)
+        {
+			cameraTilt = Mathf.SmoothDamp(cameraTilt, 0, ref tiltVel, returnTiltTime);
+			if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
+		}
 	}
 
-	public void CameraWallRun(int i)
-	{
-		cameraTilt = Mathf.SmoothDamp(cameraTilt, maxWallRunCameraTilt * i, ref tiltVel, tiltTime + 0.05f);
-		fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, fovTime);
-	}
-
-	public void CameraSlide()
-	{
-		cameraTilt = Mathf.SmoothDamp(cameraTilt, maxSlideCameraTilt, ref tiltVel, tiltTime + 0.1f);
-	}
-
-	public void ResetCameraTilt()
-	{
-		if (cameraTilt == 0 && fov == setFov) return;
-
-		cameraTilt = Mathf.SmoothDamp(cameraTilt, 0, ref tiltVel, returnTiltTime);
-		fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
-		
-		if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
-		if (fov < setFov + 0.02f)  fov = setFov;
+	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
+    {
+		if (!reset)
+        {
+			maxFov = setFov + extension;
+			fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, speed);
+		}
+		else if (fov != setFov)
+        {
+			fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
+			if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;
+			if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
+		}
 	}
 }

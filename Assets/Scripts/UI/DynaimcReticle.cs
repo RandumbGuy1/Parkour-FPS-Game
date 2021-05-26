@@ -23,7 +23,7 @@ public class DynaimcReticle : MonoBehaviour
 
     private void Reticle()
     {
-        newSize = Mathf.Pow((s.magnitude + (s.CameraInput.camVel * 4f)) * 5f, 1.3f);
+        newSize = Mathf.Pow((s.magnitude + (s.CameraInput.camVel * 6f)) * 5f, 1.3f);
         newSize = Mathf.Clamp(newSize, minSize, maxSize);
 
         size = Mathf.Lerp(size, newSize, smoothTime * Time.deltaTime);

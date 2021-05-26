@@ -31,7 +31,7 @@ public class InputManager : MonoBehaviour
     public bool interacting { get { return Input.GetKeyDown(interactKey); } }
     public bool dropping { get { return Input.GetKeyDown(dropKey); } }
     public bool moving { get { return input.x != 0f || input.y != 0f; } }
-
+    public bool rightClick { get { return Input.GetMouseButtonDown(1); } }
     public float mouseScroll { get { return Input.GetAxis("Mouse ScrollWheel"); } }
 
     private bool fast = false;
@@ -56,7 +56,6 @@ public class InputManager : MonoBehaviour
 
     [Header("Assignables")]
     [SerializeField] private ParticleSystem sprintEffect;
-    [SerializeField] private Transform orientation;
     private ScriptManager s;
     private RaycastHit slopeHit;
 
@@ -82,7 +81,7 @@ public class InputManager : MonoBehaviour
         else reachedMaxSlope = false;
 
         CheckForWall();
-        CameraTilt();
+        CameraEffects();
         SprintEffect();
     }
 
@@ -146,15 +145,20 @@ public class InputManager : MonoBehaviour
     #endregion
 
     #region Visual Effects
-    private void CameraTilt()
+    private void CameraEffects()
     {
-        if (crouching) s.CameraInput.CameraSlide();
+        if (crouching) s.CameraInput.TiltCamera(false, 1, 8, 0.3f);
 
-        if (wallRunning && isWallLeft) s.CameraInput.CameraWallRun(-1);
-        if (wallRunning && isWallRight) s.CameraInput.CameraWallRun(1);
+        if (wallRunning && isWallLeft) s.CameraInput.TiltCamera(false, -1, 20f, 0.2f);
+        if (wallRunning && isWallRight) s.CameraInput.TiltCamera(false, 1, 20f, 0.2f);
+        if (wallRunning) s.CameraInput.ChangeFov(false, 30, 0.3f);
 
         if (!wallRunning)
-            s.CameraInput.ResetCameraTilt();
+        {
+            s.CameraInput.TiltCamera(true);
+            if (s.WeaponControls.aiming) s.CameraInput.ChangeFov(false, -25, 0.15f);
+            else s.CameraInput.ChangeFov(true);
+        }
     }
 
     private void SprintEffect()
@@ -202,17 +206,16 @@ public class InputManager : MonoBehaviour
             dir.Normalize();
 
             Vector3 vaultHeight = s.playerHead.position + (Vector3.down * 0.5f);
-            Vector3 vaultCheck = s.playerHead.position + Vector3.up * 0.5f + Vector3.down * 0.05f;
-
+ 
             if (Vector3.Dot(dir.normalized, -vaultDir) < 0.3f) return;
             if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
             if (Physics.Raycast(vaultHeight, dir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
 
-            if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3.8f, Environment)) return;
+            if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3.8f, Environment)) return;
 
             s.rb.AddForce(vaultDir * 10f, ForceMode.VelocityChange);
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 3f) + (vaultDir * 0.8f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.6f) + (vaultDir * 0.9f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
@@ -254,12 +257,12 @@ public class InputManager : MonoBehaviour
     private void Land(float impactForce)
     {
         s.CameraLandBob.CameraLand(impactForce);
-        if (impactForce > 70f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
+        if (impactForce > 85f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
 
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.4f) + Math.Abs(yMag * 2.8f);
+        return (mag * 0.5f) + Math.Abs(yMag * 3f);
     }
 
     bool IsFloor(Vector3 normal, Vector3 point)

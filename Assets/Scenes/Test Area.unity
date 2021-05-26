@@ -2899,20 +2899,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9a6fc1e7db8cdf4a87aab8c6a77642f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxWallRunCameraTilt: 20
-  maxSlideCameraTilt: 10
-  tiltTime: 0.1
   returnTiltTime: 0.2
   fov: 80
-  fovTime: 0.3
-  returnFovTime: 0.5
+  returnFovTime: 0.3
   playerTurnSpeed: 20
   sensitivity: 80
   cameraTurnSpeed: {x: 18, y: 18}
   upClampAngle: 80
   downClampAngle: 70
-  player: {fileID: 1277575616}
-  Shake: {fileID: 838078167}
+  s: {fileID: 1650519438}
 --- !u!114 &838078166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3447,9 +3442,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.09
+  offsetSmoothTime: 0.04
   backSmoothTime: 0.3
-  offsetMultiplier: 0.03
+  offsetMultiplier: 0.028
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -9892,7 +9887,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 1.98
+  m_Name: Save 1.99
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10332,7 +10327,6 @@ MonoBehaviour:
   groundCancelDelay: 2
   wallCancelDelay: 2
   sprintEffect: {fileID: 2080955619}
-  orientation: {fileID: 1277575616}
 --- !u!114 &1650519436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10345,7 +10339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  accelRate: 25
+  accelRate: 20
   moveSpeed: 20
   jumpForce: 38
   jumpCooldown: 0.1
@@ -10356,7 +10350,7 @@ MonoBehaviour:
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 1.2
+  vaultDuration: 1.3
   vaultForce: 30
   vaulting: 0
   friction: 15
@@ -10440,11 +10434,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   throwForce: 15
   selectedWeapon: 0
+  aiming: 0
   smoothBob: {x: 0, y: 0, z: 0}
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
   bobAmountHoriz: 0.2
   bobAmountVert: 0.1
-  bobSpeed: 7
+  bobSpeed: 7.1
   bobSmoothTime: 0.2
   defaultRot: {x: 0, y: 18, z: 0}
   swayAmount: 10

@@ -7,6 +7,7 @@ public class WeaponController : MonoBehaviour
     [Header("Equip Settings")]
     [SerializeField] private float throwForce;
     [SerializeField] private int selectedWeapon;
+    public bool aiming = false;
 
     private Vector3 bobVel = Vector3.zero;
     private Vector3 swayVel = Vector3.zero;
@@ -55,6 +56,8 @@ public class WeaponController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count >= 2)
                 selectedWeapon = 1;
         }
+
+        if (s.PlayerInput.rightClick) aiming = !aiming;
 
         if (selectedWeapon != previousWeapon) SelectWeapon();
     }
@@ -114,7 +117,7 @@ public class WeaponController : MonoBehaviour
         {
             float strafeRot = s.PlayerInput.input.x * swayAmount * 1.8f;
             float camRot = s.CameraInput.rotationDelta.y * swayAmount;
-            camRot = Mathf.Clamp(camRot, -50, 80);
+            camRot = Mathf.Clamp(camRot, -60, 90);
 
             offset += (Vector3.up * (camRot - strafeRot));
         }
@@ -138,13 +141,13 @@ public class WeaponController : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.AddForce(s.cam.transform.forward * throwForce * ((s.magnitude * 0.1f) + 1f), ForceMode.VelocityChange);
 
-        float randX = Random.Range(-1f, 1f);
-        float randY = Random.Range(-1f, 1f);
-        float randZ = Random.Range(-1f, 1f);
+        Vector3 rand = Vector3.zero;
 
-        Vector3 dir = new Vector3(randX, randY, randZ);
+        rand.x = Random.Range(-1f, 1f);
+        rand.y = Random.Range(-1f, 1f);
+        rand.z = Random.Range(-1f, 1f);
 
-        rb.AddTorque(dir * throwForce, ForceMode.VelocityChange);
+        rb.AddTorque(rand * throwForce, ForceMode.VelocityChange);
 
         weapons[selectedWeapon].SetActive(true);
         weapons.RemoveAt(selectedWeapon);
