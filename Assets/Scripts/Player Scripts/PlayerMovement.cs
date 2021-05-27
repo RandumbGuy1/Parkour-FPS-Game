@@ -6,13 +6,13 @@ using System;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("General Movement")]
-    [SerializeField] private float accelRate;
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float maxGroundSpeed;
 
     [Header("Air Movement")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float jumpCooldown;
-    [SerializeField] private float airMoveSpeed;
+    [SerializeField] private float maxAirSpeed;
 
     bool jumped = false;
 
@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Sliding")]
     [SerializeField] private Vector3 crouchScale;
     [SerializeField] private float slideForce;
-    [SerializeField] private float slideMoveSpeed;
+    [SerializeField] private float maxSlideSpeed;
     private float crouchOffset;
     private Vector3 playerScale;
 
@@ -73,11 +73,6 @@ public class PlayerMovement : MonoBehaviour
         setVaultDuration = vaultDuration;
     }
 
-    void FixedUpdate()
-    {
-        Movement();
-    }
-
     void Update()
     {
         VaultMovement();
@@ -89,15 +84,13 @@ public class PlayerMovement : MonoBehaviour
         multiplier = CalculateMultiplier();
     }
 
-    private void Movement()
+    public void Movement(Vector2 input)
     {
         rb.AddForce(Vector3.down);
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
-        Vector2 input = s.PlayerInput.input.normalized;
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-
         CounterMovement(input.x, input.y, vel);
 
         float speed = Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2)));
@@ -123,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
         float dot = Vector3.Dot(Vector3.up, slopeDir);
         moveDir = dot < 0f ? slopeDir : inputDir;
 
-        rb.AddForce(moveDir * accelRate * 5f, ForceMode.Acceleration);
+        rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
     }
 
     private bool SnapToGround(Vector3 vel)
@@ -168,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
         vaultNormal = normal;
         vaultOriginalPos = transform.position;
 
-        distance *= 0.03f;
+        distance *= 0.05f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
@@ -184,14 +177,13 @@ public class PlayerMovement : MonoBehaviour
         if (vaulting)
         {
             transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration);
-            vaultTime += Time.deltaTime * 10f;
+            vaultTime += Time.smoothDeltaTime * 10f;
 
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
                 rb.AddForce(vaultNormal * vaultForce * 0.4f, ForceMode.VelocityChange);
                 rb.useGravity = true;
-
                 s.PlayerInput.grounded = true;
             }
         }
@@ -315,14 +307,14 @@ public class PlayerMovement : MonoBehaviour
 
         if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
         if (crouched) return new Vector2 (0.4f, 0.3f);
-        return new Vector2 (0.8f, 0.6f);
+        return new Vector2 (0.7f, 0.6f);
     }
 
     private float ControlMaxSpeed()
     {
-        if (crouched) return slideMoveSpeed;
-        if (s.PlayerInput.grounded) return moveSpeed;
-        return airMoveSpeed;
+        if (crouched) return maxSlideSpeed;
+        if (s.PlayerInput.grounded) return maxGroundSpeed;
+        return maxAirSpeed;
     }
 
     void ResetJump()

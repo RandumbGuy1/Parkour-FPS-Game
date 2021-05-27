@@ -15,11 +15,12 @@ public class WeaponController : MonoBehaviour
     private float timer = 0f;
     private bool shouldBobGun = false;
 
-    public Vector3 smoothBob = Vector3.zero;
+    private Vector3 smoothBob = Vector3.zero;
     private Vector3 smoothSway = Vector3.zero;
 
     [Header("Bob Settings")]
     [SerializeField] private Vector3 defaultPos;
+    [SerializeField] private Vector3 aimPos;
     [SerializeField] private float bobAmountHoriz;
     [SerializeField] private float bobAmountVert;
     [SerializeField] private float bobSpeed;
@@ -27,6 +28,7 @@ public class WeaponController : MonoBehaviour
 
     [Header("Sway Settings")]
     [SerializeField] private Vector3 defaultRot;
+    [SerializeField] private Vector3 aimRot;
     [SerializeField] private float swayAmount;
     [SerializeField] private float swaySmoothTime;
 
@@ -69,8 +71,8 @@ public class WeaponController : MonoBehaviour
         if (!shouldBobGun) timer = 0f;
         else timer += Time.deltaTime;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway(), ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() + (aiming ? aimPos : Vector3.zero), ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? aimRot : Vector3.zero), ref swayVel, swaySmoothTime);
 
         Vector3 newPos = defaultPos + smoothBob;
         Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway);

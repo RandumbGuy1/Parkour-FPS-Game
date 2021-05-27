@@ -67,6 +67,7 @@ public class InputManager : MonoBehaviour
     void FixedUpdate()
     {
         UpdateCollisions();
+        s.PlayerMovement.Movement(input.normalized);
     }
 
     void Update()
@@ -215,7 +216,7 @@ public class InputManager : MonoBehaviour
 
             s.rb.AddForce(vaultDir * 10f, ForceMode.VelocityChange);
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.6f) + (vaultDir * 0.9f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.9f) + (vaultDir);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
