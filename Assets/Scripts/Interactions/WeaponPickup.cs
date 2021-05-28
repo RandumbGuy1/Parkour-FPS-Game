@@ -25,12 +25,10 @@ public class WeaponPickup : Interactable
         if (rb.isKinematic)
         {
             Vector3 targetPos = Vector3.zero;
-
             if (transform.localPosition != targetPos)
                 transform.localPosition = Vector3.SmoothDamp(transform.localPosition, targetPos, ref vel, pickupPositionTime);
 
             Quaternion targetRot = Quaternion.Euler(0, 0, 0);
-
             if (transform.localRotation != targetRot)
                 transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRot, pickupRotationSpeed * Time.deltaTime);
         }
@@ -46,4 +44,5 @@ public class WeaponPickup : Interactable
     {
         rb.isKinematic = true;
     }
+
 }

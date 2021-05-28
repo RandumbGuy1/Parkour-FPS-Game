@@ -21,14 +21,11 @@ public class ButtonDoor : Interactable
 
     private Vector3 dOffset;
     private Vector3 bOffset;
-    private float elapsed = 0f;
 
     private bool opened = false;
 
     void Start()
     {
-        elapsed = openSmoothTime;
-
         originalDoorPos = door.position;
         dOffset = originalDoorPos;
         dOffset.y += doorOffset;
@@ -36,25 +33,6 @@ public class ButtonDoor : Interactable
         originalButtonPos = transform.position;
         bOffset = originalButtonPos;
         bOffset.y -= buttonOffset;
-    }
-
-    void LateUpdate()
-    {
-        if (opened)
-            if (elapsed < openSmoothTime)
-            {
-                door.position = Vector3.Lerp(door.position, dOffset, elapsed / openSmoothTime);
-                transform.position = Vector3.Lerp(transform.position, bOffset, elapsed / openSmoothTime);
-                elapsed += Time.deltaTime;
-            }
-        
-        if (!opened)
-            if (elapsed < openSmoothTime)
-            {
-                door.position = Vector3.Lerp(door.position, originalDoorPos, elapsed / openSmoothTime);
-                transform.position = Vector3.Lerp(transform.position, originalButtonPos, elapsed / openSmoothTime);
-                elapsed += Time.deltaTime;
-            }
     }
 
     public override string GetDescription()
@@ -65,7 +43,30 @@ public class ButtonDoor : Interactable
 
     public override void OnInteract()
     {
-        elapsed = 0f;
         opened = !opened;
+        StopAllCoroutines();
+        StartCoroutine(OpenDoor(opened));
+    }
+
+    private IEnumerator OpenDoor(bool opened)
+    {
+        float elapsed = 0f;
+
+        if (opened)
+            while (elapsed < openSmoothTime)
+            {
+                door.position = Vector3.Lerp(door.position, dOffset, elapsed / openSmoothTime);
+                transform.position = Vector3.Lerp(transform.position, bOffset, elapsed / openSmoothTime);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        else 
+            while (elapsed < openSmoothTime)
+            {
+                door.position = Vector3.Lerp(door.position, originalDoorPos, elapsed / openSmoothTime);
+                transform.position = Vector3.Lerp(transform.position, originalButtonPos, elapsed / openSmoothTime);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
     }
 }

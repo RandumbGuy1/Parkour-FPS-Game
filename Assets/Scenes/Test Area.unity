@@ -999,7 +999,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 0.2
-  pickupRotationSpeed: 3.5
+  pickupRotationSpeed: 3
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -2369,8 +2369,9 @@ MonoBehaviour:
   reticle: {fileID: 685652798}
   s: {fileID: 1650519438}
   smoothTime: 3
-  minSize: 30
-  maxSize: 250
+  minSize: 120
+  maxSize: 300
+  minAimSize: 30
 --- !u!1 &703298682
 GameObject:
   m_ObjectHideFlags: 0
@@ -3442,9 +3443,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.04
+  offsetSmoothTime: 0.045
   backSmoothTime: 0.3
-  offsetMultiplier: 0.025
+  offsetMultiplier: 0.024
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -8710,7 +8711,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 0.2
-  pickupRotationSpeed: 3.5
+  pickupRotationSpeed: 3
   description: Pickup Gun
 --- !u!1 &1081612406
 GameObject:
@@ -9887,7 +9888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2
+  m_Name: Save 2.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10345,15 +10346,15 @@ MonoBehaviour:
   jumpCooldown: 0.1
   maxAirSpeed: 35
   crouchScale: {x: 1, y: 1, z: 1}
-  slideForce: 200
+  slideForce: 250
   maxSlideSpeed: 40
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 1.1
+  vaultDuration: 0.5
   vaultForce: 30
   vaulting: 0
-  friction: 10
+  friction: 10.5
   slideFriction: 1.5
   sharpness: 15
   threshold: 0.05
@@ -10436,7 +10437,7 @@ MonoBehaviour:
   selectedWeapon: 0
   aiming: 0
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
-  aimPos: {x: -1.8, y: 0.1, z: -0.1}
+  aimPos: {x: -1.8, y: 0.1, z: 0}
   bobAmountHoriz: 0.2
   bobAmountVert: 0.1
   bobSpeed: 7.1

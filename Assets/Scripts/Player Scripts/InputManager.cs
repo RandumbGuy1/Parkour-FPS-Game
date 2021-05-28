@@ -12,9 +12,8 @@ public class InputManager : MonoBehaviour
     public Vector3 wallNormal { get; private set; }
 
     [Header("Thresholds")]
-    [Range(0f, 90f)] 
-    public float maxSlopeAngle;
-    public float minimumJumpHeight;
+    [SerializeField] [Range(0f, 90f)] private float maxSlopeAngle;
+    [SerializeField] private float minimumJumpHeight;
 
     [Header("States")]
     public bool grounded;
@@ -148,15 +147,15 @@ public class InputManager : MonoBehaviour
     #region Visual Effects
     private void CameraEffects()
     {
-        if (crouching) s.CameraInput.TiltCamera(false, 1, 8, 0.3f);
+        if (crouching) s.CameraInput.TiltCamera(false, 1, 8f, 0.3f);
 
         if (wallRunning && isWallLeft) s.CameraInput.TiltCamera(false, -1, 20f, 0.2f);
         if (wallRunning && isWallRight) s.CameraInput.TiltCamera(false, 1, 20f, 0.2f);
-        if (wallRunning) s.CameraInput.ChangeFov(false, 30, 0.3f);
+        if (wallRunning) s.CameraInput.ChangeFov(false, 30f, 0.3f);
 
         if (!wallRunning)
         {
-            s.CameraInput.TiltCamera(true);
+            if (!crouching) s.CameraInput.TiltCamera(true);
             if (s.WeaponControls.aiming) s.CameraInput.ChangeFov(false, -25, 0.15f);
             else s.CameraInput.ChangeFov(true);
         }
@@ -214,9 +213,9 @@ public class InputManager : MonoBehaviour
 
             if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3.8f, Environment)) return;
 
-            s.rb.AddForce(vaultDir * 10f, ForceMode.VelocityChange);
+            s.rb.AddForce(vaultDir * 20f, ForceMode.VelocityChange);
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.9f) + (vaultDir);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 3f) + (vaultDir * 1.1f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);

@@ -85,7 +85,7 @@ public class WeaponController : MonoBehaviour
     {
         weapons.Add(obj);
         obj.transform.SetParent(weaponPos);
-
+ 
         selectedWeapon = weapons.Count - 1;
         SelectWeapon();
     }

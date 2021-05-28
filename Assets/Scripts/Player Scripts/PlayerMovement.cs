@@ -123,18 +123,16 @@ public class PlayerMovement : MonoBehaviour
     {
         float speed = s.magnitude;
 
-        if (speed < 5f) return false;
-        if (stepsSinceLastGrounded > 5 || vaulting || jumped || s.PlayerInput.grounded) return false;
+        if (speed < 5f || stepsSinceLastGrounded > 3 || vaulting || jumped || s.PlayerInput.grounded) return false;
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
 
         s.PlayerInput.grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
         if (dot > 0) rb.velocity = (rb.velocity - snapHit.normal * dot).normalized * speed;
-        else rb.velocity = new Vector3(rb.velocity.x, -snapHit.distance * 10f, rb.velocity.z);
+        else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
 
-        rb.AddForce(-vel * 5f);
-
+        rb.AddForce(-vel * 6f);
         return true;
     }
 
@@ -145,11 +143,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.grounded)
         {
+            s.PlayerInput.grounded = false;
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
             rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
 
             CancelInvoke("ResetJump");
-            Invoke("ResetJump", 0.3f);
+            Invoke("ResetJump", jumpCooldown);
         }
     }
     #endregion
@@ -161,13 +160,14 @@ public class PlayerMovement : MonoBehaviour
         vaultNormal = normal;
         vaultOriginalPos = transform.position;
 
-        distance *= 0.05f;
+        distance *= 0.08f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
         vaulting = true;
 
         rb.useGravity = true;
+        rb.isKinematic = true;
         rb.velocity = Vector3.zero;
         s.PlayerInput.grounded = false;
     }
@@ -177,14 +177,14 @@ public class PlayerMovement : MonoBehaviour
         if (vaulting)
         {
             transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration);
-            vaultTime += Time.smoothDeltaTime * 10f;
+            vaultTime += Time.smoothDeltaTime * 5f;
 
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
-                rb.AddForce(vaultNormal * vaultForce * 0.4f, ForceMode.VelocityChange);
+                rb.velocity = (vaultNormal + (Vector3.down * 0.3f)).normalized * vaultForce * 0.4f;
                 rb.useGravity = true;
-                s.PlayerInput.grounded = true;
+                rb.isKinematic = false;
             }
         }
     }
@@ -226,8 +226,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * wallClimb);
         }
 
-        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 1.5f);
-        rb.AddForce(-transform.up * wallRunForce * 0.6f);
+        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 1.7f);
+        rb.AddForce(-transform.up * wallRunForce * 0.7f);
     }
 
     private void StopWallRun()
@@ -298,7 +298,7 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector2 CalculateMultiplier()
     {
-        if (vaulting) return new Vector2(0.6f, 0.6f);
+        if (vaulting) return new Vector2(0f, 0f);
         if (s.PlayerInput.grounded)
         {
             if (crouched) return new Vector2 (0.01f, 0.01f);

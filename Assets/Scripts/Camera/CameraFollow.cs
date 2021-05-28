@@ -8,17 +8,22 @@ public class CameraFollow : MonoBehaviour
 	[Header("Camera Tilt Variables")]
 	[SerializeField] private float returnTiltTime;
 
+	private int tiltDirection = 1;
+	private float tiltTime = 0;
+	private float fovTime = 0;
+
 	private float cameraTilt;
 	private float maxCameraTilt;
 
 	float tiltVel = 0f;
 	float fovVel = 0f;
+	private float maxFov, setFov;
+	private bool resetTilt = true;
+	private bool resetFov = true;
 
 	[Header("Fov")]
 	[SerializeField] private float fov;
 	[SerializeField] private float returnFovTime;
-
-	private float maxFov, setFov;
 
 	[Header("Sensitivity")]
 	[SerializeField] private float playerTurnSpeed;
@@ -59,6 +64,8 @@ public class CameraFollow : MonoBehaviour
 	{
 		mouseY = Input.GetAxisRaw("Mouse X");
 		mouseX = Input.GetAxisRaw("Mouse Y");
+
+		HandleTiltAndFov();
 	}
 
 	void LateUpdate()
@@ -95,32 +102,36 @@ public class CameraFollow : MonoBehaviour
 		s.orientation.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
 	}
 
-	public void TiltCamera(bool reset, int i = 1, float extension = 0, float speed = 0)
-	{
-		if (!reset)
-        {
-			maxCameraTilt = extension;
-			cameraTilt = Mathf.SmoothDamp(cameraTilt, maxCameraTilt * i, ref tiltVel, speed + 0.05f);
-		}
-		else if (cameraTilt != 0)
+	void HandleTiltAndFov()
+    {
+		if (!resetTilt) cameraTilt = Mathf.SmoothDamp(cameraTilt, maxCameraTilt * tiltDirection, ref tiltVel, tiltTime + 0.05f);
+		else if (cameraTilt != 0f)
         {
 			cameraTilt = Mathf.SmoothDamp(cameraTilt, 0, ref tiltVel, returnTiltTime);
 			if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
 		}
-	}
 
-	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
-    {
-		if (!reset)
-        {
-			maxFov = setFov + extension;
-			fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, speed);
-		}
+		if (!resetFov) fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, fovTime);
 		else if (fov != setFov)
-        {
+		{
 			fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
 			if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;
 			if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
 		}
+	}
+
+	public void TiltCamera(bool reset, int i = 1, float extension = 0, float speed = 0)
+	{
+		tiltDirection = i;
+		maxCameraTilt = extension;
+		tiltTime = speed;
+		resetTilt = reset;
+	}
+
+	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
+    {
+		maxFov = setFov + extension;
+		fovTime = speed;
+		resetFov = reset;
 	}
 }
