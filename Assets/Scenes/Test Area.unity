@@ -999,7 +999,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 0.2
-  pickupRotationSpeed: 3
+  pickupRotationSpeed: 2.2
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -1023,7 +1023,7 @@ Rigidbody:
   m_GameObject: {fileID: 299661631}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0.3
+  m_Drag: 0.6
   m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -2905,7 +2905,7 @@ MonoBehaviour:
   returnFovTime: 0.3
   playerTurnSpeed: 20
   sensitivity: 80
-  cameraTurnSpeed: {x: 18, y: 18}
+  cameraTurnSpeed: {x: 16, y: 16}
   upClampAngle: 80
   downClampAngle: 70
   s: {fileID: 1650519438}
@@ -8690,7 +8690,7 @@ Rigidbody:
   m_GameObject: {fileID: 1017722964}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0.3
+  m_Drag: 0.6
   m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -8711,7 +8711,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 0.2
-  pickupRotationSpeed: 3
+  pickupRotationSpeed: 2.2
   description: Pickup Gun
 --- !u!1 &1081612406
 GameObject:
@@ -9888,7 +9888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.1
+  m_Name: Save 2.21
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10446,6 +10446,10 @@ MonoBehaviour:
   aimRot: {x: 0, y: -18, z: 0}
   swayAmount: 10
   swaySmoothTime: 0.5
+  switchPosOffset: {x: 0.6, y: -1.2, z: -0.2}
+  switchRotOffset: {x: 270, y: -30, z: 0}
+  switchPosTime: 0.3
+  switchRotTime: 0.2
   weapons: []
   weaponPos: {fileID: 2126912939}
 --- !u!1 &1652803367
