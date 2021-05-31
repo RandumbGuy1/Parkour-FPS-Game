@@ -14,6 +14,7 @@ public class InputManager : MonoBehaviour
     [Header("Thresholds")]
     [SerializeField] [Range(0f, 90f)] private float maxSlopeAngle;
     [SerializeField] private float minimumJumpHeight;
+    [SerializeField] private float vaultOffset;
 
     [Header("States")]
     public bool grounded;
@@ -60,6 +61,7 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
+        //resync stuff 
         s = GetComponent<ScriptManager>();
     }
 
@@ -201,17 +203,13 @@ public class InputManager : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 dir = s.PlayerMovement.moveDir;
-            dir.y = 0f;
-            dir.Normalize();
+            Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
+            Vector3 vaultHeight = transform.position + Vector3.up * vaultOffset;
 
-            Vector3 vaultHeight = s.playerHead.position + (Vector3.down * 0.5f);
- 
-            if (Vector3.Dot(dir.normalized, -vaultDir) < 0.3f) return;
+            if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
             if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
-            if (Physics.Raycast(vaultHeight, dir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
-
-            if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3.8f, Environment)) return;
+            if (Physics.Raycast(vaultHeight, moveDir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
+            if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3f + vaultOffset, Environment)) return;
 
             s.rb.AddForce(vaultDir * 20f, ForceMode.VelocityChange);
 

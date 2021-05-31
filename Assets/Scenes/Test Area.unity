@@ -551,8 +551,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 131028426}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25.27, y: 1.5, z: -27.09}
-  m_LocalScale: {x: 2, y: 3, z: 2}
+  m_LocalPosition: {x: 25.27, y: 0.94, z: -27.09}
+  m_LocalScale: {x: 1, y: 1.8, z: 1}
   m_Children: []
   m_Father: {fileID: 1589198715}
   m_RootOrder: 1
@@ -811,11 +811,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 208876971}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 28.22, y: 2.46, z: -24.62}
-  m_LocalScale: {x: 3, y: 5, z: 1}
+  m_LocalPosition: {x: 27.76, y: 2.01, z: -24.62}
+  m_LocalScale: {x: 2, y: 4, z: 1}
   m_Children: []
   m_Father: {fileID: 1589198715}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &208876973
 BoxCollider:
@@ -1379,8 +1379,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 461129905}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 31.17, y: 7.5, z: -24.62}
-  m_LocalScale: {x: 8.8, y: 5, z: 1}
+  m_LocalPosition: {x: 29.791, y: 5.51, z: -24.595}
+  m_LocalScale: {x: 6.0706925, y: 2.9860568, z: 1}
   m_Children: []
   m_Father: {fileID: 1589198715}
   m_RootOrder: 5
@@ -2881,7 +2881,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 838078163}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: 3.5, z: 0}
+  m_LocalPosition: {x: 8.4, y: 3.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 963194228}
@@ -3443,9 +3443,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.045
+  offsetSmoothTime: 0.04
   backSmoothTime: 0.3
-  offsetMultiplier: 0.024
+  offsetMultiplier: 0.022
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -8427,11 +8427,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1014850442}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 34.04, y: 2.46, z: -24.62}
-  m_LocalScale: {x: 3, y: 5, z: 1}
+  m_LocalPosition: {x: 31.797, y: 2.01, z: -24.62}
+  m_LocalScale: {x: 2, y: 4, z: 1}
   m_Children: []
   m_Father: {fileID: 1589198715}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1014850444
 BoxCollider:
@@ -9513,8 +9513,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1334100483}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25.27, y: 3.13, z: -27.09}
-  m_LocalScale: {x: 1, y: 0.5, z: 1}
+  m_LocalPosition: {x: 25.27, y: 1.91, z: -27.09}
+  m_LocalScale: {x: 0.5, y: 0.3, z: 0.5}
   m_Children: []
   m_Father: {fileID: 1589198715}
   m_RootOrder: 0
@@ -9595,7 +9595,7 @@ MonoBehaviour:
   door: {fileID: 1698904618}
   openSmoothTime: 10
   doorOffset: 4.8
-  buttonOffset: 0.3
+  buttonOffset: 0.15
   useOnce: 0
   openHint: Open door
   closeHint: Close door
@@ -9888,7 +9888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.21
+  m_Name: Save 2.23
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10171,9 +10171,9 @@ Transform:
   m_Children:
   - {fileID: 1334100484}
   - {fileID: 131028427}
-  - {fileID: 1698904618}
   - {fileID: 1014850443}
   - {fileID: 208876972}
+  - {fileID: 1698904618}
   - {fileID: 461129906}
   m_Father: {fileID: 0}
   m_RootOrder: 8
@@ -10289,8 +10289,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1650519429}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.36, y: 2.08, z: 0}
-  m_LocalScale: {x: 1, y: 2, z: 1}
+  m_LocalPosition: {x: 8.36, y: 2, z: 0}
+  m_LocalScale: {x: 1, y: 1.8, z: 1}
   m_Children:
   - {fileID: 32658971}
   - {fileID: 1277575616}
@@ -10312,6 +10312,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSlopeAngle: 55
   minimumJumpHeight: 1.3
+  vaultOffset: 1.3
   grounded: 1
   nearWall: 0
   reachedMaxSlope: 0
@@ -10341,21 +10342,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 25
-  maxGroundSpeed: 20
+  maxGroundSpeed: 22
+  maxAirSpeed: 80
+  maxSlideSpeed: 60
   jumpForce: 35
   jumpCooldown: 0.1
-  maxAirSpeed: 35
   crouchScale: {x: 1, y: 1, z: 1}
   slideForce: 250
-  maxSlideSpeed: 40
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
   vaultDuration: 0.5
   vaultForce: 30
   vaulting: 0
-  friction: 10.5
-  slideFriction: 1.5
+  friction: 11
+  slideFriction: 1.2
   sharpness: 15
   threshold: 0.05
 --- !u!114 &1650519437
@@ -10813,11 +10814,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1698904617}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 31.09, y: 2.46, z: -24.62}
-  m_LocalScale: {x: 3, y: 5, z: 0.1}
+  m_LocalPosition: {x: 29.751, y: 1.97, z: -24.62}
+  m_LocalScale: {x: 2, y: 4, z: 0.1}
   m_Children: []
   m_Father: {fileID: 1589198715}
-  m_RootOrder: 2
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1698904619
 BoxCollider:
