@@ -6,66 +6,54 @@ using System;
 public class CameraFollow : MonoBehaviour
 {
 	[Header("Camera Tilt Variables")]
+	[SerializeField] private float cameraTilt = 0f;
 	[SerializeField] private float returnTiltTime;
 
 	private int tiltDirection = 1;
-	private float tiltTime = 0;
-	private float fovTime = 0;
-
-	private float cameraTilt;
-	private float maxCameraTilt;
-
-	float tiltVel = 0f;
-	float fovVel = 0f;
-	private float maxFov, setFov;
+	private float tiltTime = 0, tiltVel = 0f;
+	private float maxCameraTilt = 0f;
 	private bool resetTilt = true;
-	private bool resetFov = true;
 
 	[Header("Fov")]
 	[SerializeField] private float fov;
 	[SerializeField] private float returnFovTime;
+
+	private float fovTime = 0, fovVel = 0f;
+	private float maxFov = 0f, setFov;
+	private bool resetFov = true;
 
 	[Header("Sensitivity")]
 	[SerializeField] private float playerTurnSpeed;
 	[SerializeField] private float sensitivity;
 	[SerializeField] private Vector2 cameraTurnSpeed;
 
-	float multiplier = 0.01f;
-
 	[Header("Clamp Rotation")]
 	[SerializeField] private float upClampAngle;
 	[SerializeField] private float downClampAngle;
 
-	private float mouseX;
-	private float mouseY;
-
-	private float yRotation;
-	private float xRotation;
-
-	private float ySmoothRotation;
-	private float xSmoothRotation;
+	private Vector2 mouse;
+	private Vector2 rotation;
+	private Vector3 smoothRotation;
 
 	public Vector2 rotationDelta { get; private set; }
-	public float camVel { get; private set; }
 
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
 	private Camera cam;
 
-	void Start()
+	void Awake()
     {
-		cameraTilt = 0f;
-		setFov = fov;
-		maxFov = setFov + 20f;
 		cam = GetComponentInChildren<Camera>();
+		setFov = fov;
 	}
 
 	void Update()
 	{
-		mouseY = Input.GetAxisRaw("Mouse X");
-		mouseX = Input.GetAxisRaw("Mouse Y");
+		mouse.y = Input.GetAxisRaw("Mouse X");
+		mouse.x = Input.GetAxisRaw("Mouse Y");
 
-		HandleTiltAndFov();
+		ChangeTilt();
+		ChangeFov();
 	}
 
 	void LateUpdate()
@@ -79,59 +67,64 @@ public class CameraFollow : MonoBehaviour
 
 	void CalcRotation()
     {
-		rotationDelta = new Vector2(mouseX * sensitivity * multiplier, mouseY * sensitivity * multiplier);
-		camVel = rotationDelta.sqrMagnitude;
+		rotationDelta = mouse * sensitivity * 0.01f;
 
-		yRotation += rotationDelta.y;
-		xRotation -= rotationDelta.x;
-
-		xRotation = Mathf.Clamp(xRotation, -upClampAngle, downClampAngle);
+		rotation.y += rotationDelta.y;
+		rotation.x -= rotationDelta.x;
+		rotation.x = Mathf.Clamp(rotation.x, -upClampAngle, downClampAngle);
 	}
 
 	void SmoothRotation()
     {
-		ySmoothRotation = Mathf.Lerp(ySmoothRotation, yRotation, cameraTurnSpeed.y * Time.smoothDeltaTime);
-		xSmoothRotation = Mathf.Lerp(xSmoothRotation, xRotation, cameraTurnSpeed.x * Time.smoothDeltaTime);
+		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y, cameraTurnSpeed.y * Time.smoothDeltaTime);
+		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, cameraTurnSpeed.x * Time.smoothDeltaTime);
+		smoothRotation.z = cameraTilt;
 	}
 
 	void ApplyRotation()
     {
-		Vector3 shakeOffset = s.CameraShaker.offset;
+		Quaternion newCamRot = Quaternion.Euler(smoothRotation + s.CameraShaker.offset);
+		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y, 0);
 
-		cam.transform.localRotation = Quaternion.Euler(xSmoothRotation + shakeOffset.x, ySmoothRotation + shakeOffset.y, cameraTilt + shakeOffset.z);
-		s.orientation.transform.rotation = Quaternion.Euler(0, ySmoothRotation, 0);
+		cam.transform.localRotation = newCamRot;
+		s.orientation.transform.rotation = newPlayerRot;
 	}
 
-	void HandleTiltAndFov()
+	private void ChangeTilt()
     {
-		if (!resetTilt) cameraTilt = Mathf.SmoothDamp(cameraTilt, maxCameraTilt * tiltDirection, ref tiltVel, tiltTime + 0.05f);
-		else if (cameraTilt != 0f)
-        {
-			cameraTilt = Mathf.SmoothDamp(cameraTilt, 0, ref tiltVel, returnTiltTime);
-			if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
-		}
+		if (cameraTilt == 0 && resetTilt) return;
+		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref tiltVel, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
 
-		if (!resetFov) fov = Mathf.SmoothDamp(fov, maxFov, ref fovVel, fovTime);
-		else if (fov != setFov)
-		{
-			fov = Mathf.SmoothDamp(fov, setFov, ref fovVel, returnFovTime);
-			if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;
-			if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
-		}
+		if (!resetTilt) return;
+		if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
+	}
+
+	private void ChangeFov()
+	{
+		if (fov == setFov && resetFov) return;
+		fov = Mathf.SmoothDamp(fov, (resetFov ? setFov : maxFov), ref fovVel, (resetFov ? returnFovTime : fovTime + 0.05f));
+
+		if (!resetFov) return;
+		if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;
+		if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
 	}
 
 	public void TiltCamera(bool reset, int i = 1, float extension = 0, float speed = 0)
 	{
+		if (maxCameraTilt == extension) return;
+
 		tiltDirection = i;
-		maxCameraTilt = extension;
 		tiltTime = speed;
 		resetTilt = reset;
+		maxCameraTilt = extension;
 	}
 
 	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
     {
-		maxFov = setFov + extension;
+		if (maxFov == setFov + extension) return;
+
 		fovTime = speed;
 		resetFov = reset;
+		maxFov = setFov + extension;
 	}
 }

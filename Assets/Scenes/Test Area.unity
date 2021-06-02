@@ -33,7 +33,7 @@ RenderSettings:
   m_HaloTexture: {fileID: 0}
   m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
   m_DefaultReflectionMode: 0
-  m_DefaultReflectionResolution: 64
+  m_DefaultReflectionResolution: 32
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
@@ -2368,7 +2368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reticle: {fileID: 685652798}
   s: {fileID: 1650519438}
-  smoothTime: 3
+  smoothTime: 4
   minSize: 120
   maxSize: 300
   minAimSize: 30
@@ -2900,6 +2900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9a6fc1e7db8cdf4a87aab8c6a77642f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraTilt: 0
   returnTiltTime: 0.2
   fov: 80
   returnFovTime: 0.3
@@ -3443,9 +3444,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.04
+  offsetSmoothTime: 0.035
   backSmoothTime: 0.3
-  offsetMultiplier: 0.022
+  offsetMultiplier: 0.02
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -9888,7 +9889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.24
+  m_Name: Save 2.25
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10352,10 +10353,10 @@ MonoBehaviour:
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 0.5
+  vaultDuration: 0.2
   vaultForce: 30
   vaulting: 0
-  friction: 15
+  friction: 16
   slideFriction: 1.2
   sharpness: 15
   threshold: 0.05

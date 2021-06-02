@@ -44,7 +44,7 @@ public class InputManager : MonoBehaviour
 
     [Header("Collision")]
     public LayerMask Ground;
-    [SerializeField] private LayerMask Environment;
+    public LayerMask Environment;
     [SerializeField] private float groundCancelDelay;
     [SerializeField] private float wallCancelDelay;
 
@@ -80,6 +80,8 @@ public class InputManager : MonoBehaviour
         if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
+
+        s.PlayerMovement.VaultMovement();
 
         CheckForWall();
         CameraEffects();
@@ -212,7 +214,7 @@ public class InputManager : MonoBehaviour
 
             s.rb.AddForce(vaultDir * 20f, ForceMode.VelocityChange);
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 3f) + (vaultDir * 1.1f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.25f) + (vaultDir * 1.1f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
@@ -249,14 +251,15 @@ public class InputManager : MonoBehaviour
             }
         }
     }
-    #endregion
 
     private void Land(float impactForce)
     {
         s.CameraLandBob.CameraLand(impactForce);
         if (impactForce > 85f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
+    #endregion
 
+    #region Vector and speed calculations
     float LandVel(float mag, float yMag)
     {
         return (mag * 0.5f) + Math.Abs(yMag * 3f);
@@ -281,4 +284,5 @@ public class InputManager : MonoBehaviour
     {
         return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.34f;
     }
+    #endregion
 }

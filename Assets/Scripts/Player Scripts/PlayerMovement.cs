@@ -62,7 +62,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        //resync stuff 
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
 
@@ -74,17 +73,7 @@ public class PlayerMovement : MonoBehaviour
         setVaultDuration = vaultDuration;
     }
 
-    void Update()
-    {
-        VaultMovement();
-    }
-
-    void LateUpdate()
-    {
-        maxSpeed = ControlMaxSpeed();
-        multiplier = CalculateMultiplier();
-    }
-
+    #region Movement
     public void Movement(Vector2 input)
     {
         rb.AddForce(Vector3.down);
@@ -94,9 +83,10 @@ public class PlayerMovement : MonoBehaviour
         jumping = s.PlayerInput.jumping;
         Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+        Vector2 multiplier = CalculateMultiplier();
         float speed = vel.magnitude;
 
-        if (speed > maxSpeed) rb.AddForce(-vel * (speed * 0.5f));
+        if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
         CounterMovement(input, vel, mag, jumping);
 
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
@@ -123,7 +113,9 @@ public class PlayerMovement : MonoBehaviour
 
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
     }
+    #endregion
 
+    #region Surface Contact
     private bool SnapToGround()
     {
         float speed = s.magnitude;
@@ -140,6 +132,7 @@ public class PlayerMovement : MonoBehaviour
 
         return true;
     }
+    #endregion
 
     #region Jumping
     private void Jump()
@@ -165,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
         vaultNormal = normal;
         vaultOriginalPos = transform.position;
 
-        distance *= 0.08f;
+        distance = (distance * distance) * 0.055f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
@@ -177,7 +170,7 @@ public class PlayerMovement : MonoBehaviour
         s.PlayerInput.grounded = false;
     }
 
-    private void VaultMovement()
+    public void VaultMovement()
     {
         if (vaulting)
         {
@@ -187,7 +180,7 @@ public class PlayerMovement : MonoBehaviour
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
-                rb.velocity = (vaultNormal + (Vector3.down * 0.3f)).normalized * vaultForce * 0.4f;
+                rb.velocity = (vaultNormal).normalized * vaultForce * 0.4f;
                 rb.useGravity = true;
                 rb.isKinematic = false;
             }
@@ -294,7 +287,6 @@ public class PlayerMovement : MonoBehaviour
         if (CounterMomentum(input.y, mag.z))
             rb.AddForce(s.orientation.forward * -mag.z * sharpness, ForceMode.Acceleration);
     }
-    #endregion
 
     private bool CounterMomentum(float input, float mag)
     {
@@ -302,18 +294,23 @@ public class PlayerMovement : MonoBehaviour
         else return false;
     }
 
+    #endregion
+
+    #region Multipliers and Maxspeed calculation
     public Vector2 CalculateMultiplier()
     {
         if (vaulting) return new Vector2(0f, 0f);
+
         if (s.PlayerInput.grounded)
         {
-            if (crouched) return new Vector2 (0.01f, 0.01f);
+            if (crouched) return new Vector2(0.01f, 0.01f);
             return new Vector2 (1f, 1.05f);
         }
 
-        if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
-        if (crouched) return new Vector2 (0.4f, 0.3f);
-        return new Vector2 (0.65f, 0.8f);
+        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
+        if (crouched) return new Vector2(0.4f, 0.3f);
+
+        return new Vector2(0.65f, 0.8f);
     }
 
     private float ControlMaxSpeed()
@@ -323,6 +320,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.grounded) return maxGroundSpeed;
         return maxAirSpeed;
     }
+    #endregion
 
     void ResetJump()
     {

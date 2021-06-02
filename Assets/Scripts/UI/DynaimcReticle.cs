@@ -25,9 +25,10 @@ public class DynaimcReticle : MonoBehaviour
 
     private void Reticle()
     {
-        newSize = Mathf.Pow((s.magnitude + (s.CameraInput.camVel * 6f)) * 5f, 1.3f);
-        if (!s.WeaponControls.aiming) newSize = Mathf.Clamp(newSize, minSize, maxSize);
-        else newSize = Mathf.Clamp(newSize, minAimSize, minAimSize);
+        bool aiming = s.WeaponControls.aiming;
+
+        newSize = Mathf.Pow((s.magnitude + (s.CameraInput.rotationDelta.sqrMagnitude * 6f)) * 5f, 1.3f);
+        newSize = Mathf.Clamp(newSize, (aiming ? minAimSize : minSize), (aiming ? minAimSize : maxSize));
 
         size = Mathf.Lerp(size, newSize, smoothTime * Time.deltaTime);
         reticle.sizeDelta = new Vector2(size, size);

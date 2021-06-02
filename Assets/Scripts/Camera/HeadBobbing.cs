@@ -14,7 +14,6 @@ public class HeadBobbing : MonoBehaviour
     private float timer;
     private bool shouldBob = false;
     private Vector3 vel = Vector3.zero;
-    private Vector3 newPos;
     private Vector3 smoothOffset = Vector3.zero;
 
     [Header("Assignables")]
@@ -23,29 +22,20 @@ public class HeadBobbing : MonoBehaviour
     void Update()
     {
         shouldBob = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.CameraLandBob.landed && s.magnitude > 10f;
+        timer = shouldBob ? timer + Time.deltaTime : 0f;
 
-        if (!shouldBob) timer = 0f;
-        else timer += Time.deltaTime;
-
-        smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(timer), ref vel, bobSmoothTime);
-        newPos = s.playerHead.position + smoothOffset;
+        smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref vel, bobSmoothTime);
+        Vector3 newPos = s.playerHead.position + smoothOffset;
 
         transform.position = newPos;
     }
 
-    private Vector3 HeadBob(float t)
+    private Vector3 HeadBob()
     {
-        float horizOffset = 0f;
-        float vertOffset = 0f;
         Vector3 offset = Vector3.zero;
 
-        if (t > 0)
-        {
-            horizOffset = Mathf.Cos(t * bobSpeed) * bobAmountHoriz;
-            vertOffset = Mathf.Sin(t * bobSpeed * 2) * bobAmountVert;
-
-            offset = s.orientation.right * horizOffset + Vector3.up * vertOffset;
-        }
+        if (timer > 0)
+            offset = s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert;
 
         return offset;
     }
