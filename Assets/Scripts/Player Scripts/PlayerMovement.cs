@@ -283,13 +283,13 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (input.x == 0 && Math.Abs(mag.x) > threshold)
-            rb.AddForce(s.orientation.right * -mag.x * friction, ForceMode.Acceleration);
+            rb.AddForce(s.orientation.right * -mag.x * friction);
 
         if (CounterMomentum(input.x, mag.x))
             rb.AddForce(s.orientation.right * -mag.x * sharpness, ForceMode.Acceleration);
 
         if (input.y == 0 && Math.Abs(mag.z) > threshold)
-            rb.AddForce(s.orientation.forward * -mag.z * friction, ForceMode.Acceleration);
+            rb.AddForce(s.orientation.forward * -mag.z * friction);
 
         if (CounterMomentum(input.y, mag.z))
             rb.AddForce(s.orientation.forward * -mag.z * sharpness, ForceMode.Acceleration);
@@ -313,7 +313,7 @@ public class PlayerMovement : MonoBehaviour
 
         if(s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
         if (crouched) return new Vector2 (0.4f, 0.3f);
-        return new Vector2 (0.5f, 0.8f);
+        return new Vector2 (0.65f, 0.8f);
     }
 
     private float ControlMaxSpeed()

@@ -129,7 +129,7 @@ MonoBehaviour:
     m_StyleName: Thin Italic
     m_PointSize: 71
     m_Scale: 1
-    m_LineHeight: 83.203125
+    m_LineHeight: 80
     m_AscentLine: 65.86914
     m_CapLine: 50
     m_MeanLine: 38
@@ -1914,6 +1914,7 @@ MonoBehaviour:
   - {fileID: 4762688509442753270}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 0
+  m_ClearDynamicDataOnBuild: 0
   m_UsedGlyphRects:
   - m_X: 0
     m_Y: 0

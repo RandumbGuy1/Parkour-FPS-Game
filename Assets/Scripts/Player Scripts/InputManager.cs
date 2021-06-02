@@ -61,7 +61,6 @@ public class InputManager : MonoBehaviour
 
     void Awake()
     {
-        //resync stuff 
         s = GetComponent<ScriptManager>();
     }
 
