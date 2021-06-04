@@ -67,7 +67,8 @@ public class InputManager : MonoBehaviour
     void FixedUpdate()
     {
         UpdateCollisions();
-        s.PlayerMovement.Movement(input.normalized);
+        s.PlayerMovement.SetInput(input, jumping, crouching, grounded);
+        s.PlayerMovement.Movement();
     }
 
     void Update()
@@ -139,28 +140,28 @@ public class InputManager : MonoBehaviour
             isWallRight = dot < -0.8f;
         }
 
-        if (!CanWallJump() || !isWallRight && !isWallLeft)
-        {
-            wallRunning = false;
-            if (!s.PlayerMovement.vaulting) s.rb.useGravity = true;
-        }    
+        if (!CanWallJump() || !isWallRight && !isWallLeft) wallRunning = false;
+
+        s.rb.useGravity = (s.PlayerMovement.vaulting || wallRunning ? false : true);
     }
     #endregion
 
     #region Visual Effects
     private void CameraEffects()
     {
-        if (crouching) s.CameraInput.TiltCamera(false, 1, 8f, 0.3f);
+        if (crouching) s.CameraLook.TiltCamera(false, 1, 8f, 0.3f);
 
-        if (wallRunning && isWallLeft) s.CameraInput.TiltCamera(false, -1, 20f, 0.2f);
-        if (wallRunning && isWallRight) s.CameraInput.TiltCamera(false, 1, 20f, 0.2f);
-        if (wallRunning) s.CameraInput.ChangeFov(false, 30f, 0.3f);
+        if (wallRunning)
+        {
+            s.CameraLook.TiltCamera(false, (isWallRight ? 1 : -1), 20f, 0.15f);
+            s.CameraLook.ChangeFov(false, 30f, 0.3f);
+        }
 
         if (!wallRunning)
         {
-            if (!crouching) s.CameraInput.TiltCamera(true);
-            if (s.WeaponControls.aiming) s.CameraInput.ChangeFov(false, -25, 0.15f);
-            else s.CameraInput.ChangeFov(true);
+            if (!crouching) s.CameraLook.TiltCamera(true);
+            if (s.WeaponControls.aiming) s.CameraLook.ChangeFov(false, -25, 0.15f);
+            else s.CameraLook.ChangeFov(true);
         }
     }
 
@@ -214,7 +215,7 @@ public class InputManager : MonoBehaviour
 
             s.rb.AddForce(vaultDir * 20f, ForceMode.VelocityChange);
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.25f) + (vaultDir * 1.1f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.1f) + (vaultDir * 1.2f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
@@ -255,14 +256,14 @@ public class InputManager : MonoBehaviour
     private void Land(float impactForce)
     {
         s.CameraLandBob.CameraLand(impactForce);
-        if (impactForce > 85f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
+        if (impactForce > 140f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
     }
     #endregion
 
     #region Vector and speed calculations
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.5f) + Math.Abs(yMag * 3f);
+        return (mag * 0.6f) + Math.Abs(yMag * 5f);
     }
 
     bool IsFloor(Vector3 normal, Vector3 point)

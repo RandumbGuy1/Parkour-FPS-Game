@@ -135,11 +135,11 @@ public class WeaponController : MonoBehaviour
 
         if (weapons.Count > 0)
         {
-            float strafeRot = s.PlayerInput.input.x * swayAmount * 1.8f;
-            float camRot = s.CameraInput.rotationDelta.y * swayAmount;
-            camRot = Mathf.Clamp(camRot, -60, 90);
+            float horizRot = s.PlayerInput.input.x * swayAmount * 1.3f;
+            float yCamDelta = s.CameraLook.rotationDelta.y * swayAmount;
+            yCamDelta = Mathf.Clamp(yCamDelta, -60, 90);
 
-            offset += (Vector3.up * (camRot - strafeRot));
+            offset += (Vector3.up * (yCamDelta - horizRot));
         }
 
         return offset;

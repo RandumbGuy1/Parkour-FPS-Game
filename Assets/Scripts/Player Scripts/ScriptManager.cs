@@ -10,7 +10,7 @@ public class ScriptManager : MonoBehaviour
     public WeaponController WeaponControls;
 
     [Header("Camera Scripts")]
-    public CameraFollow CameraInput;
+    public CameraFollow CameraLook;
     public CameraEffects CameraLandBob;
     public HeadBobbing CameraHeadBob;
     public CameraShaker CameraShaker;

@@ -14,11 +14,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float jumpCooldown;
-
-    bool jumped = false;
-    bool jumping = false;
-
-    public Vector3 moveDir { get; private set; }
+    private bool jumped = false;
 
     [Header("Sliding")]
     [SerializeField] private Vector3 crouchScale;
@@ -42,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 vaultPos = Vector3.zero;
     private Vector3 vaultNormal = Vector3.zero;
     private Vector3 vaultOriginalPos = Vector3.zero;
+    bool stepUp = false;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
@@ -55,6 +52,12 @@ public class PlayerMovement : MonoBehaviour
     bool crouched = false;
     bool readyToWallJump = true;
     int stepsSinceLastGrounded = 0;
+
+    private Vector2 input;
+    private bool jumping;
+    private bool crouching;
+    private bool grounded;
+    public Vector3 moveDir { get; private set; }
 
     [Header("Assignables")]
     private ScriptManager s;
@@ -74,33 +77,32 @@ public class PlayerMovement : MonoBehaviour
     }
 
     #region Movement
-    public void Movement(Vector2 input)
+    public void Movement()
     {
         rb.AddForce(Vector3.down);
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
-        jumping = s.PlayerInput.jumping;
         Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         Vector2 multiplier = CalculateMultiplier();
         float speed = vel.magnitude;
 
         if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
-        CounterMovement(input, vel, mag, jumping);
+        CounterMovement(input, vel, mag);
 
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
-        if (s.PlayerInput.grounded || SnapToGround()) stepsSinceLastGrounded = 0;
+        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
         if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
 
         if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
-        if (s.PlayerInput.wallRunning && !s.PlayerInput.grounded) WallRun();
+        if (s.PlayerInput.wallRunning && !grounded) WallRun();
         if (s.PlayerInput.stopWallRun && readyToWallJump) StopWallRun();
 
-        if (s.PlayerInput.crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(vel.normalized);
-        if (!s.PlayerInput.crouching && crouched) StopCrouch();
+        if (crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(vel.normalized);
+        if (!crouching && crouched) StopCrouch();
 
         if (input.x > 0 && mag.x > 25 || input.x < 0 && mag.x < -25) input.x = 0f;
         if (input.y > 0 && mag.z > 25 || input.y < 0 && mag.z < -25) input.y = 0f;
@@ -120,13 +122,12 @@ public class PlayerMovement : MonoBehaviour
     {
         float speed = s.magnitude;
 
-        if (speed < 5f || stepsSinceLastGrounded > 3 || vaulting || jumped || s.PlayerInput.grounded) return false;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 2f, s.PlayerInput.Ground)) return false;
+        if (speed < 3f || stepsSinceLastGrounded > 3 || vaulting || jumped || grounded) return false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, s.PlayerInput.Ground)) return false;
 
         s.PlayerInput.grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
-
         if (dot > 0) rb.velocity = (rb.velocity - snapHit.normal * dot).normalized * (speed);
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * (speed);
 
@@ -139,15 +140,12 @@ public class PlayerMovement : MonoBehaviour
     {
         jumped = true;
 
-        if (s.PlayerInput.grounded)
-        {
-            s.PlayerInput.grounded = false;
-            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
+        s.PlayerInput.grounded = false;
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
 
-            CancelInvoke("ResetJump");
-            Invoke("ResetJump", jumpCooldown);
-        }
+        CancelInvoke("ResetJump");
+        Invoke("ResetJump", jumpCooldown);
     }
     #endregion
 
@@ -158,13 +156,14 @@ public class PlayerMovement : MonoBehaviour
         vaultNormal = normal;
         vaultOriginalPos = transform.position;
 
-        distance = (distance * distance) * 0.055f;
+        distance = (distance * distance) * 0.04f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
         vaulting = true;
 
-        rb.useGravity = true;
+        stepUp = vaultDuration < 0.5f;
+        
         rb.isKinematic = true;
         rb.velocity = Vector3.zero;
         s.PlayerInput.grounded = false;
@@ -174,14 +173,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting)
         {
-            transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, vaultTime / vaultDuration);
-            vaultTime += Time.smoothDeltaTime * 5f;
+            float t = vaultTime / vaultDuration;
+
+            if (stepUp) t = Mathf.Sin(t * Mathf.PI * 0.5f);
+            else t = t * t * t * (t * (6f * t - 15f) + 10f);
+
+            transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, t);
+            vaultTime += Time.deltaTime * 2;
 
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
-                rb.velocity = (vaultNormal).normalized * vaultForce * 0.4f;
-                rb.useGravity = true;
+                rb.velocity = vaultNormal * vaultForce * 0.3f;
+                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
                 rb.isKinematic = false;
             }
         }
@@ -248,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
     {
         crouched = true;
 
-        if (s.PlayerInput.grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.magnitude));
+        if (grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.magnitude));
 
         transform.localScale = crouchScale;
         rb.position += (Vector3.down * crouchOffset);
@@ -259,15 +263,13 @@ public class PlayerMovement : MonoBehaviour
         crouched = false;
         rb.position += (Vector3.up * crouchOffset);
         transform.localScale = playerScale;
-
-        if (s.PlayerInput.grounded) rb.velocity *= 0.8f;
     }
     #endregion
 
     #region Friction
-    private void CounterMovement(Vector2 input, Vector3 dir, Vector3 mag, bool jumping)
+    private void CounterMovement(Vector2 input, Vector3 dir, Vector3 mag)
     {
-        if (!s.PlayerInput.grounded || jumping) return;
+        if (!grounded) return;
 
         if (crouched)
         {
@@ -301,10 +303,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting) return new Vector2(0f, 0f);
 
-        if (s.PlayerInput.grounded)
+        if (grounded)
         {
             if (crouched) return new Vector2(0.01f, 0.01f);
-            return new Vector2 (1f, 1.05f);
+            else return new Vector2 (1f, 1.05f);
         }
 
         if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
@@ -317,8 +319,18 @@ public class PlayerMovement : MonoBehaviour
     {
         if (crouched) return maxSlideSpeed;
         if (jumping) return maxAirSpeed;
-        if (s.PlayerInput.grounded) return maxGroundSpeed;
+        if (stepsSinceLastGrounded == 0) return maxGroundSpeed;
         return maxAirSpeed;
+    }
+    #endregion
+
+    #region ProcessInput
+    public void SetInput(Vector2 input, bool jumping, bool crouching, bool grounded)
+    {
+        this.input = input;
+        this.jumping = jumping;
+        this.crouching = crouching;
+        this.grounded = grounded;
     }
     #endregion
 

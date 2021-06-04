@@ -3444,9 +3444,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.035
+  offsetSmoothTime: 0.04
   backSmoothTime: 0.3
-  offsetMultiplier: 0.02
+  offsetMultiplier: 0.016
   maxOffset: 2.5
 --- !u!114 &963194230
 MonoBehaviour:
@@ -9889,7 +9889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.25
+  m_Name: Save 2.26
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10313,7 +10313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSlopeAngle: 55
   minimumJumpHeight: 1.3
-  vaultOffset: 1.3
+  vaultOffset: 1.2
   grounded: 1
   nearWall: 0
   reachedMaxSlope: 0
@@ -10342,22 +10342,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 25
+  moveSpeed: 30
   maxGroundSpeed: 22
   maxAirSpeed: 80
   maxSlideSpeed: 60
   jumpForce: 35
   jumpCooldown: 0.1
   crouchScale: {x: 1, y: 1, z: 1}
-  slideForce: 250
+  slideForce: 80
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 0.2
-  vaultForce: 30
+  vaultDuration: 0.1
+  vaultForce: 25
   vaulting: 0
-  friction: 16
-  slideFriction: 1.2
+  friction: 20
+  slideFriction: 1
   sharpness: 15
   threshold: 0.05
 --- !u!114 &1650519437
@@ -10396,7 +10396,7 @@ MonoBehaviour:
   PlayerMovement: {fileID: 1650519436}
   PlayerInput: {fileID: 1650519435}
   WeaponControls: {fileID: 1650519440}
-  CameraInput: {fileID: 838078165}
+  CameraLook: {fileID: 838078165}
   CameraLandBob: {fileID: 963194229}
   CameraHeadBob: {fileID: 838078166}
   CameraShaker: {fileID: 838078167}
