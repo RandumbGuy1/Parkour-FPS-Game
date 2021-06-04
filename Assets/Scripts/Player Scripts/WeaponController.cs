@@ -13,8 +13,6 @@ public class WeaponController : MonoBehaviour
     private Vector3 swayVel = Vector3.zero;
 
     private float timer = 0f;
-    private bool shouldBobGun = false;
-
     private Vector3 smoothBob = Vector3.zero;
     private Vector3 smoothSway = Vector3.zero;
 
@@ -64,34 +62,25 @@ public class WeaponController : MonoBehaviour
         if (weapons.Count > 0)
         {
             if (s.PlayerInput.dropping) Drop();
+            if (Input.GetKeyDown(KeyCode.Alpha1)) selectedWeapon = 0;
+            if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count >= 2) selectedWeapon = 1;
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-                selectedWeapon = 0;
-            if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count >= 2)
-                selectedWeapon = 1;
-        }
-
-        if (s.PlayerInput.rightClick) aiming = !aiming;
-
-        if (selectedWeapon != previousWeapon) SelectWeapon(true);
-    }
-
-    void LateUpdate()
-    {
-        if (weapons.Count > 0)
-        {
-            shouldBobGun = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.magnitude > 10f;
-
-            if (!shouldBobGun) timer = 0f;
-            else timer += Time.deltaTime;
+            timer = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.magnitude > 5f ? timer += Time.deltaTime : 0f;
 
             smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() + (aiming ? aimPos : Vector3.zero), ref bobVel, bobSmoothTime);
             smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? aimRot : Vector3.zero), ref swayVel, swaySmoothTime);
 
             if (offsetPos != Vector3.zero) offsetPos = Vector3.SmoothDamp(offsetPos, Vector3.zero, ref switchPosVel, switchPosTime);
             if (offsetRot != Vector3.zero) offsetRot = Vector3.SmoothDamp(offsetRot, Vector3.zero, ref switchRotVel, switchRotTime);
+
+            if (selectedWeapon != previousWeapon) SelectWeapon(true);
         }
 
+        if (s.PlayerInput.rightClick) aiming = !aiming;
+    }
+
+    void LateUpdate()
+    {
         Vector3 newPos = defaultPos + smoothBob + offsetPos;
         Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + offsetRot);
 
@@ -113,18 +102,7 @@ public class WeaponController : MonoBehaviour
         Vector3 offset = Vector3.zero;
 
         if (weapons.Count > 0)
-        {
-            if (timer > 0)
-            {
-                float horizOffset = 0f;
-                float vertOffset = 0f;
-
-                horizOffset = Mathf.Cos(timer * bobSpeed) * bobAmountHoriz;
-                vertOffset = Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert;
-
-                offset += weaponPos.forward * horizOffset + Vector3.up * vertOffset;
-            }
-        }
+            if (timer > 0) offset += (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert);
 
         return offset;
     }
@@ -135,11 +113,11 @@ public class WeaponController : MonoBehaviour
 
         if (weapons.Count > 0)
         {
-            float horizRot = s.PlayerInput.input.x * swayAmount * 1.3f;
-            float yCamDelta = s.CameraLook.rotationDelta.y * swayAmount;
-            yCamDelta = Mathf.Clamp(yCamDelta, -60, 90);
+            float sideStrafeRot = s.PlayerInput.input.x * swayAmount;
+            float camDelta = s.CameraLook.rotationDelta.y * swayAmount * 1.3f;
+            camDelta = Mathf.Clamp(camDelta, -60, 90);
 
-            offset += (Vector3.up * (yCamDelta - horizRot));
+            offset += (Vector3.up * (camDelta - sideStrafeRot));
         }
 
         return offset;
@@ -147,23 +125,14 @@ public class WeaponController : MonoBehaviour
 
     private void SelectWeapon(bool switching)
     {
-        for (int i = 0; i < weapons.Count; i++)
+        if (switching)
         {
-            if (i == selectedWeapon)
-            {
-                weapons[i].SetActive(true);
-
-                if (!switching) continue;
-                offsetPos = switchPosOffset;
-                offsetRot = switchRotOffset;
-            }
-            else
-            {
-                weapons[i].SetActive(false);
-                weapons[i].transform.localPosition = Vector3.zero;
-                weapons[i].transform.localRotation = Quaternion.Euler(0, 0, 0);
-            }
+            offsetPos = switchPosOffset;
+            offsetRot = switchRotOffset;
         }
+
+        for (int i = 0; i < weapons.Count; i++)
+            weapons[i].SetActive(i == selectedWeapon);
     }
 
     private void Drop()
@@ -173,8 +142,9 @@ public class WeaponController : MonoBehaviour
         weapons[selectedWeapon].transform.SetParent(null);
 
         rb.isKinematic = false;
+        rb.useGravity = true;
         rb.velocity = Vector3.zero;
-        rb.AddForce(s.cam.transform.forward * throwForce * ((s.magnitude * 0.1f) + 1f), ForceMode.VelocityChange);
+        rb.AddForce(s.cam.transform.forward * throwForce * ((s.magnitude * 0.09f) + 1f), ForceMode.VelocityChange);
 
         Vector3 rand = Vector3.zero;
 

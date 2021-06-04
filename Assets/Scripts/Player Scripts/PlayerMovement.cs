@@ -59,6 +59,8 @@ public class PlayerMovement : MonoBehaviour
     private bool grounded;
     public Vector3 moveDir { get; private set; }
 
+    public Vector3 mag { get; private set; }
+
     [Header("Assignables")]
     private ScriptManager s;
     private Rigidbody rb;
@@ -83,7 +85,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
-        Vector3 mag = s.orientation.InverseTransformDirection(rb.velocity);
+        mag = s.orientation.InverseTransformDirection(rb.velocity);
+
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         Vector2 multiplier = CalculateMultiplier();
         float speed = vel.magnitude;

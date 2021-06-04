@@ -26,13 +26,12 @@ public class InputManager : MonoBehaviour
     public bool wallRunning { get; private set; }
     public bool stopWallRun { get; private set; }
 
-    public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
-    public bool crouching { get { return Input.GetKey(crouchKey); } }
-    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
-    public bool dropping { get { return Input.GetKeyDown(dropKey); } }
-    public bool moving { get { return input.x != 0f || input.y != 0f; } }
-    public bool rightClick { get { return Input.GetMouseButtonDown(1); } }
-    public float mouseScroll { get { return Input.GetAxis("Mouse ScrollWheel"); } }
+    public bool jumping { get; private set; }
+    public bool crouching { get; private set; }
+    public bool interacting { get; private set; }
+    public bool dropping { get; private set; }
+    public bool moving { get; private set; }
+    public bool rightClick { get; private set; }
 
     private bool fast = false;
 
@@ -75,6 +74,13 @@ public class InputManager : MonoBehaviour
     {
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
+        jumping = Input.GetKeyDown(jumpKey);
+        crouching = Input.GetKey(crouchKey);
+        interacting = Input.GetKeyDown(interactKey);
+        dropping = Input.GetKeyDown(dropKey);
+        moving = input.x != 0f || input.y != 0f;
+        rightClick = Input.GetMouseButtonDown(1);
+
         if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
         stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
 
@@ -83,7 +89,6 @@ public class InputManager : MonoBehaviour
         else reachedMaxSlope = false;
 
         s.PlayerMovement.VaultMovement();
-
         CheckForWall();
         CameraEffects();
         SprintEffect();
