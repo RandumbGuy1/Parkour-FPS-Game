@@ -21,8 +21,8 @@ public class InputManager : MonoBehaviour
     public bool nearWall;
     public bool reachedMaxSlope;
 
-    private bool isWallLeft = false;
-    private bool isWallRight = false;
+    public bool isWallLeft { get; private set; }
+    public bool isWallRight { get; private set; }
     public bool wallRunning { get; private set; }
     public bool stopWallRun { get; private set; }
 
@@ -32,8 +32,6 @@ public class InputManager : MonoBehaviour
     public bool dropping { get; private set; }
     public bool moving { get; private set; }
     public bool rightClick { get; private set; }
-
-    private bool fast = false;
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
@@ -54,7 +52,6 @@ public class InputManager : MonoBehaviour
     private int groundCancelSteps = 0;
 
     [Header("Assignables")]
-    [SerializeField] private ParticleSystem sprintEffect;
     private ScriptManager s;
     private RaycastHit slopeHit;
 
@@ -90,8 +87,6 @@ public class InputManager : MonoBehaviour
 
         s.PlayerMovement.VaultMovement();
         CheckForWall();
-        CameraEffects();
-        SprintEffect();
     }
 
     #region Movement Calculations
@@ -148,46 +143,6 @@ public class InputManager : MonoBehaviour
         if (!CanWallJump() || !isWallRight && !isWallLeft) wallRunning = false;
 
         s.rb.useGravity = (s.PlayerMovement.vaulting || wallRunning ? false : true);
-    }
-    #endregion
-
-    #region Visual Effects
-    private void CameraEffects()
-    {
-        if (crouching) s.CameraLook.TiltCamera(false, 1, 8f, 0.3f);
-
-        if (wallRunning)
-        {
-            s.CameraLook.TiltCamera(false, (isWallRight ? 1 : -1), 20f, 0.15f);
-            s.CameraLook.ChangeFov(false, 30f, 0.3f);
-        }
-
-        if (!wallRunning)
-        {
-            if (!crouching) s.CameraLook.TiltCamera(true);
-            if (s.WeaponControls.aiming) s.CameraLook.ChangeFov(false, -25, 0.15f);
-            else s.CameraLook.ChangeFov(true);
-        }
-    }
-
-    private void SprintEffect()
-    {
-        if (s.magnitude >= 25f)
-        {
-            if (!fast)
-            {
-                fast = true;
-                sprintEffect.Play();
-            }
-
-            var em = sprintEffect.emission;
-            em.rateOverTime = s.magnitude;
-        }
-        else if (fast)
-        {
-            sprintEffect.Stop();
-            fast = false;
-        }
     }
     #endregion
 

@@ -89,6 +89,14 @@ public class PickupObj : MonoBehaviour
         objRb.drag = storedDrag;
         objRb.angularDrag = storedAngularDrag;
 
+        Vector3 rand = Vector3.zero;
+
+        rand.x = Random.Range(-1f, 1f);
+        rand.y = Random.Range(-1f, 1f);
+        rand.z = Random.Range(-1f, 1f);
+
+        objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
+
         objRb.transform.parent = null;
         objRb = null;
         heldObj = null;

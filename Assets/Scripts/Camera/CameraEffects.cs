@@ -13,23 +13,14 @@ public class CameraEffects : MonoBehaviour
 	[SerializeField] private float offsetMultiplier;
 	[SerializeField] private float maxOffset;
 
-	private float maxSpeed;
 	private float vel = 0;
-	private float vel2 = 0;
 	private float magnitude;
-	private Vector3 newPos = Vector3.zero;
 
 	public bool landed { get; private set; }
 
-	void Start()
-	{
-		landed = false;
-		maxSpeed = Mathf.Infinity;
-	}
-
 	void LateUpdate()
 	{
-		newPos = CalculateLandOffset();
+		Vector3 newPos = CalculateLandOffset();
 		transform.localPosition = newPos;
 	}
 
@@ -40,10 +31,10 @@ public class CameraEffects : MonoBehaviour
 
 		if (landed)
 		{
-			offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, -magnitude, ref vel, offsetSmoothTime, maxSpeed, Time.smoothDeltaTime);
+			offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, -magnitude, ref vel, offsetSmoothTime);
 			if (transform.localPosition.y <= threshold) Invoke("StopCameraLand", 0.05f);
 		}
-		else if (transform.localPosition.y < -0.01f) offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, 0.01f, ref vel2, backSmoothTime, maxSpeed, Time.smoothDeltaTime);
+		else if (transform.localPosition.y < -0.01f) offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, 0.01f, ref vel, backSmoothTime);
 
 		return offsetPos;
 	}
@@ -58,11 +49,7 @@ public class CameraEffects : MonoBehaviour
 
 			if (magnitude < 0.6f) magnitude = 0f;
 			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 1f;
-			/*
-			offsetSmoothTime = setSmoothTime / (magnitude + 0.3f);
-			offsetSmoothTime = Mathf.Round(offsetSmoothTime * 1000.0f) * 0.001f;
-			offsetSmoothTime = Mathf.Clamp(offsetSmoothTime, 0.04f, 0.06f);
-			*/
+
 			landed = true;
 		}
 	}

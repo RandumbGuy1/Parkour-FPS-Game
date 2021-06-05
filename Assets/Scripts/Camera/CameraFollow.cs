@@ -23,9 +23,8 @@ public class CameraFollow : MonoBehaviour
 	private bool resetFov = true;
 
 	[Header("Sensitivity")]
-	[SerializeField] private float playerTurnSpeed;
 	[SerializeField] private float sensitivity;
-	[SerializeField] private Vector2 cameraTurnSpeed;
+	[SerializeField] private Vector2 cameraSmoothTime;
 
 	[Header("Clamp Rotation")]
 	[SerializeField] private float upClampAngle;
@@ -34,15 +33,17 @@ public class CameraFollow : MonoBehaviour
 	private Vector2 mouse;
 	private Vector2 rotation;
 	private Vector3 smoothRotation;
-
 	public Vector2 rotationDelta { get; private set; }
+
+	private bool fast = false;
 
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
+	[SerializeField] private ParticleSystem sprintEffect;
 	private Camera cam;
 
 	void Awake()
-    {
+	{
 		cam = GetComponentInChildren<Camera>();
 		setFov = fov;
 	}
@@ -52,6 +53,8 @@ public class CameraFollow : MonoBehaviour
 		mouse.y = Input.GetAxisRaw("Mouse X");
 		mouse.x = Input.GetAxisRaw("Mouse Y");
 
+		CameraEffects();
+		SpeedLines();
 		ChangeTilt();
 		ChangeFov();
 	}
@@ -66,7 +69,7 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	void CalcRotation()
-    {
+	{
 		rotationDelta = mouse * sensitivity * 0.01f;
 
 		rotation.y += rotationDelta.y;
@@ -75,14 +78,14 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	void SmoothRotation()
-    {
-		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y, cameraTurnSpeed.y * Time.smoothDeltaTime);
-		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, cameraTurnSpeed.x * Time.smoothDeltaTime);
+	{
+		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y, cameraSmoothTime.y * Time.smoothDeltaTime);
+		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, cameraSmoothTime.x * Time.smoothDeltaTime);
 		smoothRotation.z = cameraTilt;
 	}
 
 	void ApplyRotation()
-    {
+	{
 		Quaternion newCamRot = Quaternion.Euler(smoothRotation + s.CameraShaker.offset);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y, 0);
 
@@ -91,7 +94,7 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	private void ChangeTilt()
-    {
+	{
 		if (cameraTilt == 0 && resetTilt) return;
 		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref tiltVel, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
 
@@ -120,11 +123,48 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
-    {
+	{
 		if (maxFov == setFov + extension) return;
 
 		fovTime = speed;
 		resetFov = reset;
 		maxFov = setFov + extension;
 	}
+
+    #region Camera Effects
+    private void SpeedLines()
+	{
+		if (s.magnitude >= 25f)
+		{
+			if (!fast) sprintEffect.Play();
+
+			fast = true;
+			var em = sprintEffect.emission;
+			em.rateOverTime = s.magnitude;
+		}
+		else if (fast)
+		{
+			sprintEffect.Stop();
+			fast = false;
+		}
+	}
+
+	private void CameraEffects()
+	{
+		if (s.PlayerInput.crouching) TiltCamera(false, 1, 8f, 0.3f);
+
+		if (s.PlayerInput.wallRunning)
+		{
+			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 20f, 0.1f);
+			ChangeFov(false, 30f, 0.2f);
+		}
+
+		if (!s.PlayerInput.wallRunning)
+		{
+			if (!s.PlayerInput.crouching) TiltCamera(true);
+			if (s.WeaponControls.aiming) ChangeFov(false, -25, 0.2f);
+			else ChangeFov(true);
+		}
+	}
+	#endregion
 }
