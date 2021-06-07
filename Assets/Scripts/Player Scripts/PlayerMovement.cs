@@ -21,12 +21,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float slideForce;
     private float crouchOffset;
     private Vector3 playerScale;
+    private bool crouched = false;
 
     [Header("WallRunning")]
     [SerializeField] private float wallJumpForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
     private bool canAddWallRunForce = true;
+    private bool readyToWallJump = true;
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -47,12 +49,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float threshold;
     private float maxSpeed;
 
+    [Header("Collision")]
+    [SerializeField] private LayerMask Ground;
+    [SerializeField] private LayerMask Environment;
+
+    private int stepsSinceLastGrounded = 0;
+
     private Vector2 multiplier;
-
-    bool crouched = false;
-    bool readyToWallJump = true;
-    int stepsSinceLastGrounded = 0;
-
     private Vector2 input;
     private bool jumping;
     private bool crouching;
@@ -126,7 +129,7 @@ public class PlayerMovement : MonoBehaviour
         float speed = s.magnitude;
 
         if (speed < 3f || stepsSinceLastGrounded > 3 || vaulting || jumped || grounded) return false;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, s.PlayerInput.Ground)) return false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, Ground)) return false;
 
         s.PlayerInput.grounded = true;
 

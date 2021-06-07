@@ -9889,7 +9889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.28
+  m_Name: Save 2.29
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10359,6 +10359,12 @@ MonoBehaviour:
   slideFriction: 1
   sharpness: 15
   threshold: 0.05
+  Ground:
+    serializedVersion: 2
+    m_Bits: 3840
+  Environment:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &1650519437
 MonoBehaviour:
   m_ObjectHideFlags: 0

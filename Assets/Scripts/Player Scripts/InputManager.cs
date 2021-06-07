@@ -40,8 +40,8 @@ public class InputManager : MonoBehaviour
     [SerializeField] private KeyCode dropKey = KeyCode.Q;
 
     [Header("Collision")]
-    public LayerMask Ground;
-    public LayerMask Environment;
+    [SerializeField] private LayerMask Ground;
+    [SerializeField] private LayerMask Environment;
     [SerializeField] private float groundCancelDelay;
     [SerializeField] private float wallCancelDelay;
 
