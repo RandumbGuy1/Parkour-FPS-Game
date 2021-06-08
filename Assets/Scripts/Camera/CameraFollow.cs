@@ -151,11 +151,11 @@ public class CameraFollow : MonoBehaviour
 
 	private void CameraEffects()
 	{
-		if (s.PlayerInput.crouching) TiltCamera(false, 1, 8f, 0.3f);
+		if (s.PlayerInput.crouching) TiltCamera(false, 1, 8f, 0.15f);
 
 		if (s.PlayerInput.wallRunning)
 		{
-			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 20f, 0.1f);
+			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 20f, 0.13f);
 			ChangeFov(false, 30f, 0.2f);
 		}
 

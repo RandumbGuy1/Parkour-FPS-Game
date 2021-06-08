@@ -5,26 +5,23 @@ using UnityEngine;
 public class PickupObj : MonoBehaviour
 {
     [Header("Grab detection")]
-    public LayerMask Objects;
-    public float grabRange;
-    public float throwForce;
-    public float grabRadius;
-    public float objSpeed;
-    public float maxGrabDistance;
+    [SerializeField] private LayerMask Objects;
+    [SerializeField] private float grabRange;
+    [SerializeField] private float throwForce;
+    [SerializeField] private float grabRadius;
+    [SerializeField] private float objSpeed;
+    [SerializeField] private float maxGrabDistance;
 
-    float setThrowForce;
+    private float storedDrag;
+    private float storedAngularDrag;
+    private float setThrowForce;
 
     [Header("Assignables")]
-    public Transform grabPos;
+    [SerializeField] private Transform grabPos;
     private GameObject heldObj;
     private Rigidbody objRb;
 
     private ScriptManager s;
-
-    bool grabbing;
-    float storedDrag;
-    float storedAngularDrag;
-    Vector3 vel = Vector3.zero;
 
     void Awake()
     {
@@ -32,13 +29,13 @@ public class PickupObj : MonoBehaviour
         setThrowForce = throwForce;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
             if (Physics.SphereCast(s.cam.position, grabRadius, s.cam.forward, out hit, grabRange, Objects))
-                StartCoroutine(Pickup(hit.transform.gameObject));
+                Pickup(hit.transform.gameObject);
         }
 
         if (heldObj != null) CheckObject();
@@ -46,19 +43,19 @@ public class PickupObj : MonoBehaviour
 
     private void CheckObject()
     {
-        if ((grabPos.position - heldObj.transform.position).sqrMagnitude > 0.01f)
-            heldObj.transform.position = Vector3.SmoothDamp(heldObj.transform.position, grabPos.position, ref vel, objSpeed);
+        Vector3 followVel = (grabPos.position - heldObj.transform.position);
+        followVel = Vector3.ClampMagnitude(followVel, 25f);
 
-        objRb.velocity = Vector3.zero;
+        objRb.AddForce(followVel * objSpeed * 15f, ForceMode.VelocityChange);
 
-        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance && grabbing) 
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) 
             Drop();
     }
 
-    private IEnumerator Pickup(GameObject obj)
+    private void Pickup(GameObject obj)
     {
         objRb = obj.transform.GetComponent<Rigidbody>();
-        if (objRb == null) yield return null;
+        if (objRb == null) return;
 
         if (objRb.mass <= 3f)
         {
@@ -66,16 +63,10 @@ public class PickupObj : MonoBehaviour
             storedAngularDrag = objRb.angularDrag;
 
             objRb.useGravity = false;
-            objRb.drag = 0f;
-            objRb.angularDrag = 1f;
+            objRb.drag = 5f;
+            objRb.angularDrag = 0.5f;
             heldObj = obj;
-
-            yield return new WaitForSeconds(0.5f);
-
-            grabbing = true;
         }
-
-        yield return null;
     }
 
     private void Drop()
@@ -100,6 +91,5 @@ public class PickupObj : MonoBehaviour
         objRb.transform.parent = null;
         objRb = null;
         heldObj = null;
-        grabbing = false;
     }
 }

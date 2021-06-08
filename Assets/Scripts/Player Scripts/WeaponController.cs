@@ -76,16 +76,13 @@ public class WeaponController : MonoBehaviour
             if (selectedWeapon != previousWeapon) SelectWeapon(true);
         }
 
-        if (s.PlayerInput.rightClick) aiming = !aiming;
-    }
-
-    void LateUpdate()
-    {
         Vector3 newPos = defaultPos + smoothBob + offsetPos;
         Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + offsetRot);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
+
+        if (s.PlayerInput.rightClick) aiming = !aiming;
     }
 
     public void AddWeapon(GameObject obj)
@@ -104,6 +101,12 @@ public class WeaponController : MonoBehaviour
         if (weapons.Count > 0)
             if (timer > 0) offset += (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert);
 
+        Vector2 camDelta = s.CameraLook.rotationDelta * 0.2f;
+        camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
+        camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
+
+        offset -= new Vector3(camDelta.y, camDelta.x, 0f);
+
         return offset;
     }
 
@@ -113,11 +116,12 @@ public class WeaponController : MonoBehaviour
 
         if (weapons.Count > 0)
         {
-            float sideStrafeRot = s.PlayerInput.input.x * swayAmount;
-            float camDelta = s.CameraLook.rotationDelta.y * swayAmount * 1.3f;
-            camDelta = Mathf.Clamp(camDelta, -60, 90);
+            Vector2 camDelta = s.CameraLook.rotationDelta * swayAmount * 0.8f;
+            camDelta.y -= s.PlayerInput.input.x * swayAmount * 1.4f;
+            camDelta.y = Mathf.Clamp(camDelta.y, -100, 100);
+            camDelta.x = Mathf.Clamp(camDelta.x, -60, 60);
 
-            offset += (Vector3.up * (camDelta - sideStrafeRot));
+            offset += Vector3.up * camDelta.y + Vector3.right * camDelta.x * -1.4f;
         }
 
         return offset;

@@ -5,13 +5,14 @@ using System;
 
 public class CameraEffects : MonoBehaviour
 {
-	[Header("Offset Settings")]
+	[Header("Land Bob Settings")]
 	[SerializeField] private float offsetSmoothTime;
 	[SerializeField] private float backSmoothTime;
-
-	[Header("Offset Calculation Settings")]
 	[SerializeField] private float offsetMultiplier;
 	[SerializeField] private float maxOffset;
+
+	[Header("Assignables")]
+	[SerializeField] private ScriptManager s;
 
 	private float vel = 0;
 	private float magnitude;
@@ -27,14 +28,11 @@ public class CameraEffects : MonoBehaviour
 	private Vector3 CalculateLandOffset()
     {
 		Vector3 offsetPos = Vector3.zero;
-		float threshold = -magnitude + 0.1f;
-
-		if (landed)
-		{
-			offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, -magnitude, ref vel, offsetSmoothTime);
-			if (transform.localPosition.y <= threshold) Invoke("StopCameraLand", 0.05f);
-		}
+	
+		if (landed) offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, -magnitude, ref vel, offsetSmoothTime);
 		else if (transform.localPosition.y < -0.01f) offsetPos.y = Mathf.SmoothDamp(transform.localPosition.y, 0.01f, ref vel, backSmoothTime);
+
+		if (transform.localPosition.y <= -magnitude + 0.1f && landed) Invoke("StopCameraLand", 0.05f);
 
 		return offsetPos;
 	}
@@ -47,8 +45,8 @@ public class CameraEffects : MonoBehaviour
 			magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
 			magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
-			if (magnitude < 0.6f) magnitude = 0f;
-			if (Input.GetKey(KeyCode.LeftControl)) magnitude = 1f;
+			if (magnitude < 0.5f) magnitude = 0f;
+			if (s.PlayerInput.crouching) magnitude = 0.9f;
 
 			landed = true;
 		}

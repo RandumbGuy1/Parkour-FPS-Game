@@ -69,6 +69,7 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        #region Input
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         jumping = Input.GetKeyDown(jumpKey);
@@ -84,6 +85,7 @@ public class InputManager : MonoBehaviour
         if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
+        #endregion 
 
         s.PlayerMovement.VaultMovement();
         CheckForWall();
@@ -215,8 +217,8 @@ public class InputManager : MonoBehaviour
 
     private void Land(float impactForce)
     {
-        s.CameraLandBob.CameraLand(impactForce);
         if (impactForce > 140f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
+        s.CameraLandBob.CameraLand(impactForce);
     }
     #endregion
 

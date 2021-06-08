@@ -2369,7 +2369,7 @@ MonoBehaviour:
   reticle: {fileID: 685652798}
   s: {fileID: 1650519438}
   smoothTime: 4
-  minSize: 120
+  minSize: 150
   maxSize: 300
   minAimSize: 30
 --- !u!1 &703298682
@@ -3395,7 +3395,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.1
+  near clip plane: 0.15
   far clip plane: 300
   field of view: 80
   orthographic: 0
@@ -3446,8 +3446,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offsetSmoothTime: 0.043
   backSmoothTime: 0.3
-  offsetMultiplier: 0.015
+  offsetMultiplier: 0.016
   maxOffset: 2.5
+  s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9889,7 +9890,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.29
+  m_Name: Save 2.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10347,12 +10348,12 @@ MonoBehaviour:
   maxSlideSpeed: 60
   jumpForce: 45
   jumpCooldown: 0.1
-  crouchScale: {x: 1, y: 1, z: 1}
+  crouchScale: {x: 1, y: 0.8, z: 1}
   slideForce: 80
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 0.1
+  vaultDuration: 0.11
   vaultForce: 25
   vaulting: 0
   friction: 20
@@ -10384,7 +10385,7 @@ MonoBehaviour:
   throwForce: 10
   grabRadius: 0.3
   objSpeed: 0.1
-  maxGrabDistance: 4
+  maxGrabDistance: 10
   grabPos: {fileID: 493642731}
 --- !u!114 &1650519438
 MonoBehaviour:
@@ -10452,7 +10453,7 @@ MonoBehaviour:
   defaultRot: {x: 0, y: 18, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
   swayAmount: 10
-  swaySmoothTime: 0.5
+  swaySmoothTime: 0.4
   switchPosOffset: {x: 0.6, y: -1.2, z: -0.2}
   switchRotOffset: {x: 270, y: -30, z: 0}
   switchPosTime: 0.3

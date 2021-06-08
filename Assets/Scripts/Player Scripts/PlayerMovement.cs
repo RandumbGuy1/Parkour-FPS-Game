@@ -258,7 +258,7 @@ public class PlayerMovement : MonoBehaviour
     {
         crouched = true;
 
-        if (grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * Math.Abs(s.magnitude));
+        if (grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * s.magnitude);
 
         transform.localScale = crouchScale;
         rb.position += (Vector3.down * crouchOffset);

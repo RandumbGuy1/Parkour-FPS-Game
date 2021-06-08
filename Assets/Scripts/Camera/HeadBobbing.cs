@@ -6,17 +6,17 @@ using System;
 public class HeadBobbing : MonoBehaviour
 {
     [Header("View Bob Settings")]
-    public float bobSpeed;
-    public float bobAmountHoriz;
-    public float bobAmountVert;
-    [Range(0f, 0.2f)] public float bobSmoothTime;
+    [SerializeField] private float bobSpeed;
+    [SerializeField] private float bobAmountHoriz;
+    [SerializeField] private float bobAmountVert;
+    [Range(0f, 0.2f)] [SerializeField] private float bobSmoothTime;
 
     private float timer;
     private Vector3 vel = Vector3.zero;
     private Vector3 smoothOffset = Vector3.zero;
 
     [Header("Assignables")]
-    public ScriptManager s;
+    [SerializeField] private ScriptManager s;
 
     void Update()
     {
