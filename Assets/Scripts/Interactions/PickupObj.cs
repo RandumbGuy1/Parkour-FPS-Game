@@ -14,7 +14,6 @@ public class PickupObj : MonoBehaviour
 
     private float storedDrag;
     private float storedAngularDrag;
-    private float setThrowForce;
 
     [Header("Assignables")]
     [SerializeField] private Transform grabPos;
@@ -26,18 +25,21 @@ public class PickupObj : MonoBehaviour
     void Awake()
     {
         s = GetComponent<ScriptManager>();
-        setThrowForce = throwForce;
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && heldObj == null)
+            if (Physics.SphereCast(s.cam.position, grabRadius, s.cam.forward, out var hit, grabRange, Objects)) Pickup(hit.transform.gameObject);
+
+        if (heldObj == null) return;
+
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance)
+            Drop();
     }
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            if (Physics.SphereCast(s.cam.position, grabRadius, s.cam.forward, out hit, grabRange, Objects))
-                Pickup(hit.transform.gameObject);
-        }
-
         if (heldObj != null) CheckObject();
     }
 
@@ -46,25 +48,21 @@ public class PickupObj : MonoBehaviour
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
         followVel = Vector3.ClampMagnitude(followVel, 25f);
 
-        objRb.AddForce(followVel * objSpeed * 15f, ForceMode.VelocityChange);
-
-        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) 
-            Drop();
+        objRb.AddForce(followVel * objSpeed * 0.1f, ForceMode.Impulse);
     }
 
     private void Pickup(GameObject obj)
     {
         objRb = obj.transform.GetComponent<Rigidbody>();
-        if (objRb == null) return;
 
-        if (objRb.mass <= 3f)
+        if (objRb != null)
         {
             storedDrag = objRb.drag;
             storedAngularDrag = objRb.angularDrag;
 
             objRb.useGravity = false;
-            objRb.drag = 5f;
-            objRb.angularDrag = 0.5f;
+            objRb.drag = 3f;
+            objRb.angularDrag = 0f;
             heldObj = obj;
         }
     }
@@ -72,11 +70,7 @@ public class PickupObj : MonoBehaviour
     private void Drop()
     {
         objRb.useGravity = true;
-        objRb.velocity = Vector3.zero;
 
-        throwForce = setThrowForce + (s.velocity.magnitude * 0.3f);
-
-        objRb.velocity = throwForce * (grabPos.position - heldObj.transform.position);
         objRb.drag = storedDrag;
         objRb.angularDrag = storedAngularDrag;
 
@@ -86,10 +80,11 @@ public class PickupObj : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
+        objRb.velocity *= throwForce * (s.velocity.magnitude * 0.1f + 1f) * 0.8f;
         objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
+        heldObj = null;
         objRb.transform.parent = null;
         objRb = null;
-        heldObj = null;
     }
 }

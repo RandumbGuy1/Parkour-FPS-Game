@@ -27,31 +27,27 @@ public class PlayerInteraction : MonoBehaviour
 
     void CheckForInteractable()
     {
-        RaycastHit hit;
-        bool found = false;
-
-        if (Physics.Raycast(s.cam.position, s.cam.forward, out hit, interactionRange, Interactables))
+        if (Physics.Raycast(s.cam.position, s.cam.forward, out var hit, interactionRange, Interactables))
         {
             Interactable interactable = hit.transform.GetComponent<Interactable>();
+            if (interactable == null) return;
 
-            if (interactable != null)
+            string text = interactable.GetDescription();
+            if (text == null && interactionText.text != " ")
             {
-                string text = interactable.GetDescription();
-                found = text != null;
+                textDisplay.SetActive(false);
+                interactionText.text = " ";
+                return;
+            }
 
-                if (found)
-                {
-                    GameObject obj = hit.transform.gameObject;
+            GameObject obj = hit.transform.gameObject;
 
-                    textDisplay.SetActive(true);
-                    interactionText.text = text;
+            textDisplay.SetActive(true);
+            interactionText.text = text;
 
-                    if (s.PlayerInput.interacting) Interact(interactable, obj);
-                }
-            } 
+            if (s.PlayerInput.interacting) Interact(interactable, obj);
         }
-
-        if (!found && interactionText.text != " ")
+        else if (interactionText.text != " ")
         {
             textDisplay.SetActive(false);
             interactionText.text = " ";

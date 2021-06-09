@@ -9890,7 +9890,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.3
+  m_Name: Save 2.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10381,11 +10381,11 @@ MonoBehaviour:
   Objects:
     serializedVersion: 2
     m_Bits: 1024
-  grabRange: 5
-  throwForce: 10
+  grabRange: 6
+  throwForce: 0.4
   grabRadius: 0.3
-  objSpeed: 0.1
-  maxGrabDistance: 10
+  objSpeed: 8
+  maxGrabDistance: 6
   grabPos: {fileID: 493642731}
 --- !u!114 &1650519438
 MonoBehaviour:
