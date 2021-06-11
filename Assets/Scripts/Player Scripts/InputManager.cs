@@ -156,7 +156,7 @@ public class InputManager : MonoBehaviour
 
         Vector3 normal = col.GetContact(0).normal;
 
-        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.magnitude, Math.Abs(s.velocity.y)));
+        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, Math.Abs(s.PlayerMovement.velocity.y)));
 
         #region Vaulting
         if (IsVaultable(normal))
@@ -175,12 +175,11 @@ public class InputManager : MonoBehaviour
             if (Physics.Raycast(vaultHeight, moveDir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
             if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3f + vaultOffset, Environment)) return;
 
-            s.rb.AddForce(vaultDir * 20f, ForceMode.VelocityChange);
-
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.1f) + (vaultDir * 1.2f);
+            Vector3 vel = -col.relativeVelocity * 0.5f;
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
-            s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
+            s.PlayerMovement.Vault(vaultPoint, -vaultDir, vel, distance);
         }
         #endregion
     }

@@ -9890,7 +9890,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.4
+  m_Name: Save 2.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10353,7 +10353,7 @@ MonoBehaviour:
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 0.11
+  vaultDuration: 0.1
   vaultForce: 25
   vaulting: 0
   friction: 20
@@ -10382,9 +10382,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   grabRange: 6
-  throwForce: 0.4
+  throwForce: 0.6
   grabRadius: 0.3
-  objSpeed: 8
+  objSpeed: 15
+  objSmoothing: 0.06
   maxGrabDistance: 6
   grabPos: {fileID: 493642731}
 --- !u!114 &1650519438

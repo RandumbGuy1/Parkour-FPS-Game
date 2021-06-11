@@ -134,13 +134,13 @@ public class CameraFollow : MonoBehaviour
     #region Camera Effects
     private void SpeedLines()
 	{
-		if (s.magnitude >= 25f)
+		if (s.PlayerMovement.magnitude >= 25f)
 		{
 			if (!fast) sprintEffect.Play();
 
 			fast = true;
 			var em = sprintEffect.emission;
-			em.rateOverTime = s.magnitude;
+			em.rateOverTime = s.PlayerMovement.magnitude;
 		}
 		else if (fast)
 		{

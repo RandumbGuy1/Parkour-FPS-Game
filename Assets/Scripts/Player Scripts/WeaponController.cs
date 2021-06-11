@@ -65,7 +65,7 @@ public class WeaponController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Alpha1)) selectedWeapon = 0;
             if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count >= 2) selectedWeapon = 1;
 
-            timer = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.magnitude > 5f ? timer += Time.deltaTime : 0f;
+            timer = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
 
             smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() + (aiming ? aimPos : Vector3.zero), ref bobVel, bobSmoothTime);
             smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? aimRot : Vector3.zero), ref swayVel, swaySmoothTime);
@@ -148,7 +148,7 @@ public class WeaponController : MonoBehaviour
         rb.isKinematic = false;
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
-        rb.AddForce(s.cam.transform.forward * throwForce * ((s.magnitude * 0.09f) + 1f), ForceMode.VelocityChange);
+        rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.09f) + 1f), ForceMode.VelocityChange);
 
         Vector3 rand = Vector3.zero;
 

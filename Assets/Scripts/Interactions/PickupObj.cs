@@ -10,8 +10,11 @@ public class PickupObj : MonoBehaviour
     [SerializeField] private float throwForce;
     [SerializeField] private float grabRadius;
     [SerializeField] private float objSpeed;
+    [SerializeField] private float objSmoothing;
     [SerializeField] private float maxGrabDistance;
 
+    private Vector3 smoothVel = Vector3.zero;
+    private Vector3 vel = Vector3.zero;
     private float storedDrag;
     private float storedAngularDrag;
 
@@ -48,7 +51,9 @@ public class PickupObj : MonoBehaviour
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
         followVel = Vector3.ClampMagnitude(followVel, 25f);
 
-        objRb.AddForce(followVel * objSpeed * 0.1f, ForceMode.Impulse);
+        smoothVel = Vector3.SmoothDamp(smoothVel, followVel, ref vel, objSmoothing);
+
+        objRb.velocity = smoothVel * objSpeed;
     }
 
     private void Pickup(GameObject obj)
@@ -61,8 +66,8 @@ public class PickupObj : MonoBehaviour
             storedAngularDrag = objRb.angularDrag;
 
             objRb.useGravity = false;
-            objRb.drag = 3f;
-            objRb.angularDrag = 0f;
+            objRb.drag = 0f;
+            objRb.angularDrag = 0.05f;
             heldObj = obj;
         }
     }
@@ -80,7 +85,7 @@ public class PickupObj : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
-        objRb.velocity *= throwForce * (s.velocity.magnitude * 0.1f + 1f) * 0.8f;
+        objRb.velocity *= throwForce * (s.PlayerMovement.magnitude * 0.1f + 1f) * 0.8f;
         objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
         heldObj = null;

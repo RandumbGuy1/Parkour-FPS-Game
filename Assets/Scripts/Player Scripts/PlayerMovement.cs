@@ -40,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 vaultPos = Vector3.zero;
     private Vector3 vaultNormal = Vector3.zero;
     private Vector3 vaultOriginalPos = Vector3.zero;
+    private Vector3 vaultVel = Vector3.zero;
     bool stepUp = false;
 
     [Header("Movement Control")]
@@ -67,6 +68,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Assignables")]
     private ScriptManager s;
     private Rigidbody rb;
+
+    public float magnitude { get; private set; }
+    public Vector3 velocity { get; private set; }
 
     void Awake()
     {
@@ -120,13 +124,16 @@ public class PlayerMovement : MonoBehaviour
         moveDir = dot < 0f ? slopeDir : inputDir;
 
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
+
+        magnitude = rb.velocity.magnitude;
+        velocity = rb.velocity;
     }
     #endregion
 
     #region Surface Contact
     private bool SnapToGround()
     {
-        float speed = s.magnitude;
+        float speed = magnitude;
 
         if (speed < 3f || stepsSinceLastGrounded > 3 || vaulting || jumped || grounded) return false;
         if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, Ground)) return false;
@@ -156,23 +163,28 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Vaulting
-    public void Vault(Vector3 pos, Vector3 normal, float distance)
+    public void Vault(Vector3 pos, Vector3 normal, Vector3 vel, float distance)
     {
         vaultPos = pos;
         vaultNormal = normal;
+        vaultVel = vel;
         vaultOriginalPos = transform.position;
 
         distance = (distance * distance) * 0.04f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
-        vaulting = true;
 
         stepUp = vaultDuration < 0.5f;
-        
-        rb.isKinematic = true;
-        rb.velocity = Vector3.zero;
+
+        if (stepUp) rb.velocity = normal * 8f;
+        else vaultVel = normal;
+
         s.PlayerInput.grounded = false;
+        rb.velocity = Vector3.zero;
+        rb.isKinematic = true;
+
+        vaulting = true;
     }
 
     public void VaultMovement()
@@ -190,7 +202,7 @@ public class PlayerMovement : MonoBehaviour
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
-                rb.velocity = vaultNormal * vaultForce * 0.3f;
+                rb.velocity = vaultVel;
                 rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
                 rb.isKinematic = false;
             }
@@ -258,7 +270,7 @@ public class PlayerMovement : MonoBehaviour
     {
         crouched = true;
 
-        if (grounded) if (s.magnitude > 0.5f) rb.AddForce(dir * slideForce * s.magnitude);
+        if (grounded) if (magnitude > 0.5f) rb.AddForce(dir * slideForce * magnitude);
 
         transform.localScale = crouchScale;
         rb.position += (Vector3.down * crouchOffset);
