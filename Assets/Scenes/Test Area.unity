@@ -2925,7 +2925,7 @@ MonoBehaviour:
   bobSpeed: 8
   bobAmountHoriz: 0.3
   bobAmountVert: 0.5
-  bobSmoothTime: 0.2
+  bobSmoothTime: 0.18
   s: {fileID: 1650519438}
 --- !u!114 &838078167
 MonoBehaviour:
@@ -3444,7 +3444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.043
+  offsetSmoothTime: 0.042
   backSmoothTime: 0.3
   offsetMultiplier: 0.016
   maxOffset: 2.5
@@ -9890,7 +9890,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.5
+  m_Name: Save 2.6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10198,7 +10198,6 @@ GameObject:
   - component: {fileID: 1650519436}
   - component: {fileID: 1650519440}
   - component: {fileID: 1650519439}
-  - component: {fileID: 1650519437}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -10342,8 +10341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30
-  maxGroundSpeed: 22
+  moveSpeed: 22.5
+  maxGroundSpeed: 20
   maxAirSpeed: 80
   maxSlideSpeed: 60
   jumpForce: 45
@@ -10354,10 +10353,10 @@ MonoBehaviour:
   wallRunForce: 25
   wallClimbForce: 10
   vaultDuration: 0.1
-  vaultForce: 25
+  vaultForce: 10
   vaulting: 0
   friction: 20
-  slideFriction: 1
+  slideFriction: 1.2
   sharpness: 15
   threshold: 0.05
   Ground:
@@ -10366,28 +10365,6 @@ MonoBehaviour:
   Environment:
     serializedVersion: 2
     m_Bits: 256
---- !u!114 &1650519437
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1650519429}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ccb18a071d7eab42999c6d7057fcde5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Objects:
-    serializedVersion: 2
-    m_Bits: 1024
-  grabRange: 6
-  throwForce: 0.6
-  grabRadius: 0.3
-  objSpeed: 15
-  objSmoothing: 0.06
-  maxGrabDistance: 6
-  grabPos: {fileID: 493642731}
 --- !u!114 &1650519438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10426,10 +10403,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Interactables:
     serializedVersion: 2
-    m_Bits: 2048
-  interactionRange: 10
+    m_Bits: 3072
+  interactionRange: 8
+  interactionRadius: 0.8
+  throwForce: 0.5
+  objSpeed: 15
+  objSmoothing: 0.06
+  maxGrabDistance: 6
   textDisplay: {fileID: 1823617645}
   interactionText: {fileID: 2067588103}
+  grabPos: {fileID: 493642731}
 --- !u!114 &1650519440
 MonoBehaviour:
   m_ObjectHideFlags: 0

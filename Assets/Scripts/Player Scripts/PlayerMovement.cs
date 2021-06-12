@@ -63,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
     private bool grounded;
     public Vector3 moveDir { get; private set; }
 
-    public Vector3 mag { get; private set; }
+    public Vector3 relativeVel { get; private set; }
 
     [Header("Assignables")]
     private ScriptManager s;
@@ -92,14 +92,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 70f);
 
-        mag = s.orientation.InverseTransformDirection(rb.velocity);
+        relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
 
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         Vector2 multiplier = CalculateMultiplier();
         float speed = vel.magnitude;
 
         if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
-        CounterMovement(input, vel, mag);
+        CounterMovement(input, vel, relativeVel);
 
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
         if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
@@ -114,8 +114,8 @@ public class PlayerMovement : MonoBehaviour
         if (crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(vel.normalized);
         if (!crouching && crouched) StopCrouch();
 
-        if (input.x > 0 && mag.x > 25 || input.x < 0 && mag.x < -25) input.x = 0f;
-        if (input.y > 0 && mag.z > 25 || input.y < 0 && mag.z < -25) input.y = 0f;
+        if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x = 0f;
+        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y = 0f;
 
         Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
@@ -168,28 +168,28 @@ public class PlayerMovement : MonoBehaviour
         vaultPos = pos;
         vaultNormal = normal;
         vaultVel = vel;
-        vaultOriginalPos = transform.position;
 
-        distance = (distance * distance) * 0.04f;
+        distance = (distance * distance) * 0.05f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
 
         stepUp = vaultDuration < 0.5f;
-
-        if (stepUp) rb.velocity = normal * 8f;
-        else vaultVel = normal;
+        if (stepUp) rb.velocity = normal * 10f;
+        else vaultVel = normal * vaultForce;
 
         s.PlayerInput.grounded = false;
         rb.velocity = Vector3.zero;
         rb.isKinematic = true;
+
+        vaultOriginalPos = transform.position;
 
         vaulting = true;
     }
 
     public void VaultMovement()
     {
-        if (vaulting)
+        if (vaulting && vaultTime < vaultDuration)
         {
             float t = vaultTime / vaultDuration;
 
@@ -197,14 +197,14 @@ public class PlayerMovement : MonoBehaviour
             else t = t * t * t * (t * (6f * t - 15f) + 10f);
 
             transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, t);
-            vaultTime += Time.deltaTime * 2;
+            vaultTime += Time.deltaTime * 2.5f;
 
             if (vaultTime >= vaultDuration)
             {
                 vaulting = false;
+                rb.isKinematic = false;
                 rb.velocity = vaultVel;
                 rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-                rb.isKinematic = false;
             }
         }
     }

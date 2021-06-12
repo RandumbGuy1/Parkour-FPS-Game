@@ -176,7 +176,7 @@ public class InputManager : MonoBehaviour
             if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3f + vaultOffset, Environment)) return;
 
             Vector3 vel = -col.relativeVelocity * 0.5f;
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.0f) + (vaultDir * 0.95f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, vel, distance);

@@ -85,7 +85,7 @@ public class PickupObj : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
-        objRb.velocity *= throwForce * (s.PlayerMovement.magnitude * 0.1f + 1f) * 0.8f;
+        objRb.velocity *= throwForce * (s.PlayerMovement.magnitude * 0.01f + 1f) * 1.5f;
         objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
         heldObj = null;
