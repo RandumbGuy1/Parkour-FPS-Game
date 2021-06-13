@@ -13,7 +13,6 @@ public class PlayerInteraction : MonoBehaviour
     [Header("Grab Settings")]
     [SerializeField] private float throwForce;
     [SerializeField] private float objSpeed;
-    [SerializeField] private float objSmoothing;
     [SerializeField] private float maxGrabDistance;
 
     private Vector3 smoothVel = Vector3.zero;
@@ -105,9 +104,10 @@ public class PlayerInteraction : MonoBehaviour
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
         followVel = Vector3.ClampMagnitude(followVel, 25f);
 
-        smoothVel = Vector3.SmoothDamp(smoothVel, followVel, ref vel, objSmoothing);
+        if ((grabPos.position - heldObj.transform.position).sqrMagnitude < 8f) 
+            objRb.velocity = Vector3.SmoothDamp(objRb.velocity, Vector3.zero, ref vel, 0.2f);
 
-        objRb.velocity = smoothVel * objSpeed;
+        objRb.AddForce(followVel * objSpeed * 0.08f, ForceMode.VelocityChange);
     }
 
     private void Pickup(GameObject obj)
@@ -120,7 +120,7 @@ public class PlayerInteraction : MonoBehaviour
             storedAngularDrag = objRb.angularDrag;
 
             objRb.useGravity = false;
-            objRb.drag = 0f;
+            objRb.drag = 3.5f;
             objRb.angularDrag = 0.05f;
             heldObj = obj;
         }

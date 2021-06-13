@@ -165,26 +165,23 @@ public class PlayerMovement : MonoBehaviour
     #region Vaulting
     public void Vault(Vector3 pos, Vector3 normal, Vector3 vel, float distance)
     {
+        rb.isKinematic = true;
+
         vaultPos = pos;
         vaultNormal = normal;
         vaultVel = vel;
+        vaultOriginalPos = transform.position;
 
         distance = (distance * distance) * 0.05f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
         vaultDuration = setVaultDuration + distance;
         vaultTime = 0f;
+        vaulting = true;
 
         stepUp = vaultDuration < 0.5f;
-        if (stepUp) rb.velocity = normal * 10f;
-        else vaultVel = normal * vaultForce;
+        if (!stepUp) vaultVel = normal * vaultForce * 0.5f;
 
         s.PlayerInput.grounded = false;
-        rb.velocity = Vector3.zero;
-        rb.isKinematic = true;
-
-        vaultOriginalPos = transform.position;
-
-        vaulting = true;
     }
 
     public void VaultMovement()
@@ -197,9 +194,9 @@ public class PlayerMovement : MonoBehaviour
             else t = t * t * t * (t * (6f * t - 15f) + 10f);
 
             transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, t);
-            vaultTime += Time.deltaTime * 2.5f;
+            vaultTime += Time.deltaTime * 2f;
 
-            if (vaultTime >= vaultDuration)
+            if (vaultTime >= vaultDuration - 0.04f)
             {
                 vaulting = false;
                 rb.isKinematic = false;

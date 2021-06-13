@@ -156,7 +156,7 @@ public class InputManager : MonoBehaviour
 
         Vector3 normal = col.GetContact(0).normal;
 
-        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, Math.Abs(s.PlayerMovement.velocity.y)));
+        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
 
         #region Vaulting
         if (IsVaultable(normal))
@@ -167,6 +167,9 @@ public class InputManager : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
+            Vector3 vel = s.PlayerMovement.velocity * 0.4f;
+            vel.y = 0f;
+
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
             Vector3 vaultHeight = transform.position + Vector3.up * vaultOffset;
 
@@ -174,9 +177,8 @@ public class InputManager : MonoBehaviour
             if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
             if (Physics.Raycast(vaultHeight, moveDir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
             if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3f + vaultOffset, Environment)) return;
-
-            Vector3 vel = -col.relativeVelocity * 0.5f;
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.0f) + (vaultDir * 0.95f);
+ 
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.05f) + (vel.normalized * 0.2f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, vel, distance);
