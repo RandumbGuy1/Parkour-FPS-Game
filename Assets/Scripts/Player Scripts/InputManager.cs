@@ -54,7 +54,7 @@ public class InputManager : MonoBehaviour
     [Header("Assignables")]
     private ScriptManager s;
     private RaycastHit slopeHit;
-
+    public Vector3 idk;
     void Awake()
     {
         s = GetComponent<ScriptManager>();
@@ -86,7 +86,7 @@ public class InputManager : MonoBehaviour
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
         #endregion 
-
+        Debug.DrawRay(transform.position, idk, Color.red);
         s.PlayerMovement.VaultMovement();
         CheckForWall();
     }
@@ -154,16 +154,16 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | 1 << layer)) return;
 
-        Vector3 normal = col.GetContact(0).normal;
+        ContactPoint contact = col.GetContact(0);
 
-        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
+        if (IsFloor(contact.normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y), contact.point);
 
         #region Vaulting
-        if (IsVaultable(normal))
+        if (IsVaultable(contact.normal))
         {
             if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
-
-            Vector3 vaultDir = normal;
+            
+            Vector3 vaultDir = contact.normal;
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
@@ -171,16 +171,18 @@ public class InputManager : MonoBehaviour
             vel.y = 0f;
 
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
-            Vector3 vaultHeight = transform.position + Vector3.up * vaultOffset;
-
+            Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
+         
             if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
-            if (Physics.Raycast(vaultHeight, Vector3.up, 2f, Environment)) return;
-            if (Physics.Raycast(vaultHeight, moveDir, 1.3f, Environment) || Physics.Raycast(vaultHeight, -vaultDir, 1.3f, Environment)) return;
-            if (!Physics.Raycast(vaultHeight - vaultDir, Vector3.down, out var vaultHit, 3f + vaultOffset, Environment)) return;
- 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.05f) + (vel.normalized * 0.2f);
+            if (Physics.Raycast(vaultCheck, vel, 1.3f, Environment)) return;
+            if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
+            if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
+
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) - (vel.normalized * 0.1f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
+            if (distance > vaultOffset) return;
+ 
             s.PlayerMovement.Vault(vaultPoint, -vaultDir, vel, distance);
         }
         #endregion
@@ -216,9 +218,24 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    private void Land(float impactForce)
+    private void Land(float impactForce, Vector3 impactPoint)
     {
-        if (impactForce > 140f) ObjectPooler.Instance.Spawn("Land Effects", transform.position + Vector3.down, Quaternion.Euler(-90, 0, 0));
+        if (impactForce > 130f)
+        {
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
+
+            Vector3 magnitude = s.PlayerMovement.velocity;
+
+            //if (magnitude.x < 5f && magnitude.x > 0f) magnitude.x = 5f;
+            //if (magnitude.x > -5f && magnitude.x < 0f) magnitude.x = -5f;s
+
+            //if (magnitude.z < 5f && magnitude.z > 0f) magnitude.z = 5f;
+            //if (magnitude.z > -5f && magnitude.z < 0f) magnitude.z = -5f;
+
+            velocityOverLifetime.x = magnitude.x;
+            velocityOverLifetime.z = magnitude.z;
+        }
+            
         s.CameraLandBob.CameraLand(impactForce);
     }
     #endregion

@@ -155,7 +155,7 @@ public class CameraFollow : MonoBehaviour
 
 		if (s.PlayerInput.wallRunning)
 		{
-			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 20f, 0.13f);
+			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 18f, 0.13f);
 			ChangeFov(false, 30f, 0.2f);
 		}
 

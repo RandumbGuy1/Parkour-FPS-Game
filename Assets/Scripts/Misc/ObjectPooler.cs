@@ -51,11 +51,28 @@ public class ObjectPooler : MonoBehaviour
         spawnedObject.transform.position = position;
         spawnedObject.transform.rotation = rotation;
 
-        ParticleSystem particle = spawnedObject.GetComponent<ParticleSystem>();
-        if (particle != null) particle.Play();
-
         poolDictionary[tag].Enqueue(spawnedObject);
 
         return spawnedObject;
+    }
+
+    public ParticleSystem SpawnParticle(string tag, Vector3 position, Quaternion rotation)
+    {
+        if (!poolDictionary.ContainsKey(tag)) return null;
+
+        GameObject spawnedObject = poolDictionary[tag].Dequeue();
+
+        spawnedObject.SetActive(true);
+        spawnedObject.transform.position = position;
+        spawnedObject.transform.rotation = rotation;
+
+        poolDictionary[tag].Enqueue(spawnedObject);
+
+        ParticleSystem particle = spawnedObject.GetComponent<ParticleSystem>();
+        if (particle == null) return null;
+
+        particle.Play();
+
+        return particle;
     }
 }
