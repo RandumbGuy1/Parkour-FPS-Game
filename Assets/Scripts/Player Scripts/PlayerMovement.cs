@@ -64,13 +64,12 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 moveDir { get; private set; }
 
     public Vector3 relativeVel { get; private set; }
+    public float magnitude { get; private set; }
+    public Vector3 velocity { get; private set; }
 
     [Header("Assignables")]
     private ScriptManager s;
     private Rigidbody rb;
-
-    public float magnitude { get; private set; }
-    public Vector3 velocity { get; private set; }
 
     void Awake()
     {
@@ -99,7 +98,9 @@ public class PlayerMovement : MonoBehaviour
         float speed = vel.magnitude;
 
         if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
+
         CounterMovement(input, vel, relativeVel);
+        rb.useGravity = UseGravity();
 
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
         if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
@@ -141,8 +142,26 @@ public class PlayerMovement : MonoBehaviour
         s.PlayerInput.grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
-        if (dot > 0) rb.velocity = (rb.velocity - snapHit.normal * dot).normalized * (speed);
+        if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot * 0.5f)).normalized * (speed);
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * (speed);
+
+        return true;
+    }
+
+    private bool UseGravity()
+    {
+        if (vaulting || s.PlayerInput.wallRunning) return false;
+
+        if (grounded && s.PlayerInput.onRamp && !crouching && !jumped && !s.PlayerInput.moving)
+        {
+            if (velocity.y > 0 && input.x == 0 && input.y == 0f)
+            {
+                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                return false;
+            }
+
+            return false;
+        }
 
         return true;
     }
@@ -154,6 +173,7 @@ public class PlayerMovement : MonoBehaviour
         jumped = true;
 
         s.PlayerInput.grounded = false;
+        rb.useGravity = true;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
 
@@ -292,13 +312,13 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        if (input.x == 0 && Math.Abs(mag.x) > threshold)
+        if ((int) input.x == 0 && Math.Abs(mag.x) > threshold)
             rb.AddForce(s.orientation.right * -mag.x * friction);
 
         if (CounterMomentum(input.x, mag.x))
             rb.AddForce(s.orientation.right * -mag.x * sharpness, ForceMode.Acceleration);
 
-        if (input.y == 0 && Math.Abs(mag.z) > threshold)
+        if ((int)input.y == 0 && Math.Abs(mag.z) > threshold)
             rb.AddForce(s.orientation.forward * -mag.z * friction);
 
         if (CounterMomentum(input.y, mag.z))

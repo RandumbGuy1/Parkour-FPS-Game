@@ -9,7 +9,7 @@ public class HeadBobbing : MonoBehaviour
     [SerializeField] private float bobSpeed;
     [SerializeField] private float bobAmountHoriz;
     [SerializeField] private float bobAmountVert;
-    [Range(0f, 0.2f)] [SerializeField] private float bobSmoothTime;
+    [Range(0f, 0.5f)] [SerializeField] private float bobSmoothTime;
 
     private float timer;
     private Vector3 vel = Vector3.zero;

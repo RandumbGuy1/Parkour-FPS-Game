@@ -2734,9 +2734,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bobSpeed: 8
-  bobAmountHoriz: 0.3
-  bobAmountVert: 0.5
-  bobSmoothTime: 0.18
+  bobAmountHoriz: 0.2
+  bobAmountVert: 0.4
+  bobSmoothTime: 0.2
   s: {fileID: 1650519438}
 --- !u!114 &838078167
 MonoBehaviour:
@@ -3299,7 +3299,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.15
+  near clip plane: 0.1
   far clip plane: 300
   field of view: 80
   orthographic: 0
@@ -3348,7 +3348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.04
+  offsetSmoothTime: 0.036
   backSmoothTime: 0.3
   offsetMultiplier: 0.015
   maxOffset: 2.5
@@ -9608,7 +9608,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.8
+  m_Name: Save 2.9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10034,6 +10034,7 @@ MonoBehaviour:
   vaultOffset: 5
   grounded: 1
   nearWall: 0
+  onRamp: 0
   reachedMaxSlope: 0
   jumpKey: 32
   crouchKey: 306
@@ -10047,7 +10048,6 @@ MonoBehaviour:
     m_Bits: 256
   groundCancelDelay: 2
   wallCancelDelay: 1
-  idk: {x: 0, y: 0, z: 0}
 --- !u!114 &1650519436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10060,7 +10060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 20
+  moveSpeed: 25
   maxGroundSpeed: 20
   maxAirSpeed: 80
   maxSlideSpeed: 60
@@ -15804,13 +15804,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1841774804}
-  m_LocalRotation: {x: 0, y: 0, z: -0.258819, w: 0.9659259}
+  m_LocalRotation: {x: 0, y: 0, z: -0.21643952, w: 0.97629607}
   m_LocalPosition: {x: -29.3, y: 3.3, z: 52.7}
   m_LocalScale: {x: 20, y: 1, z: 10}
   m_Children: []
   m_Father: {fileID: 492395354}
   m_RootOrder: 33
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -30}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -25}
 --- !u!65 &1841774806
 BoxCollider:
   m_ObjectHideFlags: 0

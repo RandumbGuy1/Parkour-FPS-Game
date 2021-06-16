@@ -19,6 +19,7 @@ public class InputManager : MonoBehaviour
     [Header("States")]
     public bool grounded;
     public bool nearWall;
+    public bool onRamp;
     public bool reachedMaxSlope;
 
     public bool isWallLeft { get; private set; }
@@ -54,7 +55,7 @@ public class InputManager : MonoBehaviour
     [Header("Assignables")]
     private ScriptManager s;
     private RaycastHit slopeHit;
-    public Vector3 idk;
+
     void Awake()
     {
         s = GetComponent<ScriptManager>();
@@ -86,7 +87,7 @@ public class InputManager : MonoBehaviour
             reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         else reachedMaxSlope = false;
         #endregion 
-        Debug.DrawRay(transform.position, idk, Color.red);
+
         s.PlayerMovement.VaultMovement();
         CheckForWall();
     }
@@ -102,6 +103,7 @@ public class InputManager : MonoBehaviour
                 groundCancelSteps++;
                 if ((float) groundCancelSteps > groundCancelDelay)
                 {
+                    onRamp = false;
                     groundNormal = Vector3.up;
                     grounded = false;
                 }
@@ -143,8 +145,6 @@ public class InputManager : MonoBehaviour
         }
 
         if (!CanWallJump() || !isWallRight && !isWallLeft) wallRunning = false;
-
-        s.rb.useGravity = (s.PlayerMovement.vaulting || wallRunning ? false : true);
     }
     #endregion
 
@@ -154,16 +154,16 @@ public class InputManager : MonoBehaviour
         int layer = col.gameObject.layer;
         if (Ground != (Ground | 1 << layer)) return;
 
-        ContactPoint contact = col.GetContact(0);
+        Vector3 normal = col.GetContact(0).normal;
 
-        if (IsFloor(contact.normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y), contact.point);
+        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
 
         #region Vaulting
-        if (IsVaultable(contact.normal))
+        if (IsVaultable(normal))
         {
             if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
             
-            Vector3 vaultDir = contact.normal;
+            Vector3 vaultDir = normal;
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
@@ -194,43 +194,39 @@ public class InputManager : MonoBehaviour
 
         for (int i = 0; i < col.contactCount; i++)
         {
-            ContactPoint contact = col.GetContact(i);
+            Vector3 normal = col.GetContact(i).normal;
 
-            if (IsFloor(contact.normal, contact.point))
+            if (IsFloor(normal))
             {
                 if (Ground != (Ground | 1 << layer)) continue;
+
+                onRamp = normal.y < 1f;
 
                 grounded = true;
                 cancelGround = false;
                 groundCancelSteps = 0;
-                groundNormal = contact.normal;
+                groundNormal = normal;
             }
 
-            if (IsWall(contact.normal))
+            if (IsWall(normal))
             {
                 if (Environment != (Environment | 1 << layer)) continue;
 
                 nearWall = true;
                 cancelWall = false;
                 wallCancelSteps = 0;
-                wallNormal = contact.normal;
+                wallNormal = normal;
             }
         }
     }
 
-    private void Land(float impactForce, Vector3 impactPoint)
+    private void Land(float impactForce)
     {
         if (impactForce > 130f)
         {
             ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
-            Vector3 magnitude = s.PlayerMovement.velocity;
-
-            //if (magnitude.x < 5f && magnitude.x > 0f) magnitude.x = 5f;
-            //if (magnitude.x > -5f && magnitude.x < 0f) magnitude.x = -5f;s
-
-            //if (magnitude.z < 5f && magnitude.z > 0f) magnitude.z = 5f;
-            //if (magnitude.z > -5f && magnitude.z < 0f) magnitude.z = -5f;
+            Vector3 magnitude = s.rb.velocity;
 
             velocityOverLifetime.x = magnitude.x;
             velocityOverLifetime.z = magnitude.z;
@@ -244,11 +240,6 @@ public class InputManager : MonoBehaviour
     float LandVel(float mag, float yMag)
     {
         return (mag * 0.6f) + Math.Abs(yMag * 5f);
-    }
-
-    bool IsFloor(Vector3 normal, Vector3 point)
-    {
-        return Vector3.Angle(Vector3.up, normal) < maxSlopeAngle && point.y <= s.rb.position.y;
     }
 
     bool IsFloor(Vector3 normal)
