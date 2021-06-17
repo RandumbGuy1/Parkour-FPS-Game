@@ -167,23 +167,30 @@ public class InputManager : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 vel = s.PlayerMovement.velocity * 0.4f;
+            Vector3 vel = s.PlayerMovement.velocity * 0.6f;
             vel.y = 0f;
 
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
             Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
          
             if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
-            if (Physics.Raycast(vaultCheck, vel, 1.3f, Environment)) return;
             if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
             if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) - (vel.normalized * 0.1f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir * 0.8f);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             if (distance > vaultOffset) return;
- 
-            s.PlayerMovement.Vault(vaultPoint, -vaultDir, vel, distance);
+
+            if (distance < 3.5f)
+            {
+                s.CameraHeadBob.vaultDesync = (transform.position - vaultPoint);
+                transform.position = vaultPoint;
+                s.rb.velocity = vel;
+                return;
+            }
+
+            s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
         }
         #endregion
     }

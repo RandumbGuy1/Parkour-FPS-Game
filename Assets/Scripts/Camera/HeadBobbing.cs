@@ -15,6 +15,13 @@ public class HeadBobbing : MonoBehaviour
     private Vector3 vel = Vector3.zero;
     private Vector3 smoothOffset = Vector3.zero;
 
+    [Header("Vault Settings")]
+    public float vaultSpeed;
+
+    [HideInInspector] 
+    public Vector3 vaultDesync = Vector3.zero;
+    private Vector3 vaultVel = Vector3.zero;
+
     [Header("Assignables")]
     [SerializeField] private ScriptManager s;
 
@@ -22,8 +29,10 @@ public class HeadBobbing : MonoBehaviour
     {
         timer = s.PlayerInput.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && !s.CameraLandBob.landed && s.PlayerMovement.magnitude > 5f ? timer + Time.deltaTime : 0f;
 
+        if (vaultDesync != Vector3.zero) vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, vaultSpeed);
+
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref vel, bobSmoothTime);
-        Vector3 newPos = s.playerHead.position + smoothOffset;
+        Vector3 newPos = s.playerHead.position + smoothOffset + vaultDesync;
 
         transform.position = newPos;
     }

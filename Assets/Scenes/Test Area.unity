@@ -2713,7 +2713,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraTilt: 0
   returnTiltTime: 0.15
-  fov: 80
+  fov: 90
   returnFovTime: 0.3
   sensitivity: 80
   cameraSmoothTime: {x: 15, y: 15}
@@ -2737,6 +2737,8 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.4
   bobSmoothTime: 0.2
+  vaultSpeed: 0.07
+  vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &838078167
 MonoBehaviour:
@@ -3301,7 +3303,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 300
-  field of view: 80
+  field of view: 90
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -3348,9 +3350,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.036
+  offsetSmoothTime: 0.04
   backSmoothTime: 0.3
-  offsetMultiplier: 0.015
+  offsetMultiplier: 0.014
   maxOffset: 2.5
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -9608,7 +9610,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 2.9
+  m_Name: Save 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10062,7 +10064,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 25
   maxGroundSpeed: 20
-  maxAirSpeed: 80
+  maxAirSpeed: 65
   maxSlideSpeed: 60
   jumpForce: 45
   jumpCooldown: 0.1
@@ -10071,12 +10073,11 @@ MonoBehaviour:
   wallJumpForce: 40
   wallRunForce: 25
   wallClimbForce: 10
-  vaultDuration: 0.2
+  vaultDuration: 0.08
   vaultForce: 10
   vaulting: 0
-  friction: 20
-  slideFriction: 1.2
-  sharpness: 15
+  friction: 5
+  slideFriction: 6
   threshold: 0.05
   Ground:
     serializedVersion: 2
@@ -16535,7 +16536,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2073544791}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.8, z: 0}
+  m_LocalPosition: {x: 0, y: -0.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1650519434}
