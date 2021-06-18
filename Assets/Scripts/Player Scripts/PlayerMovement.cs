@@ -82,9 +82,10 @@ public class PlayerMovement : MonoBehaviour
 
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        float speed = vel.magnitude;
+        float maxSpeed = ControlMaxSpeed();
+        float coefficientOfFriction = moveSpeed / maxSpeed;
 
-        if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.Acceleration);
         rb.useGravity = UseGravity();
 
         ProcessInput();
@@ -110,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 AirMove(Vector2 multiplier, Vector2 input)
     {
         if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x = 0f;
-        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y = 0f;
+        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y = 0f;       
 
         return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     }

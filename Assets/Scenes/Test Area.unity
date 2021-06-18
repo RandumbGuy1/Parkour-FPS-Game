@@ -33,7 +33,7 @@ RenderSettings:
   m_HaloTexture: {fileID: 0}
   m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
   m_DefaultReflectionMode: 0
-  m_DefaultReflectionResolution: 32
+  m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
@@ -2407,10 +2407,10 @@ Light:
     m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 0.6
+    m_Strength: 0.4
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -2435,7 +2435,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 3841
   m_RenderingLayerMask: 1
   m_Lightmapping: 1
   m_LightShadowCasterMode: 0
@@ -2454,13 +2454,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.55291045, y: -0.30851814, z: -0.17202725, w: 0.754661}
+  m_LocalRotation: {x: 0.37021673, y: -0.5159943, z: 0.24938692, w: 0.73109215}
   m_LocalPosition: {x: -1.2, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 46.750004, y: -73.185005, z: -61.266003}
+  m_LocalEulerAnglesHint: {x: 53.005, y: -71.255005, z: -1.6580001}
 --- !u!1 &736335795
 GameObject:
   m_ObjectHideFlags: 0
@@ -2737,7 +2737,7 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.4
   bobSmoothTime: 0.2
-  stepSmoothTime: 0.06
+  stepSmoothTime: 0.05
   vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &838078167
@@ -3350,9 +3350,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.035
-  backSmoothTime: 0.3
-  offsetMultiplier: 0.012
+  bobSmoothTime: 0.06
+  bobMultiplier: 0.02
   maxOffset: 2.5
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -10064,7 +10063,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 30
   maxGroundSpeed: 20
-  maxAirSpeed: 45
+  maxAirSpeed: 40
   maxSlideSpeed: 60
   jumpForce: 45
   jumpCooldown: 0.1

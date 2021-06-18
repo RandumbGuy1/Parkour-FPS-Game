@@ -228,7 +228,7 @@ public class InputManager : MonoBehaviour
 
     private void Land(float impactForce)
     {
-        if (impactForce > 130f)
+        if (impactForce > 100f)
         {
             ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
@@ -245,7 +245,7 @@ public class InputManager : MonoBehaviour
     #region Vector and speed calculations
     float LandVel(float mag, float yMag)
     {
-        return (mag * 0.6f) + Math.Abs(yMag * 5f);
+        return (mag * 0.6f) + Math.Abs(yMag * 4f);
     }
 
     bool IsFloor(Vector3 normal)
