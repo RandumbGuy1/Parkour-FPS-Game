@@ -10,21 +10,20 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private float returnTiltTime;
 
 	private int tiltDirection = 1;
-	private float tiltTime = 0, tiltVel = 0f;
-	private float maxCameraTilt = 0f;
-	private bool resetTilt = true;
+	private float tiltTime = 0, maxCameraTilt = 0f;
 
 	[Header("Fov")]
 	[SerializeField] private float fov;
 	[SerializeField] private float returnFovTime;
 
-	private float fovTime = 0, fovVel = 0f;
-	private float maxFov = 0f, setFov;
-	private bool resetFov = true;
+	private float maxFov = 0f, setFov, fovTime = 0;
+	private bool resetFov = true, resetTilt = true;
+
+	private Vector2 effectVel = Vector2.zero;
 
 	[Header("Sensitivity")]
 	[SerializeField] private float sensitivity;
-	[SerializeField] private Vector2 cameraSmoothTime;
+	[SerializeField] private Vector2 rotateSmoothTime;
 
 	[Header("Clamp Rotation")]
 	[SerializeField] private float upClampAngle;
@@ -35,12 +34,11 @@ public class CameraFollow : MonoBehaviour
 	private Vector3 smoothRotation;
 	public Vector2 rotationDelta { get; private set; }
 
-	private bool fast = false;
-
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
 	[SerializeField] private ParticleSystem sprintEffect;
 	private Camera cam;
+	private bool fast = false;
 
 	void Awake()
 	{
@@ -79,8 +77,8 @@ public class CameraFollow : MonoBehaviour
 
 	void SmoothRotation()
 	{
-		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y, cameraSmoothTime.y * Time.smoothDeltaTime);
-		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, cameraSmoothTime.x * Time.smoothDeltaTime);
+		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime);
+		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x,  rotateSmoothTime.x * Time.deltaTime);
 		smoothRotation.z = cameraTilt;
 	}
 
@@ -96,7 +94,7 @@ public class CameraFollow : MonoBehaviour
 	private void ChangeTilt()
 	{
 		if (cameraTilt == 0 && resetTilt) return;
-		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref tiltVel, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
+		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref effectVel.x, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
 
 		if (!resetTilt) return;
 		if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
@@ -105,7 +103,7 @@ public class CameraFollow : MonoBehaviour
 	private void ChangeFov()
 	{
 		if (fov == setFov && resetFov) return;
-		fov = Mathf.SmoothDamp(fov, (resetFov ? setFov : maxFov), ref fovVel, (resetFov ? returnFovTime : fovTime + 0.05f));
+		fov = Mathf.SmoothDamp(fov, (resetFov ? setFov : maxFov), ref effectVel.y, (resetFov ? returnFovTime : fovTime + 0.05f));
 
 		if (!resetFov) return;
 		if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;

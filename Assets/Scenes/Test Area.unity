@@ -2716,7 +2716,7 @@ MonoBehaviour:
   fov: 90
   returnFovTime: 0.3
   sensitivity: 80
-  cameraSmoothTime: {x: 15, y: 15}
+  rotateSmoothTime: {x: 15, y: 15}
   upClampAngle: 80
   downClampAngle: 70
   s: {fileID: 1650519438}
@@ -2737,7 +2737,7 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.4
   bobSmoothTime: 0.2
-  vaultSpeed: 0.07
+  stepSmoothTime: 0.06
   vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &838078167
@@ -3350,9 +3350,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetSmoothTime: 0.04
+  offsetSmoothTime: 0.035
   backSmoothTime: 0.3
-  offsetMultiplier: 0.014
+  offsetMultiplier: 0.012
   maxOffset: 2.5
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -9610,7 +9610,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 3
+  m_Name: Save 3.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10062,9 +10062,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 25
+  moveSpeed: 30
   maxGroundSpeed: 20
-  maxAirSpeed: 65
+  maxAirSpeed: 45
   maxSlideSpeed: 60
   jumpForce: 45
   jumpCooldown: 0.1

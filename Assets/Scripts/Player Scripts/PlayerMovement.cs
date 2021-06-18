@@ -35,12 +35,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float vaultForce;
     public bool vaulting = false;
 
-    private float vaultTime = 0f;
-    private float setVaultDuration;
-    private Vector3 vaultPos = Vector3.zero;
-    private Vector3 vaultNormal = Vector3.zero;
-    private Vector3 vaultOriginalPos = Vector3.zero;
-
     [Header("Movement Control")]
     [SerializeField] private float friction;
     [SerializeField] private float slideFriction;
@@ -53,7 +47,6 @@ public class PlayerMovement : MonoBehaviour
 
     private int stepsSinceLastGrounded = 0;
 
-    private Vector2 multiplier;
     private Vector2 input;
     private bool jumping;
     private bool crouching;
@@ -78,7 +71,6 @@ public class PlayerMovement : MonoBehaviour
 
         playerScale = transform.localScale;
         crouchOffset = crouchScale.y * 0.6f;
-        setVaultDuration = vaultDuration;
     }
 
     #region Movement
@@ -95,46 +87,32 @@ public class PlayerMovement : MonoBehaviour
         if (speed > ControlMaxSpeed()) rb.AddForce(-vel * (speed * 0.5f));
         rb.useGravity = UseGravity();
 
-        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
-        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
-        if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
+        ProcessInput();
 
-        if (crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(vel.normalized);
-        if (!crouching && crouched) StopCrouch();
-
-        if (grounded) GroundMove(CalculateMultiplier(), relativeVel, vel, speed);
-        else AirMove(CalculateMultiplier());
-
+        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier(), input));
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
     }
 
-    private void GroundMove(Vector2 multiplier, Vector3 relativeVel, Vector3 vel, float speed)
+    private Vector3 GroundMove(Vector2 multiplier, Vector3 vel)
     {
-        if (!jumping) Friction(vel, relativeVel, speed);
-
-        if (stepsSinceLastGrounded < 3 && jumping) Jump();
+        Friction(vel, relativeVel);
 
         Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
-        moveDir = dot < 0f ? slopeDir : inputDir;
+        return dot < 0f ? slopeDir : inputDir;
     }
 
-    private void AirMove(Vector2 multiplier)
+    private Vector3 AirMove(Vector2 multiplier, Vector2 input)
     {
-        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
-        if (s.PlayerInput.wallRunning && !grounded) WallRun();
-        if (s.PlayerInput.stopWallRun && readyToWallJump) StopWallRun();
-
         if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x = 0f;
         if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y = 0f;
 
-        Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
-        moveDir = inputDir;
+        return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     }
     #endregion
 
@@ -190,41 +168,35 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Vaulting
-    public void Vault(Vector3 pos, Vector3 normal, float distance)
+    public IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
         rb.isKinematic = true;
-
-        vaultPos = pos;
-        vaultNormal = normal;
-        vaultOriginalPos = transform.position;
+        vaulting = true;
 
         distance = (distance * distance) * 0.05f;
         distance = Mathf.Round(distance * 100.0f) * 0.01f;
-        vaultDuration = setVaultDuration + distance;
-        vaultTime = 0f;
-        vaulting = true;
+
+        Vector3 vaultOriginalPos = transform.position;
+        float elapsed = 0f;
+        float vaultDuration = this.vaultDuration + distance;
 
         s.PlayerInput.grounded = false;
-    }
 
-    public void VaultMovement()
-    {
-        if (vaulting && vaultTime < vaultDuration)
+        while (elapsed < vaultDuration)
         {
-            float t = vaultTime / vaultDuration;
+            float t = elapsed / vaultDuration;
             t = t * t * t * (t * (6f * t - 15f) + 10f);
 
-            transform.position = Vector3.Lerp(vaultOriginalPos, vaultPos, t);
-            vaultTime += Time.deltaTime * 2f;
+            transform.position = Vector3.Lerp(vaultOriginalPos, pos, t);
+            elapsed += Time.deltaTime * 2f;
 
-            if (vaultTime >= vaultDuration - 0.04f)
-            {
-                vaulting = false;
-                rb.isKinematic = false;
-                rb.velocity = vaultNormal * vaultForce * 0.5f;
-                rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            }
+            yield return null;
         }
+
+        vaulting = false;
+        rb.isKinematic = false;
+        rb.velocity = normal * vaultForce * 0.5f;
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
     }
     #endregion
 
@@ -303,8 +275,10 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Friction
-    private void Friction(Vector3 vel, Vector3 mag, float speed)
+    private void Friction(Vector3 vel, Vector3 mag)
     {
+        if (jumping) return;
+
         if (crouched)
         {
             rb.AddForce(-vel * slideFriction * 0.4f);
@@ -317,7 +291,7 @@ public class PlayerMovement : MonoBehaviour
         if (Math.Abs(input.y) < threshold && Math.Abs(mag.z) > threshold || CounterMomentum(input.y, mag.z))
             rb.AddForce(s.orientation.forward * -mag.z * friction * 2f, ForceMode.Acceleration);
 
-        if (speed > threshold) rb.AddForce(-vel * friction * 0.5f, ForceMode.Acceleration);
+        if (magnitude > threshold) rb.AddForce(-vel * friction * 0.5f, ForceMode.Acceleration);
     }
 
     private bool CounterMomentum(float input, float mag)
@@ -342,7 +316,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
         if (crouched) return new Vector2(0.4f, 0.3f);
 
-        return new Vector2(0.65f, 0.8f);
+        return new Vector2(0.5f, 0.5f);
     }
 
     private float ControlMaxSpeed()
@@ -354,13 +328,30 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
-    #region ProcessInput
+    #region Input
     public void SetInput(Vector2 input, bool jumping, bool crouching, bool grounded)
     {
         this.input = input;
         this.jumping = jumping;
         this.crouching = crouching;
         this.grounded = grounded;
+    }
+
+    private void ProcessInput()
+    {
+        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
+        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
+
+        if (crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(moveDir);
+        if (!crouching && crouched) StopCrouch();
+
+        if (stepsSinceLastGrounded < 3 && jumping) Jump();
+        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
+
+        if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
+
+        if (s.PlayerInput.wallRunning && !grounded) WallRun();
+        if (s.PlayerInput.stopWallRun && readyToWallJump) StopWallRun();
     }
     #endregion
 

@@ -88,7 +88,6 @@ public class InputManager : MonoBehaviour
         else reachedMaxSlope = false;
         #endregion 
 
-        s.PlayerMovement.VaultMovement();
         CheckForWall();
     }
 
@@ -167,7 +166,7 @@ public class InputManager : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 vel = s.PlayerMovement.velocity * 0.6f;
+            Vector3 vel = s.PlayerMovement.velocity * 0.8f;
             vel.y = 0f;
 
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
@@ -177,20 +176,20 @@ public class InputManager : MonoBehaviour
             if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
             if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
 
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir * 0.8f);
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
             float distance = vaultPoint.y - s.groundCheck.position.y;
 
             if (distance > vaultOffset) return;
 
-            if (distance < 3.5f)
+            if (distance < 3.3f)
             {
-                s.CameraHeadBob.vaultDesync = (transform.position - vaultPoint);
+                s.CameraHeadBob.StepUp(transform.position - vaultPoint);
                 transform.position = vaultPoint;
                 s.rb.velocity = vel;
                 return;
             }
 
-            s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance);
+            StartCoroutine(s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance));
         }
         #endregion
     }
