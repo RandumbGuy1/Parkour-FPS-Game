@@ -91,7 +91,8 @@ public class CameraFollow : MonoBehaviour
 		s.orientation.transform.rotation = newPlayerRot;
 	}
 
-	private void ChangeTilt()
+    #region Camera Effects
+    private void ChangeTilt()
 	{
 		if (cameraTilt == 0 && resetTilt) return;
 		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref effectVel.x, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
@@ -128,9 +129,10 @@ public class CameraFollow : MonoBehaviour
 		resetFov = reset;
 		maxFov = setFov + extension;
 	}
+	#endregion
 
-    #region Camera Effects
-    private void SpeedLines()
+	#region Process Camera Tilt and Fov
+	private void SpeedLines()
 	{
 		if (s.PlayerMovement.magnitude >= 25f)
 		{
@@ -154,7 +156,7 @@ public class CameraFollow : MonoBehaviour
 		if (s.PlayerInput.wallRunning)
 		{
 			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 18f, 0.13f);
-			ChangeFov(false, 30f, 0.2f);
+			ChangeFov(false, 25f, 0.2f);
 		}
 
 		if (!s.PlayerInput.wallRunning)

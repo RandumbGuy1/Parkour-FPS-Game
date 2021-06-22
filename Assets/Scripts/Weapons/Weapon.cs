@@ -20,4 +20,5 @@ public abstract class Weapon : MonoBehaviour
     public AttackType attackType;
 
     public abstract void OnAttack();
+    public abstract void SecondaryAction();
 }

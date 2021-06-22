@@ -2737,7 +2737,7 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.4
   bobSmoothTime: 0.2
-  stepSmoothTime: 0.065
+  stepSmoothTime: 0.06
   vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &838078167
@@ -2776,11 +2776,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 0.040721603
+      outSlope: 0.040721603
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.21719038
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -8541,7 +8541,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 0
-  attackType: 0
+  attackType: 1
 --- !u!1 &1081612406
 GameObject:
   m_ObjectHideFlags: 0
@@ -9624,7 +9624,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 3.2
+  m_Name: Save 3.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10046,7 +10046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSlopeAngle: 55
-  minimumJumpHeight: 1.3
+  minimumJumpHeight: 1
   vaultOffset: 5
   grounded: 1
   nearWall: 0
@@ -10056,6 +10056,7 @@ MonoBehaviour:
   crouchKey: 306
   interactKey: 101
   dropKey: 113
+  reloadKey: 114
   Ground:
     serializedVersion: 2
     m_Bits: 3840
@@ -10083,7 +10084,7 @@ MonoBehaviour:
   jumpForce: 45
   jumpCooldown: 0.1
   maxJumpSteps: 10
-  crouchScale: {x: 1, y: 0.8, z: 1}
+  crouchScale: {x: 1, y: 1.2, z: 1}
   slideForce: 80
   wallJumpForce: 40
   wallRunForce: 25
@@ -10094,12 +10095,6 @@ MonoBehaviour:
   friction: 5
   slideFriction: 6
   threshold: 0.05
-  Ground:
-    serializedVersion: 2
-    m_Bits: 3840
-  Environment:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!114 &1650519438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10159,6 +10154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbbffdda1c177314494cf651b21d9478, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CurrentWeapon: {fileID: 0}
   throwForce: 15
   selectedWeapon: 0
   aiming: 0

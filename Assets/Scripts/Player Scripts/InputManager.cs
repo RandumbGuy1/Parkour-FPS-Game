@@ -6,7 +6,7 @@ using System;
 
 public class InputManager : MonoBehaviour
 {
-    public Vector2 input { get; private set; }
+    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
 
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
@@ -27,22 +27,26 @@ public class InputManager : MonoBehaviour
     public bool wallRunning { get; private set; }
     public bool stopWallRun { get; private set; }
 
-    public bool jumping { get; private set; }
-    public bool crouching { get; private set; }
-    public bool interacting { get; private set; }
-    public bool dropping { get; private set; }
-    public bool moving { get; private set; }
-    public bool rightClick { get; private set; }
+    public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
+    public bool crouching { get { return Input.GetKey(crouchKey); } }
+    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
+    public bool dropping { get { return Input.GetKeyDown(dropKey); } }
+    public bool reloading { get { return Input.GetKeyDown(reloadKey); } }
+
+    public bool rightClick { get { return Input.GetMouseButtonDown(1); } }
+    public bool leftClick { get { return Input.GetMouseButtonDown(0); } }
+    public bool leftHoldClick { get { return Input.GetMouseButton(0); } }
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
     [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
     [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private KeyCode dropKey = KeyCode.Q;
+    [SerializeField] private KeyCode reloadKey = KeyCode.R;
 
     [Header("Collision")]
-    [SerializeField] private LayerMask Ground;
-    [SerializeField] private LayerMask Environment;
+    public LayerMask Ground;
+    public LayerMask Environment;
     [SerializeField] private float groundCancelDelay;
     [SerializeField] private float wallCancelDelay;
 
@@ -54,7 +58,6 @@ public class InputManager : MonoBehaviour
 
     [Header("Assignables")]
     private ScriptManager s;
-    private RaycastHit slopeHit;
 
     void Awake()
     {
@@ -63,32 +66,11 @@ public class InputManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
+
         UpdateCollisions();
         s.PlayerMovement.SetInput(input, jumping, crouching, grounded);
         s.PlayerMovement.Movement();
-    }
-
-    void Update()
-    {
-        #region Input
-        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-
-        jumping = Input.GetKeyDown(jumpKey);
-        crouching = Input.GetKey(crouchKey);
-        interacting = Input.GetKeyDown(interactKey);
-        dropping = Input.GetKeyDown(dropKey);
-        moving = input.x != 0f || input.y != 0f;
-        rightClick = Input.GetMouseButtonDown(1);
-
-        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
-        stopWallRun = isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning;
-
-        if (Physics.Raycast(s.groundCheck.position, Vector3.down, out slopeHit, 1.5f, Ground))
-            reachedMaxSlope = Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
-        else reachedMaxSlope = false;
-        #endregion 
-
-        CheckForWall();
     }
 
     #region Movement Calculations
@@ -103,6 +85,7 @@ public class InputManager : MonoBehaviour
                 if ((float) groundCancelSteps > groundCancelDelay)
                 {
                     onRamp = false;
+                    reachedMaxSlope = false;
                     groundNormal = Vector3.up;
                     grounded = false;
                 }
@@ -121,6 +104,7 @@ public class InputManager : MonoBehaviour
                     wallNormal = Vector3.zero;
                     isWallLeft = false;
                     isWallRight = false;
+                    wallRunning = false;
                 }
             }
         }
@@ -131,19 +115,6 @@ public class InputManager : MonoBehaviour
         if (!nearWall || s.PlayerMovement.vaulting || grounded || crouching) return false;
         if (reachedMaxSlope) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
-    }
-
-    private void CheckForWall()
-    {
-        if (nearWall)
-        {
-            float dot = Vector3.Dot(s.orientation.right, wallNormal);
-
-            isWallLeft = dot > 0.8f;
-            isWallRight = dot < -0.8f;
-        }
-
-        if (!CanWallJump() || !isWallRight && !isWallLeft) wallRunning = false;
     }
     #endregion
 
@@ -175,6 +146,7 @@ public class InputManager : MonoBehaviour
             if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
             if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
             if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
+            if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
             Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
             float distance = vaultPoint.y - s.groundCheck.position.y;
@@ -222,7 +194,16 @@ public class InputManager : MonoBehaviour
                 cancelWall = false;
                 wallCancelSteps = 0;
                 wallNormal = normal;
+
+                float dot = Vector3.Dot(s.orientation.right, normal);
+
+                isWallLeft = dot > 0.8f;
+                isWallRight = dot < -0.8f;
+
+                if (wallRunning && !CanWallJump() || wallRunning && !isWallLeft && !isWallRight) wallRunning = false;
             }
+
+            reachedMaxSlope = Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         }
     }
 

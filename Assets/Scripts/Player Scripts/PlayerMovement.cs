@@ -41,10 +41,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float threshold;
     private float maxSpeed;
 
-    [Header("Collision")]
-    [SerializeField] private LayerMask Ground;
-    [SerializeField] private LayerMask Environment;
-
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
 
@@ -53,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
     private bool crouching;
     private bool grounded;
     private Vector3 moveDir;
+    public bool moving { get; private set; }
 
     public Vector3 relativeVel { get; private set; }
     public float magnitude { get; private set; }
@@ -71,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.6f;
+        crouchOffset = crouchScale.y * 0.45f;
     }
 
     #region Movement
@@ -124,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
         float speed = magnitude;
 
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || vaulting || grounded) return false;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, Ground)) return false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, s.PlayerInput.Ground)) return false;
 
         s.PlayerInput.grounded = true;
 
@@ -139,10 +136,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting || s.PlayerInput.wallRunning) return false;
 
-        bool moving = input.x != 0f && input.y != 0f;
-        bool canWalkSlope = grounded && s.PlayerInput.onRamp && !crouching && stepsSinceLastJumped >= maxJumpSteps;
-
-        if (canWalkSlope && !s.PlayerInput.moving)
+        if (grounded && s.PlayerInput.onRamp && !crouching && stepsSinceLastJumped >= maxJumpSteps && !moving)
         {
             if (velocity.y > 0) rb.velocity = new Vector3(rb.velocity.x, -1f, rb.velocity.z);
             if (velocity.y < 0 && magnitude < 2f) rb.velocity = Vector3.zero;
@@ -228,7 +222,7 @@ public class PlayerMovement : MonoBehaviour
             canAddWallRunForce = false;
             rb.useGravity = false;
 
-            float wallMagnitude = (rb.velocity.y * 2f);
+            float wallMagnitude = (rb.velocity.y);
             if (wallMagnitude < 0) wallMagnitude *= 1.2f;
 
             wallClimb = wallMagnitude + wallClimbForce;
@@ -236,8 +230,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * wallClimb);
         }
 
-        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 1.7f);
-        rb.AddForce(-transform.up * wallRunForce * 0.7f);
+        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 2f);
+        rb.AddForce(-transform.up * wallRunForce * 0.5f);
     }
 
     private void StopWallRun()
@@ -313,7 +307,7 @@ public class PlayerMovement : MonoBehaviour
             else return new Vector2 (1f, 1.05f);
         }
 
-        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.5f);
+        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.4f);
         if (crouched) return new Vector2(0.4f, 0.3f);
 
         return new Vector2(0.5f, 0.5f);
@@ -335,6 +329,8 @@ public class PlayerMovement : MonoBehaviour
         this.jumping = jumping;
         this.crouching = crouching;
         this.grounded = grounded;
+
+        moving = input != Vector2.zero;
     }
 
     private void ProcessInput()
@@ -351,7 +347,9 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
         if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
         if (s.PlayerInput.wallRunning && !grounded) WallRun();
-        if (s.PlayerInput.stopWallRun && readyToWallJump) StopWallRun();
+
+        if (s.PlayerInput.isWallLeft && input.x > 0 && s.PlayerInput.wallRunning || s.PlayerInput.isWallRight && input.x < 0 && s.PlayerInput.wallRunning && readyToWallJump) 
+            StopWallRun();
     }
     #endregion
 
