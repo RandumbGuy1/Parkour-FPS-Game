@@ -4,13 +4,78 @@ using UnityEngine;
 
 public class ProjectileGun : Weapon
 {
-    public override void OnAttack()
+    [Header("Shooting Settings")]
+    [SerializeField] private float shootForce;
+    [SerializeField] private float attackRange;
+    [SerializeField] private float spread;
+    [SerializeField] private float fireRate;
+
+    [Header("Reload Settings")]
+    [SerializeField] private int magazineSize;
+    [SerializeField] private int bulletsPerTap;
+    [SerializeField] private float reloadTime;
+
+    int bulletsShot = 0;
+    private int bulletsLeft;
+    private bool readyToShoot = true;
+    private bool reloading = false;
+
+    [Header("Collision")]
+    [SerializeField] private LayerMask Environment;
+
+    [Header("Assignables")]
+    [SerializeField] private Transform attackPoint;
+
+    void Awake()
     {
-        print("shot something");
+        bulletsLeft = magazineSize;
+    }
+
+    public override bool OnAttack(Transform cam)
+    {
+        if (reloading || !readyToShoot || bulletsLeft <= 0) return false;
+
+        Vector3 targetPoint = Vector3.zero;
+        Ray ray = cam.GetComponent<Camera>().ViewportPointToRay((Vector3) Vector2.one * 0.5f);
+
+        if (Physics.Raycast(ray, out var hit, attackRange, Environment)) targetPoint = hit.point;
+        else targetPoint = ray.GetPoint(100);
+
+        Vector3 dir = (targetPoint - attackPoint.position).normalized;
+
+        for (int i = 0; i < bulletsPerTap; i++)
+        {
+            Vector2 rand = Vector3.zero;
+
+            rand.x = Random.Range(-1f, 1f) * spread * 0.01f;
+            rand.y = Random.Range(-1f, 1f) * spread * 0.01f;
+
+            Vector3 spreadDir = dir + (cam.right * rand.x) + (Vector3.up * rand.y);
+
+            GameObject bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity);
+            
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+
+            rb.velocity = Vector3.zero;
+            rb.AddForce(spreadDir * shootForce, ForceMode.Impulse);
+        }
+
+        if (readyToShoot)
+        {
+            readyToShoot = false;
+            Invoke("ResetShot", 1 / fireRate);
+        }
+
+        return true;
     }
 
     public override void SecondaryAction()
     {
-        print("reloading");
+        //idk some reload thing
+    }
+
+    private void ResetShot()
+    {
+        readyToShoot = true;
     }
 }

@@ -19,6 +19,6 @@ public abstract class Weapon : MonoBehaviour
     public WeaponClass weaponType;
     public AttackType attackType;
 
-    public abstract void OnAttack();
+    public abstract bool OnAttack(Transform cam);
     public abstract void SecondaryAction();
 }

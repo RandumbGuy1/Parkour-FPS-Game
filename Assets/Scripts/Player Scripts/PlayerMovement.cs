@@ -68,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.45f;
+        crouchOffset = crouchScale.y * 0.4f;
     }
 
     #region Movement

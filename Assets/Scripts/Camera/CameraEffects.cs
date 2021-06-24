@@ -14,7 +14,6 @@ public class CameraEffects : MonoBehaviour
 	[SerializeField] private ScriptManager s;
 
 	private float vel = 0f;
-	private float bobOffset = 0f;
 	private float desiredOffset = 0f;
 
 	void LateUpdate()
@@ -27,13 +26,12 @@ public class CameraEffects : MonoBehaviour
     {
 		Vector3 offset = Vector3.zero;
 
-		if (desiredOffset >= 0f && bobOffset == 0f) return offset;
+		if (desiredOffset >= 0f) return offset;
 
 		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 4f * Time.deltaTime);
-		bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref vel, bobSmoothTime);
-		offset.y = bobOffset;
+		offset.y = Mathf.SmoothDamp(transform.localPosition.y, desiredOffset, ref vel, bobSmoothTime);
 
-		if (desiredOffset >= -0.05f) desiredOffset = 0f;
+		if (desiredOffset >= -0.01f) desiredOffset = 0f;
 
 		return offset;
 	}

@@ -49,7 +49,6 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Transform weaponPos;
 
     private ScriptManager s;
-    private Transform selectedTransform;
 
     void Awake()
     {
@@ -90,7 +89,8 @@ public class WeaponController : MonoBehaviour
         if (CurrentWeapon == null) return;
 
         if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) CurrentWeapon.SecondaryAction();
-        if ((CurrentWeapon.attackType == Weapon.AttackType.Automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick)) CurrentWeapon.OnAttack();
+        if ((CurrentWeapon.attackType == Weapon.AttackType.Automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick)) 
+            if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(6f, 5f, 0.45f);
     }
 
     public void AddWeapon(GameObject obj)
