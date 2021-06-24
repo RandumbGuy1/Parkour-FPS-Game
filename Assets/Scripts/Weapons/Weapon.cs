@@ -10,14 +10,8 @@ public abstract class Weapon : MonoBehaviour
         Melee,
     }
 
-    public enum AttackType
-    {
-        Automatic,
-        NonAutomatic,
-    }
-
     public WeaponClass weaponType;
-    public AttackType attackType;
+    public bool automatic;
 
     public abstract bool OnAttack(Transform cam);
     public abstract void SecondaryAction();

@@ -715,7 +715,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198284363}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 1}
+  m_LocalPosition: {x: 0, y: 0.2, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1017722965}
@@ -900,6 +900,7 @@ GameObject:
   - component: {fileID: 299661635}
   - component: {fileID: 299661634}
   - component: {fileID: 299661633}
+  - component: {fileID: 299661636}
   m_Layer: 11
   m_Name: Gun (1)
   m_TagString: Untagged
@@ -968,6 +969,31 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &299661636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 299661631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebb5d5ff750d0dc43bccbeb7d0e67b6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponType: 0
+  automatic: 1
+  shootForce: 90
+  attackRange: 120
+  spread: 2
+  fireRate: 7
+  magazineSize: 30
+  bulletsPerTap: 1
+  reloadTime: 2.5
+  Environment:
+    serializedVersion: 2
+    m_Bits: 7936
+  attackPoint: {fileID: 1332355919}
 --- !u!1 &302361563
 GameObject:
   m_ObjectHideFlags: 0
@@ -2303,8 +2329,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   reticle: {fileID: 685652798}
   s: {fileID: 1650519438}
-  smoothTime: 4
-  minSize: 150
+  smoothTime: 5
+  minSize: 200
   maxSize: 300
   minAimSize: 30
 --- !u!1 &703298682
@@ -8573,14 +8599,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 0
-  attackType: 1
-  shootForce: 50
-  attackRange: 80
+  automatic: 0
+  shootForce: 90
+  attackRange: 90
   spread: 1
-  fireRate: 8
+  fireRate: 6
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 0.5
+  reloadTime: 1.5
   Environment:
     serializedVersion: 2
     m_Bits: 3840
@@ -9381,7 +9407,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1332355918}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 1}
+  m_LocalPosition: {x: 0, y: 0.2, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 299661632}
@@ -9697,7 +9723,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 3.4
+  m_Name: Save 3.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10231,15 +10257,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbbffdda1c177314494cf651b21d9478, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentWeapon: {fileID: 0}
   throwForce: 15
   selectedWeapon: 0
   aiming: 0
+  recoilPosOffset: {x: 0, y: 0, z: -1}
+  recoilRotOffset: {x: -20, y: 0, z: 0}
+  recoilSmoothTime: 0.05
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
   aimPos: {x: -1.8, y: 0.1, z: 0}
   bobAmountHoriz: 0.2
   bobAmountVert: 0.1
-  bobSpeed: 7.1
+  bobSpeed: 8
   bobSmoothTime: 0.2
   defaultRot: {x: 0, y: 18, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
