@@ -986,10 +986,10 @@ MonoBehaviour:
   shootForce: 90
   attackRange: 120
   spread: 2
-  fireRate: 7
+  fireRate: 10
   magazineSize: 30
   bulletsPerTap: 1
-  reloadTime: 2.5
+  reloadTime: 2
   Environment:
     serializedVersion: 2
     m_Bits: 7936
@@ -8606,7 +8606,7 @@ MonoBehaviour:
   fireRate: 6
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 1.5
+  reloadTime: 2
   Environment:
     serializedVersion: 2
     m_Bits: 3840
@@ -9723,7 +9723,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 3.5
+  m_Name: Save 3.6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10033,8 +10033,8 @@ GameObject:
   - component: {fileID: 1650519438}
   - component: {fileID: 1650519435}
   - component: {fileID: 1650519436}
-  - component: {fileID: 1650519440}
   - component: {fileID: 1650519439}
+  - component: {fileID: 1650519440}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -10180,7 +10180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30
+  moveSpeed: 32
   maxGroundSpeed: 20
   maxAirSpeed: 40
   maxSlideSpeed: 60
@@ -10260,9 +10260,12 @@ MonoBehaviour:
   throwForce: 15
   selectedWeapon: 0
   aiming: 0
-  recoilPosOffset: {x: 0, y: 0, z: -1}
+  recoilPosOffset: {x: 0, y: 0, z: -0.8}
   recoilRotOffset: {x: -20, y: 0, z: 0}
-  recoilSmoothTime: 0.05
+  recoilSmoothTime: 0.03
+  reloadPosOffset: {x: 0, y: -0.5, z: 0}
+  reloadRotOffset: {x: 720, y: 0, z: 0}
+  reloadSmoothTime: 0.6
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
   aimPos: {x: -1.8, y: 0.1, z: 0}
   bobAmountHoriz: 0.2

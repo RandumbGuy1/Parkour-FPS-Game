@@ -6,7 +6,7 @@ public class ScriptManager : MonoBehaviour
 {
     [Header("Player Scripts")]
     public PlayerMovement PlayerMovement;
-    public InputManager PlayerInput;
+    public PlayerInput PlayerInput;
     public WeaponController WeaponControls;
 
     [Header("Camera Scripts")]

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class InputManager : MonoBehaviour
+public class PlayerInput : MonoBehaviour
 {
     public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
 
@@ -153,7 +153,7 @@ public class InputManager : MonoBehaviour
 
             if (distance > vaultOffset) return;
 
-            if (distance < 3.3f)
+            if (distance < 3.5f)
             {
                 s.CameraHeadBob.StepUp(transform.position - vaultPoint);
                 transform.position = vaultPoint;

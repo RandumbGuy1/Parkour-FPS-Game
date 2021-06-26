@@ -24,6 +24,14 @@ public class WeaponController : MonoBehaviour
     private Vector3 recoilRot = Vector3.zero, recoilPos = Vector3.zero;
     private Vector3 recoilRotVel = Vector3.zero, recoilPosVel = Vector3.zero;
 
+    [Header("Reload Settings")]
+    [SerializeField] private Vector3 reloadPosOffset;
+    [SerializeField] private Vector3 reloadRotOffset;
+    [SerializeField] private float reloadSmoothTime;
+
+    private Vector3 reloadRot = Vector3.zero, reloadPos = Vector3.zero;
+    private Vector3 reloadRotVel = Vector3.zero, reloadPosVel = Vector3.zero;
+
     [Header("Bob Settings")]
     [SerializeField] private Vector3 defaultPos;
     [SerializeField] private Vector3 aimPos;
@@ -44,7 +52,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private float switchPosTime;
     [SerializeField] private float switchRotTime;
 
-    private Vector3 offsetPos = Vector3.zero, offsetRot = Vector3.zero;
+    private Vector3 switchOffsetPos = Vector3.zero, switchOffsetRot = Vector3.zero;
     private Vector3 switchPosVel = Vector3.zero, switchRotVel = Vector3.zero;
 
     [Header("Weapons Equipped")]
@@ -82,8 +90,8 @@ public class WeaponController : MonoBehaviour
             }
         }
 
-        Vector3 newPos = defaultPos + smoothBob + offsetPos + recoilPos;
-        Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + offsetRot + recoilRot);
+        Vector3 newPos = defaultPos + smoothBob + switchOffsetPos + recoilPos + reloadPos;
+        Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -93,14 +101,22 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) CurrentWeapon.SecondaryAction();
-        if ((CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick))
+        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick))
+        {
+            if (CurrentWeapon.SecondaryAction())
+            {
+                reloadPos = reloadPosOffset;
+                reloadRot = reloadRotOffset;
+            }
+        }
+
+        if ((CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick) && !s.PlayerMovement.vaulting)
         {
             if (CurrentWeapon.OnAttack(s.cam))
             {
-                s.CameraShaker.ShakeOnce(8f, 4f, 0.5f);
-                desiredRecoilPos = recoilPosOffset + (recoilPosOffset == Vector3.zero ? Vector3.zero : (recoilPosOffset * 0.2f));
-                desiredRecoilRot = recoilRotOffset + (recoilRotOffset == Vector3.zero ? Vector3.zero : (recoilRotOffset * 0.2f));
+                s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
+                desiredRecoilPos = recoilPosOffset;
+                desiredRecoilRot = recoilRotOffset;
             }
         }
     }
@@ -121,8 +137,8 @@ public class WeaponController : MonoBehaviour
     {
         if (switching)
         {
-            offsetPos = switchPosOffset;
-            offsetRot = switchRotOffset;
+            switchOffsetPos = switchPosOffset;
+            switchOffsetRot = switchRotOffset;
         }
 
         for (int i = 0; i < weapons.Count; i++)
@@ -138,7 +154,7 @@ public class WeaponController : MonoBehaviour
         rb.isKinematic = false;
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
-        rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.09f) + 1f), ForceMode.VelocityChange);
+        rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.08f) + 1f), ForceMode.VelocityChange);
 
         Vector3 rand = Vector3.zero;
 
@@ -174,7 +190,10 @@ public class WeaponController : MonoBehaviour
         float fallSpeed = s.PlayerMovement.velocity.y * 0.03f;
         fallSpeed = Mathf.Clamp(fallSpeed, -1f, 1f);
 
-        offset -= new Vector3(camDelta.y + (s.PlayerInput.input.x * 0.2f), camDelta.x + fallSpeed, 0f);
+        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.05f;
+        strafeOffset = Mathf.Clamp(strafeOffset, -0.5f, 0.5f);
+
+        offset -= new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f);
 
         return offset;
     }
@@ -198,10 +217,18 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateSwitchOffset()
     {
-        if (offsetPos == Vector3.zero && offsetRot == Vector3.zero) return;
+        if (switchOffsetPos == Vector3.zero && switchOffsetRot == Vector3.zero) return;
 
-        offsetPos = Vector3.SmoothDamp(offsetPos, Vector3.zero, ref switchPosVel, switchPosTime);
-        offsetRot = Vector3.SmoothDamp(offsetRot, Vector3.zero, ref switchRotVel, switchRotTime);
+        switchOffsetPos = Vector3.SmoothDamp(switchOffsetPos, Vector3.zero, ref switchPosVel, switchPosTime);
+        switchOffsetRot = Vector3.SmoothDamp(switchOffsetRot, Vector3.zero, ref switchRotVel, switchRotTime);
+    }
+
+    private void CalculateReloadOffset()
+    {
+        if (reloadPos == Vector3.zero && reloadRot == Vector3.zero) return;
+
+        reloadPos = Vector3.SmoothDamp(reloadPos, Vector3.zero, ref reloadPosVel, reloadSmoothTime);
+        reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, reloadSmoothTime);
     }
 
     private void CalculateRecoilOffset()
@@ -230,6 +257,7 @@ public class WeaponController : MonoBehaviour
 
         CalculateRecoilOffset();
         CalculateSwitchOffset();
+        CalculateReloadOffset();
     }
     #endregion
 }

@@ -17,6 +17,7 @@ public class ProjectileGun : Weapon
 
     private int bulletsLeft;
     private bool readyToShoot = true;
+    private bool reloading;
 
     [Header("Collision")]
     [SerializeField] private LayerMask Environment;
@@ -31,13 +32,7 @@ public class ProjectileGun : Weapon
 
     public override bool OnAttack(Transform cam)
     {
-        if (!readyToShoot) return false;
-
-        if (bulletsLeft <= 0)
-        {
-            SecondaryAction();
-            return false;
-        }
+        if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
 
         Vector3 targetPoint = Vector3.zero;
         Ray ray = cam.GetComponent<Camera>().ViewportPointToRay((Vector3) Vector2.one * 0.5f);
@@ -73,16 +68,22 @@ public class ProjectileGun : Weapon
         return true;
     }
 
-    public override void SecondaryAction()
+    public override bool SecondaryAction()
     {
+        if (bulletsLeft >= magazineSize || reloading) return false;
+
         StartCoroutine(Reload());
+        return true;
     }
 
     private IEnumerator Reload()
     {
+        reloading = true;
+
         yield return new WaitForSeconds(reloadTime);
 
         bulletsLeft = magazineSize;
+        reloading = false;
     }
 
     private void ResetShot()
