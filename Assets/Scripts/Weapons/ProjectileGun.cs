@@ -30,6 +30,11 @@ public class ProjectileGun : Weapon
         bulletsLeft = magazineSize;
     }
 
+    void OnEnable()
+    {
+        reloading = false;
+    }
+
     public override bool OnAttack(Transform cam)
     {
         if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
@@ -52,11 +57,12 @@ public class ProjectileGun : Weapon
 
             Vector3 spreadDir = dir + (cam.right * rand.x) + (Vector3.up * rand.y);
 
-            GameObject bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity);     
-            
+            GameObject bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity);
+            bullet.transform.up = spreadDir;
+
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             rb.velocity = Vector3.zero;
-            rb.AddForce(spreadDir * shootForce * 0.9f, ForceMode.Impulse);
+            rb.AddForce(bullet.transform.up * shootForce, ForceMode.Impulse);
         }
 
         if (readyToShoot)

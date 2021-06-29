@@ -118,7 +118,7 @@ public class PlayerInput : MonoBehaviour
     }
     #endregion
 
-    #region Collision Detection
+    #region Vaulting
     void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
@@ -128,8 +128,7 @@ public class PlayerInput : MonoBehaviour
 
         if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
 
-        #region Vaulting
-        if (IsVaultable(normal))
+        if (IsWall(normal, 0.3f))
         {
             if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
             
@@ -137,7 +136,7 @@ public class PlayerInput : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 vel = s.PlayerMovement.velocity * 0.8f;
+            Vector3 vel = s.PlayerMovement.velocity * 0.7f;
             vel.y = 0f;
 
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
@@ -163,9 +162,10 @@ public class PlayerInput : MonoBehaviour
 
             StartCoroutine(s.PlayerMovement.Vault(vaultPoint, -vaultDir, distance));
         }
-        #endregion
     }
+    #endregion
 
+    #region Collision Detection
     void OnCollisionStay(Collision col)
     {
         int layer = col.gameObject.layer;
@@ -186,7 +186,7 @@ public class PlayerInput : MonoBehaviour
                 groundNormal = normal;
             }
 
-            if (IsWall(normal))
+            if (IsWall(normal, 0.1f))
             {
                 if (Environment != (Environment | 1 << layer)) continue;
 
@@ -206,6 +206,7 @@ public class PlayerInput : MonoBehaviour
             reachedMaxSlope = Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         }
     }
+    #endregion
 
     private void Land(float impactForce)
     {
@@ -221,27 +222,9 @@ public class PlayerInput : MonoBehaviour
             
         s.CameraLandBob.CameraLand(impactForce);
     }
-    #endregion
 
-    #region Vector and speed calculations
-    float LandVel(float mag, float yMag)
-    {
-        return (mag * 0.6f) + Math.Abs(yMag * 4f);
-    }
+    float LandVel(float mag, float yMag) => (mag * 0.6f) + Math.Abs(yMag * 4f);
 
-    bool IsFloor(Vector3 normal)
-    {
-        return Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
-    }
-
-    bool IsWall(Vector3 normal)
-    {
-        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.1f;
-    }
-
-    bool IsVaultable(Vector3 normal)
-    {
-        return Math.Abs(Vector3.Dot(normal, Vector3.up)) < 0.34f;
-    }
-    #endregion
+    bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
+    bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;
 }

@@ -97,30 +97,48 @@ public class WeaponController : MonoBehaviour
         weaponPos.localRotation = newRot;
     }
 
+    #region WeaponInput
     private void ProcessWeaponInput()
     {
         if (CurrentWeapon == null) return;
 
-        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick))
-        {
-            if (CurrentWeapon.SecondaryAction())
-            {
-                reloadPos = reloadPosOffset;
-                reloadRot = reloadRotOffset;
-            }
-        }
+        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f;
 
-        if ((CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick) && !s.PlayerMovement.vaulting)
+        switch (CurrentWeapon.weaponType)
         {
-            if (CurrentWeapon.OnAttack(s.cam))
-            {
-                s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
-                desiredRecoilPos = recoilPosOffset;
-                desiredRecoilRot = recoilRotOffset;
-            }
+            case Weapon.WeaponClass.Ranged:
+                if (s.PlayerInput.reloading)
+                {
+                    if (CurrentWeapon.SecondaryAction())
+                    {
+                        reloadPos = reloadPosOffset;
+                        reloadRot = reloadRotOffset;
+                    }
+                }
+
+                if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
+                {
+                    if (CurrentWeapon.OnAttack(s.cam))
+                    {
+                        s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
+                        desiredRecoilPos = recoilPosOffset * Random.Range(1f, 1.5f) + Vector3.right * Random.Range(0.2f, 0.4f);
+                        desiredRecoilRot = recoilRotOffset * Random.Range(1f, 1.5f);
+                    }
+                }
+                break;
+
+            case Weapon.WeaponClass.Melee:
+                if (s.PlayerInput.rightClick) CurrentWeapon.SecondaryAction();
+
+                if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
+                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
+                break;
+
         }
     }
+    #endregion
 
+    #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
         CurrentWeapon = obj.GetComponent<Weapon>();
@@ -132,17 +150,18 @@ public class WeaponController : MonoBehaviour
         SelectWeapon(false);
     }
 
-    #region Inventory Management
     private void SelectWeapon(bool switching)
     {
         if (switching)
         {
             switchOffsetPos = switchPosOffset;
             switchOffsetRot = switchRotOffset;
+
+            reloadPos = Vector3.zero;
+            reloadRot = Vector3.zero;
         }
 
-        for (int i = 0; i < weapons.Count; i++)
-            weapons[i].SetActive(i == selectedWeapon);
+        for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
     }
 
     private void Drop()
