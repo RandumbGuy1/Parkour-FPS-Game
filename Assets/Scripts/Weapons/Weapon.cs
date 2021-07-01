@@ -13,6 +13,8 @@ public abstract class Weapon : MonoBehaviour
     public WeaponClass weaponType;
     public bool automatic;
 
+    public float recoilForce;
+
     public abstract bool OnAttack(Transform cam);
     public abstract bool SecondaryAction();
 }

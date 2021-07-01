@@ -25,12 +25,11 @@ public class WeaponController : MonoBehaviour
     private Vector3 recoilRotVel = Vector3.zero, recoilPosVel = Vector3.zero;
 
     [Header("Reload Settings")]
-    [SerializeField] private Vector3 reloadPosOffset;
     [SerializeField] private Vector3 reloadRotOffset;
     [SerializeField] private float reloadSmoothTime;
 
-    private Vector3 reloadRot = Vector3.zero, reloadPos = Vector3.zero;
-    private Vector3 reloadRotVel = Vector3.zero, reloadPosVel = Vector3.zero;
+    private Vector3 reloadRot = Vector3.zero;
+    private Vector3 reloadRotVel = Vector3.zero;
 
     [Header("Bob Settings")]
     [SerializeField] private Vector3 defaultPos;
@@ -83,14 +82,10 @@ public class WeaponController : MonoBehaviour
             ProcessWeaponInput();
             ProcessMovement();
 
-            if (selectedWeapon != previousWeapon)
-            {
-                CurrentWeapon = weapons[selectedWeapon].GetComponent<Weapon>();
-                SelectWeapon(true);
-            }
+            if (selectedWeapon != previousWeapon) SelectWeapon(true);
         }
 
-        Vector3 newPos = defaultPos + smoothBob + switchOffsetPos + recoilPos + reloadPos;
+        Vector3 newPos = defaultPos + smoothBob + switchOffsetPos + recoilPos;
         Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot);
 
         weaponPos.localPosition = newPos;
@@ -102,27 +97,21 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f;
+        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
 
         switch (CurrentWeapon.weaponType)
         {
             case Weapon.WeaponClass.Ranged:
                 if (s.PlayerInput.reloading)
-                {
-                    if (CurrentWeapon.SecondaryAction())
-                    {
-                        reloadPos = reloadPosOffset;
-                        reloadRot = reloadRotOffset;
-                    }
-                }
+                    if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
 
                 if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
                 {
                     if (CurrentWeapon.OnAttack(s.cam))
                     {
-                        s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
-                        desiredRecoilPos = recoilPosOffset * Random.Range(1f, 1.5f) + Vector3.right * Random.Range(0.2f, 0.4f);
-                        desiredRecoilRot = recoilRotOffset * Random.Range(1f, 1.5f);
+                        s.CameraShaker.ShakeOnce(6f, 8f, 0.3f, 0.06f, 4f);
+                        desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.8f, 1.2f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
+                        desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                     }
                 }
                 break;
@@ -131,7 +120,7 @@ public class WeaponController : MonoBehaviour
                 if (s.PlayerInput.rightClick) CurrentWeapon.SecondaryAction();
 
                 if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
-                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(8f, 4.5f, 0.4f);
+                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f, 4f);
                 break;
 
         }
@@ -157,9 +146,10 @@ public class WeaponController : MonoBehaviour
             switchOffsetPos = switchPosOffset;
             switchOffsetRot = switchRotOffset;
 
-            reloadPos = Vector3.zero;
             reloadRot = Vector3.zero;
         }
+
+        CurrentWeapon = weapons[selectedWeapon].GetComponent<Weapon>();
 
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
     }
@@ -244,9 +234,8 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateReloadOffset()
     {
-        if (reloadPos == Vector3.zero && reloadRot == Vector3.zero) return;
+        if (reloadRot == Vector3.zero) return;
 
-        reloadPos = Vector3.SmoothDamp(reloadPos, Vector3.zero, ref reloadPosVel, reloadSmoothTime);
         reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, reloadSmoothTime);
     }
 
