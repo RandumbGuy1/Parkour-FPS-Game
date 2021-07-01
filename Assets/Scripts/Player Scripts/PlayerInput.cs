@@ -104,10 +104,16 @@ public class PlayerInput : MonoBehaviour
                     wallNormal = Vector3.zero;
                     isWallLeft = false;
                     isWallRight = false;
-                    wallRunning = false;
                 }
             }
         }
+
+        float dot = Vector3.Dot(s.orientation.right, wallNormal);
+
+        isWallLeft = dot > 0.8f;
+        isWallRight = dot < -0.8f;
+
+        if (!CanWallJump() || !isWallLeft && !isWallRight) wallRunning = false;
     }
 
     public bool CanWallJump()
@@ -136,7 +142,7 @@ public class PlayerInput : MonoBehaviour
             vaultDir.y = 0f;
             vaultDir.Normalize();
 
-            Vector3 vel = s.PlayerMovement.velocity * 0.7f;
+            Vector3 vel = s.PlayerMovement.velocity;
             vel.y = 0f;
 
             Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
@@ -194,13 +200,6 @@ public class PlayerInput : MonoBehaviour
                 cancelWall = false;
                 wallCancelSteps = 0;
                 wallNormal = normal;
-
-                float dot = Vector3.Dot(s.orientation.right, normal);
-
-                isWallLeft = dot > 0.8f;
-                isWallRight = dot < -0.8f;
-
-                if (wallRunning && !CanWallJump() || wallRunning && !isWallLeft && !isWallRight) wallRunning = false;
             }
 
             reachedMaxSlope = Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;

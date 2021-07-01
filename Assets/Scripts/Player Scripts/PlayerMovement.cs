@@ -17,11 +17,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private int maxJumpSteps;
     
     [Header("Sliding")]
-    [SerializeField] private Vector3 crouchScale;
+    [SerializeField] private float crouchScale;
+    [SerializeField] private float crouchSmoothTime;
     [SerializeField] private float slideForce;
+    private float crouchVel = 0f;
     private float crouchOffset;
-    private Vector3 playerScale;
     private bool crouched = false;
+    private Vector3 playerScale;
 
     [Header("WallRunning")]
     [SerializeField] private float wallJumpForce;
@@ -68,7 +70,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale.y * 0.4f;
+        crouchOffset = crouchScale * 0.2f;
     }
 
     #region Movement
@@ -81,23 +83,23 @@ public class PlayerMovement : MonoBehaviour
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float maxSpeed = ControlMaxSpeed();
-        float coefficientOfFriction = moveSpeed * 2.5f / maxSpeed;
+        float coefficientOfFriction = moveSpeed * 3f / maxSpeed;
 
         if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.Acceleration);
         rb.useGravity = UseGravity();
 
         ProcessInput();
 
-        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier(), input));
+        moveDir = (grounded ? GroundMove(CalculateMultiplier()) : AirMove(CalculateMultiplier(), input));
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
     }
 
-    private Vector3 GroundMove(Vector2 multiplier, Vector3 vel)
+    private Vector3 GroundMove(Vector2 multiplier)
     {
-        Friction(vel, relativeVel);
+        Friction(relativeVel);
 
         Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
@@ -108,8 +110,8 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 AirMove(Vector2 multiplier, Vector2 input)
     {
-        if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x = 0.1f;
-        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y = 0.1f;       
+        if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x *= 0.1f;
+        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y *= 0.1f;
 
         return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     }
@@ -250,32 +252,31 @@ public class PlayerMovement : MonoBehaviour
     #endregion 
 
     #region Sliding
-    private void StartCrouch(Vector3 dir)
+    private void Crouch(Vector3 dir)
     {
         crouched = true;
-
         if (grounded) if (magnitude > 0.5f) rb.AddForce(dir * slideForce * magnitude);
-
-        transform.localScale = crouchScale;
-        rb.position += (Vector3.down * crouchOffset);
     }
 
-    private void StopCrouch()
+    private void UpdateCrouchScale()
     {
-        crouched = false;
-        rb.position += (Vector3.up * crouchOffset);
-        transform.localScale = playerScale;
+        if (crouching && transform.localScale.y == crouchScale || !crouching && transform.localScale.y == playerScale.y) return;
+
+        transform.localScale = new Vector3(playerScale.x, Mathf.SmoothDamp(transform.localScale.y, (crouched ? crouchScale : playerScale.y), ref crouchVel, crouchSmoothTime), playerScale.z);
+    
+        if (crouching && transform.localScale.y < crouchScale + 0.01f) transform.localScale = new Vector3(playerScale.x, crouchScale, playerScale.z);
+        if (!crouching && transform.localScale.y > playerScale.y - 0.01f) transform.localScale = playerScale;
     }
     #endregion
 
     #region Friction
-    private void Friction(Vector3 vel, Vector3 mag)
+    private void Friction(Vector3 mag)
     {
         if (jumping) return;
 
         if (crouched)
         {
-            rb.AddForce(-vel * slideFriction * 0.4f);
+            rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (magnitude * 0.1f));
             return;
         }
 
@@ -284,8 +285,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (Math.Abs(input.y) < threshold && Math.Abs(mag.z) > threshold || CounterMomentum(input.y, mag.z))
             rb.AddForce(s.orientation.forward * -mag.z * friction * 2f, ForceMode.Acceleration);
-
-        if (magnitude > threshold) rb.AddForce(-vel * friction * 0.5f, ForceMode.Acceleration);
     }
 
     private bool CounterMomentum(float input, float mag)
@@ -294,32 +293,6 @@ public class PlayerMovement : MonoBehaviour
         else return false;
     }
 
-    #endregion
-
-    #region Multipliers and Maxspeed calculation
-    public Vector2 CalculateMultiplier()
-    {
-        if (vaulting) return new Vector2(0f, 0f);
-
-        if (grounded)
-        {
-            if (crouched) return new Vector2(0.01f, 0.01f);
-            else return new Vector2 (1f, 1.05f);
-        }
-
-        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.4f);
-        if (crouched) return new Vector2(0.4f, 0.3f);
-
-        return new Vector2(0.5f, 0.5f);
-    }
-
-    private float ControlMaxSpeed()
-    {
-        if (crouched) return maxSlideSpeed;
-        if (jumping) return maxAirSpeed;
-        if (stepsSinceLastGrounded == 0) return maxGroundSpeed;
-        return maxAirSpeed;
-    }
     #endregion
 
     #region Input
@@ -341,8 +314,14 @@ public class PlayerMovement : MonoBehaviour
         if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
-        if (crouching && !s.PlayerInput.wallRunning && !crouched) StartCrouch(moveDir);
-        if (!crouching && crouched) StopCrouch();
+        if (crouching && !s.PlayerInput.wallRunning && !crouched) Crouch(moveDir);
+        if (!crouching && crouched)
+        {
+            crouched = false;
+            rb.velocity *= 0.8f;
+        }
+
+        UpdateCrouchScale();
 
         if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
         if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
@@ -352,6 +331,27 @@ public class PlayerMovement : MonoBehaviour
             StopWallRun();
     }
     #endregion
+
+    public Vector2 CalculateMultiplier()
+    {
+        if (vaulting) return new Vector2(0f, 0f);
+
+        if (grounded) return (crouched ? new Vector2(0.01f, 0.01f) : new Vector2(1f, 1.05f));
+
+        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.4f);
+        if (crouched) return new Vector2(0.4f, 0.3f);
+
+        return new Vector2(0.5f, 0.5f);
+    }
+
+    private float ControlMaxSpeed()
+    {
+        if (crouched) return maxSlideSpeed;
+        if (jumping) return maxAirSpeed;
+        if (grounded) return maxGroundSpeed;
+
+        return maxAirSpeed;
+    }
 
     void ResetWallJump()
     {

@@ -25,26 +25,17 @@ public class ProjectileGun : Weapon
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
 
-    void Start()
-    {
-        bulletsLeft = magazineSize;
-    }
+    void Start() => bulletsLeft = magazineSize;
 
-    void OnEnable()
-    {
-        reloading = false;
-    }
+    void OnEnable() => reloading = false;
 
     public override bool OnAttack(Transform cam)
     {
         if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
 
-        Vector3 targetPoint = Vector3.zero;
         Ray ray = cam.GetComponent<Camera>().ViewportPointToRay((Vector3) Vector2.one * 0.5f);
 
-        if (Physics.Raycast(ray, out var hit, attackRange, Environment)) targetPoint = hit.point;
-        else targetPoint = ray.GetPoint(attackRange);
-
+        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
         Vector3 dir = (targetPoint - attackPoint.position).normalized;
 
         for (int i = 0; i < bulletsPerTap; i++)
