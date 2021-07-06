@@ -109,8 +109,8 @@ public class CameraShaker : MonoBehaviour
 
         headSwayScroller += Time.deltaTime * swayFrequency;
 
-        headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 1f) * 0.8f;
-        headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 1.2f;
+        headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
+        headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 5f) * 0.9f;
 
         headSwayOffset -= (Vector3) Vector2.one * 0.5f;
 

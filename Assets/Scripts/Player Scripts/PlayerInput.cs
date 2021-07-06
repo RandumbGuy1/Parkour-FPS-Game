@@ -222,7 +222,7 @@ public class PlayerInput : MonoBehaviour
         s.CameraLandBob.CameraLand(impactForce);
     }
 
-    float LandVel(float mag, float yMag) => (mag * 0.6f) + Math.Abs(yMag * 4f);
+    float LandVel(float mag, float yMag) => (mag * 0.6f) + Math.Abs(yMag * 3.5f);
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;

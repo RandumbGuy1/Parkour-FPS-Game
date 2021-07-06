@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale * 0.2f;
+        crouchOffset = crouchScale * 0.4f;
     }
 
     #region Movement
@@ -92,7 +92,7 @@ public class PlayerMovement : MonoBehaviour
 
         ProcessInput();
 
-        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier(), input));
+        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier()));
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
 
         magnitude = rb.velocity.magnitude;
@@ -110,12 +110,14 @@ public class PlayerMovement : MonoBehaviour
         return dot < 0f ? slopeDir : inputDir;
     }
 
-    private Vector3 AirMove(Vector2 multiplier, Vector2 input)
+    private Vector3 AirMove(Vector2 multiplier)
     {
-        if (input.x > 0 && relativeVel.x > 25 || input.x < 0 && relativeVel.x < -25) input.x *= 0.1f;
-        if (input.y > 0 && relativeVel.z > 25 || input.y < 0 && relativeVel.z < -25) input.y *= 0.1f;
+        Vector2 inputTemp = input;
 
-        return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
+        if (inputTemp.x > 0 && relativeVel.x > 25f || inputTemp.x < 0 && relativeVel.x < -25f) inputTemp.x = 0f;
+        if (inputTemp.y > 0 && relativeVel.z > 25f || inputTemp.y < 0 && relativeVel.z < -25f) inputTemp.y = 0f;
+
+        return s.orientation.forward * inputTemp.y * multiplier.y + s.orientation.right * inputTemp.x * multiplier.x;
     }
     #endregion
 
@@ -244,8 +246,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * wallClimb);
         }
 
-        //Vector3 wallMoveDir = Vector3.Cross(-s.PlayerInput.wallNormal, Vector3.up);
-        Vector3 wallMoveDir = Vector3.ProjectOnPlane(s.orientation.forward, Vector3.up) * input.y;
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, s.PlayerInput.wallNormal);
+        Vector3 wallMoveDir = Vector3.Cross(wallUpCross, s.PlayerInput.wallNormal);
 
         rb.AddForce(-s.PlayerInput.wallNormal * wallRunGravityForce);
         rb.AddForce(-transform.up * wallHoldForce);
@@ -317,6 +319,8 @@ public class PlayerMovement : MonoBehaviour
     public void SetInput(Vector2 input, bool jumping, bool crouching, bool grounded)
     {
         this.input = input;
+        this.input = Vector2.ClampMagnitude(this.input, 1f);
+
         this.jumping = jumping;
         this.crouching = crouching;
         this.grounded = grounded;
@@ -358,7 +362,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouched) return new Vector2(0.4f, 0.3f);
 
-        return new Vector2(0.5f, 0.5f);
+        return new Vector2(0.4f, 0.8f);
     }
 
     private float ControlMaxSpeed()

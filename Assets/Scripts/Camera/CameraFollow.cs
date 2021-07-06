@@ -77,8 +77,8 @@ public class CameraFollow : MonoBehaviour
 
 	void SmoothRotation()
 	{
-		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime);
-		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x,  rotateSmoothTime.x * Time.deltaTime);
+		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, rotateSmoothTime.x * Time.deltaTime);
+		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime) - cameraTilt * 0.15f;
 		smoothRotation.z = cameraTilt;
 	}
 
