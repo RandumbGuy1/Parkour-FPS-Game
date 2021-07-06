@@ -5,13 +5,20 @@ using UnityEngine;
 public class CameraShaker : MonoBehaviour
 {
     [Header("Shake Settings")]
-    public AnimationCurve blendOverLifetime = new AnimationCurve(
+    [SerializeField] private AnimationCurve blendOverLifetime = new AnimationCurve(
 
       new Keyframe(0.0f, 0.0f, Mathf.Deg2Rad * 0.0f, Mathf.Deg2Rad * 720.0f),
       new Keyframe(0.2f, 1.0f),
       new Keyframe(1.0f, 0.0f));
 
     public Vector3 offset { get; private set; }
+
+    [Header("Head Sway Settings")]
+    [SerializeField] private float swayAmount;
+    [SerializeField] private float swayFrequency;
+
+    private Vector3 headSwayOffset = Vector3.zero;
+    private float headSwayScroller = 0;
 
     public class ShakeEvent
     {
@@ -99,6 +106,15 @@ public class CameraShaker : MonoBehaviour
                 }
             }
         }
+
+        headSwayScroller += Time.deltaTime * swayFrequency;
+
+        headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 1f) * 0.8f;
+        headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 1.2f;
+
+        headSwayOffset -= (Vector3) Vector2.one * 0.5f;
+
+        rotationOffset += headSwayOffset * swayAmount;
 
         offset = rotationOffset;
     }

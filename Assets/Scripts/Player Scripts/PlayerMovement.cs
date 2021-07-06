@@ -13,7 +13,6 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
-    [SerializeField] private float jumpCooldown;
     [SerializeField] private int maxJumpSteps;
     
     [Header("Sliding")]
@@ -26,11 +25,14 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 playerScale;
 
     [Header("WallRunning")]
+    [SerializeField] private float wallRunGravityForce;
     [SerializeField] private float wallJumpForce;
+    [SerializeField] private float wallHoldForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
+    private Vector3 idk;
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -85,21 +87,21 @@ public class PlayerMovement : MonoBehaviour
         float maxSpeed = ControlMaxSpeed();
         float coefficientOfFriction = moveSpeed * 3f / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.Acceleration);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 2f, ForceMode.Acceleration);
         rb.useGravity = UseGravity();
 
         ProcessInput();
 
-        moveDir = (grounded ? GroundMove(CalculateMultiplier()) : AirMove(CalculateMultiplier(), input));
+        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier(), input));
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
     }
 
-    private Vector3 GroundMove(Vector2 multiplier)
+    private Vector3 GroundMove(Vector2 multiplier, Vector3 vel)
     {
-        Friction(relativeVel);
+        Friction(vel);
 
         Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
@@ -128,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
         s.PlayerInput.grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
-        if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot * 1.1f)).normalized * speed;
+        if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot * 1.05f)).normalized * speed;
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
 
         return true;
@@ -141,9 +143,19 @@ public class PlayerMovement : MonoBehaviour
         if (grounded && s.PlayerInput.onRamp && !crouching && stepsSinceLastJumped >= maxJumpSteps && !moving)
         {
             if (velocity.y > 0) rb.velocity = new Vector3(rb.velocity.x, -1f, rb.velocity.z);
-            if (velocity.y < 0 && magnitude < 2f) rb.velocity = Vector3.zero;
 
-            return false;
+            Vector3 dir = s.PlayerInput.groundNormal;
+            dir.y = 0f;
+            dir.Normalize();
+
+            Vector3 slopeDir = Vector3.ProjectOnPlane(-dir, s.PlayerInput.groundNormal);
+            float dot = Vector3.Dot(dir, s.PlayerInput.groundNormal);
+
+            slopeDir.y -= 0.1f;
+
+            rb.AddForce(slopeDir * 52f * dot, ForceMode.Acceleration);
+
+            if (velocity.y < 0 && magnitude < 1f) rb.velocity = Vector3.zero;
         }
 
         return true;
@@ -232,8 +244,12 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * wallClimb);
         }
 
-        rb.AddForce(-s.PlayerInput.wallNormal * wallRunForce * 2f);
-        rb.AddForce(-transform.up * wallRunForce * 0.5f);
+        //Vector3 wallMoveDir = Vector3.Cross(-s.PlayerInput.wallNormal, Vector3.up);
+        Vector3 wallMoveDir = Vector3.ProjectOnPlane(s.orientation.forward, Vector3.up) * input.y;
+
+        rb.AddForce(-s.PlayerInput.wallNormal * wallRunGravityForce);
+        rb.AddForce(-transform.up * wallHoldForce);
+        rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
     }
 
     private void StopWallRun()
@@ -270,21 +286,23 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Friction
-    private void Friction(Vector3 mag)
+    private void Friction(Vector3 vel)
     {
         if (jumping) return;
 
+        Vector3 frictionForce = -Vector3.ProjectOnPlane(vel, s.PlayerInput.groundNormal);
+
         if (crouched)
         {
-            rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (magnitude * 0.1f));
+            rb.AddForce(frictionForce.normalized * slideFriction * 3f * (magnitude * 0.1f));
             return;
         }
 
-        if (Math.Abs(input.x) < threshold && Math.Abs(mag.x) > threshold || CounterMomentum(input.x, mag.x))
-            rb.AddForce(s.orientation.right * -mag.x * friction * 2f, ForceMode.Acceleration);
+        if (Math.Abs(input.x) < threshold && Math.Abs(relativeVel.x) > threshold || CounterMomentum(input.x, relativeVel.x))
+        rb.AddForce(s.orientation.right * -relativeVel.x * friction * 2f, ForceMode.Acceleration);
 
-        if (Math.Abs(input.y) < threshold && Math.Abs(mag.z) > threshold || CounterMomentum(input.y, mag.z))
-            rb.AddForce(s.orientation.forward * -mag.z * friction * 2f, ForceMode.Acceleration);
+        if (Math.Abs(input.y) < threshold && Math.Abs(relativeVel.z) > threshold || CounterMomentum(input.y, relativeVel.z))
+        rb.AddForce(s.orientation.forward * -relativeVel.z * friction * 2f, ForceMode.Acceleration);
     }
 
     private bool CounterMomentum(float input, float mag)
@@ -334,11 +352,10 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector2 CalculateMultiplier()
     {
-        if (vaulting) return new Vector2(0f, 0f);
+        if (vaulting || s.PlayerInput.wallRunning) return new Vector2(0f, 0f);
 
         if (grounded) return (crouched ? new Vector2(0.01f, 0.01f) : new Vector2(1f, 1.05f));
 
-        if (s.PlayerInput.wallRunning) return new Vector2(0.01f, 0.4f);
         if (crouched) return new Vector2(0.4f, 0.3f);
 
         return new Vector2(0.5f, 0.5f);

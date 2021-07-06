@@ -134,7 +134,7 @@ public class PlayerInput : MonoBehaviour
 
         if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
 
-        if (IsWall(normal, 0.3f))
+        if (IsWall(normal, 0.31f))
         {
             if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
             
