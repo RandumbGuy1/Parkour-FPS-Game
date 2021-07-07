@@ -30,6 +30,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallHoldForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
+    public bool wallRunning = false;
+    private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
     private Vector3 idk;
@@ -87,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
         float maxSpeed = ControlMaxSpeed();
         float coefficientOfFriction = moveSpeed * 3f / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 2f, ForceMode.Acceleration);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.Acceleration);
         rb.useGravity = UseGravity();
 
         ProcessInput();
@@ -103,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Friction(vel);
 
-        Vector3 inputDir = (s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x);
+        Vector3 inputDir = CalculateInputDir(input, multiplier);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
@@ -117,7 +119,7 @@ public class PlayerMovement : MonoBehaviour
         if (inputTemp.x > 0 && relativeVel.x > 25f || inputTemp.x < 0 && relativeVel.x < -25f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && relativeVel.z > 25f || inputTemp.y < 0 && relativeVel.z < -25f) inputTemp.y = 0f;
 
-        return s.orientation.forward * inputTemp.y * multiplier.y + s.orientation.right * inputTemp.x * multiplier.x;
+        return CalculateInputDir(inputTemp, multiplier);
     }
     #endregion
 
@@ -140,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool UseGravity()
     {
-        if (vaulting || s.PlayerInput.wallRunning) return false;
+        if (vaulting || wallRunning) return false;
 
         if (grounded && s.PlayerInput.onRamp && !crouching && stepsSinceLastJumped >= maxJumpSteps && !moving)
         {
@@ -233,30 +235,33 @@ public class PlayerMovement : MonoBehaviour
     {
         float wallClimb = 0f;
 
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, s.PlayerInput.wallNormal);
+        wallMoveDir = Vector3.Cross(wallUpCross, s.PlayerInput.wallNormal);
+
         if (canAddWallRunForce)
         {
             canAddWallRunForce = false;
             rb.useGravity = false;
 
-            float wallMagnitude = (rb.velocity.y);
-            if (wallMagnitude < 0) wallMagnitude *= 1.2f;
+            float wallUpSpeed = velocity.y;
+            float wallMagnitude = magnitude;
 
-            wallClimb = wallMagnitude + wallClimbForce;
-            wallClimb = Mathf.Clamp(wallClimb, -20f, 10f);
+            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 10f);
+
+            wallClimb = wallUpSpeed + wallClimbForce;
+            wallClimb = Mathf.Clamp(wallClimb, -5f, 10f);
             rb.AddForce(Vector3.up * wallClimb);
+            rb.AddForce(wallMoveDir * wallMagnitude * 0.4f, ForceMode.VelocityChange);
         }
 
-        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, s.PlayerInput.wallNormal);
-        Vector3 wallMoveDir = Vector3.Cross(wallUpCross, s.PlayerInput.wallNormal);
-
-        rb.AddForce(-s.PlayerInput.wallNormal * wallRunGravityForce);
-        rb.AddForce(-transform.up * wallHoldForce);
+        rb.AddForce(-s.PlayerInput.wallNormal * wallHoldForce);
+        rb.AddForce(-transform.up * wallRunGravityForce, ForceMode.Acceleration);
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
     }
 
     private void StopWallRun()
     {
-        if (s.PlayerInput.wallRunning && readyToWallJump)
+        if (wallRunning && readyToWallJump)
         {
             readyToWallJump = false;
             s.PlayerInput.nearWall = false;
@@ -312,7 +317,6 @@ public class PlayerMovement : MonoBehaviour
         if (input > 0 && mag < -threshold || input < 0 && mag > threshold) return true;
         else return false;
     }
-
     #endregion
 
     #region Input
@@ -336,7 +340,7 @@ public class PlayerMovement : MonoBehaviour
         if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
-        if (crouching && !s.PlayerInput.wallRunning && !crouched) Crouch(moveDir);
+        if (crouching && !wallRunning && !crouched) Crouch(moveDir);
         if (!crouching && crouched)
         {
             crouched = false;
@@ -345,24 +349,33 @@ public class PlayerMovement : MonoBehaviour
 
         UpdateCrouchScale();
 
-        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
-        if (!s.PlayerInput.CanWallJump()) canAddWallRunForce = true;
-        if (s.PlayerInput.wallRunning && !grounded) WallRun();
+        if (s.PlayerInput.nearWall && s.PlayerInput.isWallLeft && s.PlayerInput.CanWallJump() && input.x < 0 || s.PlayerInput.nearWall && s.PlayerInput.isWallRight && s.PlayerInput.CanWallJump() && input.x > 0) wallRunning = true;
 
-        if (s.PlayerInput.isWallLeft && input.x > 0 && s.PlayerInput.wallRunning || s.PlayerInput.isWallRight && input.x < 0 && s.PlayerInput.wallRunning && readyToWallJump) 
+        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
+        if (!s.PlayerInput.CanWallJump() || !s.PlayerInput.isWallRight && !s.PlayerInput.isWallLeft)
+        {
+            wallRunning = false;
+            canAddWallRunForce = true;
+        }
+
+        if (wallRunning && !grounded) WallRun();
+
+        if (s.PlayerInput.isWallLeft && input.x > 0 && wallRunning || s.PlayerInput.isWallRight && input.x < 0 && wallRunning && readyToWallJump) 
             StopWallRun();
     }
+
+    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier) => s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     #endregion
 
     public Vector2 CalculateMultiplier()
     {
-        if (vaulting || s.PlayerInput.wallRunning) return new Vector2(0f, 0f);
+        if (vaulting || wallRunning) return new Vector2(0f, 0f);
 
         if (grounded) return (crouched ? new Vector2(0.01f, 0.01f) : new Vector2(1f, 1.05f));
 
         if (crouched) return new Vector2(0.4f, 0.3f);
 
-        return new Vector2(0.4f, 0.8f);
+        return new Vector2(0.4f, 0.6f);
     }
 
     private float ControlMaxSpeed()

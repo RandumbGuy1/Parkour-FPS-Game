@@ -24,8 +24,6 @@ public class PlayerInput : MonoBehaviour
 
     public bool isWallLeft { get; private set; }
     public bool isWallRight { get; private set; }
-    public bool wallRunning { get; private set; }
-    public bool stopWallRun { get; private set; }
 
     public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
     public bool crouching { get { return Input.GetKey(crouchKey); } }
@@ -66,14 +64,12 @@ public class PlayerInput : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
-
         UpdateCollisions();
         s.PlayerMovement.SetInput(input, jumping, crouching, grounded);
         s.PlayerMovement.Movement();
     }
 
-    #region Movement Calculations
+    #region Collision Calculations
     private void UpdateCollisions()
     {
         if (grounded) 
@@ -94,6 +90,11 @@ public class PlayerInput : MonoBehaviour
 
         if (nearWall)
         {
+            float dot = Vector3.Dot(s.orientation.right, wallNormal);
+
+            isWallLeft = dot > 0.8f;
+            isWallRight = dot < -0.8f;
+
             if (!cancelWall) cancelWall = true;
             else
             {
@@ -107,19 +108,12 @@ public class PlayerInput : MonoBehaviour
                 }
             }
         }
-
-        float dot = Vector3.Dot(s.orientation.right, wallNormal);
-
-        isWallLeft = dot > 0.8f;
-        isWallRight = dot < -0.8f;
-
-        if (!CanWallJump() || !isWallLeft && !isWallRight) wallRunning = false;
     }
 
     public bool CanWallJump()
     {
-        if (!nearWall || s.PlayerMovement.vaulting || grounded || crouching) return false;
-        if (reachedMaxSlope) return false;
+        if (!nearWall) return false;
+        if (reachedMaxSlope || s.PlayerMovement.vaulting || grounded || crouching) return false;
         return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
     }
     #endregion
@@ -136,7 +130,7 @@ public class PlayerInput : MonoBehaviour
 
         if (IsWall(normal, 0.31f))
         {
-            if (s.PlayerMovement.vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
+            if (s.PlayerMovement.vaulting || s.PlayerMovement.wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
             
             Vector3 vaultDir = normal;
             vaultDir.y = 0f;
@@ -222,7 +216,7 @@ public class PlayerInput : MonoBehaviour
         s.CameraLandBob.CameraLand(impactForce);
     }
 
-    float LandVel(float mag, float yMag) => (mag * 0.6f) + Math.Abs(yMag * 3.5f);
+    float LandVel(float mag, float yMag) => (mag * 0.5f) + Math.Abs(yMag * 4f);
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;

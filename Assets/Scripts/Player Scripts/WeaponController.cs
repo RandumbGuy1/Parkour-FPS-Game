@@ -62,10 +62,7 @@ public class WeaponController : MonoBehaviour
 
     private ScriptManager s;
 
-    void Awake()
-    {
-        s = GetComponent<ScriptManager>();
-    }
+    void Awake() => s = GetComponent<ScriptManager>();
 
     void Update()
     {
@@ -82,7 +79,7 @@ public class WeaponController : MonoBehaviour
             ProcessWeaponInput();
             ProcessMovement();
 
-            if (selectedWeapon != previousWeapon) SelectWeapon(true);
+            if (selectedWeapon != previousWeapon) SelectWeapon();
         }
 
         Vector3 newPos = defaultPos + smoothBob + switchOffsetPos + recoilPos;
@@ -92,7 +89,7 @@ public class WeaponController : MonoBehaviour
         weaponPos.localRotation = newRot;
     }
 
-    #region WeaponInput
+    #region Weapon Input
     private void ProcessWeaponInput()
     {
         if (CurrentWeapon == null) return;
@@ -139,7 +136,7 @@ public class WeaponController : MonoBehaviour
         SelectWeapon(false);
     }
 
-    private void SelectWeapon(bool switching)
+    private void SelectWeapon(bool switching = true)
     {
         if (switching)
         {
@@ -179,7 +176,7 @@ public class WeaponController : MonoBehaviour
         if (weapons.Count > 0)
         {
             selectedWeapon = weapons.Count - 1;
-            SelectWeapon(true);
+            SelectWeapon();
         }
     }
     #endregion
@@ -230,6 +227,12 @@ public class WeaponController : MonoBehaviour
 
         switchOffsetPos = Vector3.SmoothDamp(switchOffsetPos, Vector3.zero, ref switchPosVel, switchPosTime);
         switchOffsetRot = Vector3.SmoothDamp(switchOffsetRot, Vector3.zero, ref switchRotVel, switchRotTime);
+
+        if (switchOffsetPos.sqrMagnitude < 0.01f && switchOffsetRot.sqrMagnitude < 0.01f)
+        {
+            switchOffsetPos = Vector3.zero;
+            switchOffsetRot = Vector3.zero;
+        }
     }
 
     private void CalculateReloadOffset()
@@ -237,6 +240,8 @@ public class WeaponController : MonoBehaviour
         if (reloadRot == Vector3.zero) return;
 
         reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, reloadSmoothTime);
+
+        if (reloadRot.sqrMagnitude < 0.01f) reloadRot = Vector3.zero;
     }
 
     private void CalculateRecoilOffset()
@@ -249,7 +254,7 @@ public class WeaponController : MonoBehaviour
         recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, recoilSmoothTime);
         recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, recoilSmoothTime);
         
-        if (Mathf.Abs(desiredRecoilPos.sqrMagnitude) < 0.01f && Mathf.Abs(desiredRecoilRot.sqrMagnitude) < 0.01f)
+        if (desiredRecoilPos.sqrMagnitude < 0.01f && desiredRecoilRot.sqrMagnitude < 0.01f)
         {
             desiredRecoilPos = Vector3.zero;
             desiredRecoilRot = Vector3.zero;

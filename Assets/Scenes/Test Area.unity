@@ -1886,7 +1886,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 963194228}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &554171070
 GameObject:
@@ -3246,11 +3246,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTilt: 0
+  wallRunRotation: 0
   returnTiltTime: 0.15
   fov: 90
   returnFovTime: 0.3
   sensitivity: 80
-  rotateSmoothTime: {x: 12.5, y: 13.5}
+  rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
   downClampAngle: 70
   s: {fileID: 1650519438}
@@ -3268,9 +3269,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bobSpeed: 8
-  bobAmountHoriz: 0.2
-  bobAmountVert: 0.4
-  bobSmoothTime: 0.2
+  bobAmountHoriz: 0.1
+  bobAmountVert: 0.2
+  bobSmoothTime: 0.1
   stepSmoothTime: 0.06
   vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
@@ -3319,8 +3320,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  swayAmount: 10
-  swayFrequency: 0.3
+  swayAmount: 6
+  swayFrequency: 0.35
 --- !u!1 &869843952
 GameObject:
   m_ObjectHideFlags: 0
@@ -3961,8 +3962,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 493642731}
   - {fileID: 2080955620}
+  - {fileID: 493642731}
   - {fileID: 2126912939}
   m_Father: {fileID: 838078164}
   m_RootOrder: 0
@@ -3979,7 +3980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bobSmoothTime: 0.055
+  bobSmoothTime: 0.05
   bobMultiplier: 0.02
   maxOffset: 2.5
   s: {fileID: 1650519438}
@@ -10389,7 +10390,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.1
+  m_Name: Save 4.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10846,7 +10847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 25
+  moveSpeed: 30
   maxGroundSpeed: 20
   maxAirSpeed: 50
   maxSlideSpeed: 60
@@ -10855,11 +10856,12 @@ MonoBehaviour:
   crouchScale: 1
   crouchSmoothTime: 0.1
   slideForce: 80
-  wallRunGravityForce: 35
-  wallJumpForce: 40
-  wallHoldForce: 15
-  wallRunForce: 15
+  wallRunGravityForce: 10
+  wallJumpForce: 45
+  wallHoldForce: 50
+  wallRunForce: 8
   wallClimbForce: 5
+  wallRunning: 0
   vaultDuration: 0.08
   vaultForce: 10
   vaulting: 0
@@ -18230,7 +18232,7 @@ ParticleSystem:
     donutRadius: 0.2
     m_Position: {x: 0, y: 0, z: 0}
     m_Rotation: {x: 0, y: 0, z: 0}
-    m_Scale: {x: 5, y: 3, z: 1}
+    m_Scale: {x: 6, y: 4, z: 1}
     placementMode: 0
     m_MeshMaterialIndex: 0
     m_MeshNormalOffset: 0
@@ -22265,7 +22267,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 963194228}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &2086672311
 GameObject:

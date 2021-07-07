@@ -7,6 +7,7 @@ public class CameraFollow : MonoBehaviour
 {
 	[Header("Camera Tilt Variables")]
 	[SerializeField] private float cameraTilt = 0f;
+	[SerializeField] private float wallRunRotation = 0f;
 	[SerializeField] private float returnTiltTime;
 
 	private int tiltDirection = 1;
@@ -78,7 +79,7 @@ public class CameraFollow : MonoBehaviour
 	void SmoothRotation()
 	{
 		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, rotateSmoothTime.x * Time.deltaTime);
-		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime) - cameraTilt * 0.15f;
+		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime);
 		smoothRotation.z = cameraTilt;
 	}
 
@@ -111,7 +112,7 @@ public class CameraFollow : MonoBehaviour
 		if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
 	}
 
-	public void TiltCamera(bool reset, int i = 1, float extension = 0, float speed = 0)
+	public void SetTilt(bool reset, int i = 1, float extension = 0, float speed = 0)
 	{
 		if (maxCameraTilt == extension) return;
 
@@ -121,7 +122,7 @@ public class CameraFollow : MonoBehaviour
 		maxCameraTilt = extension;
 	}
 
-	public void ChangeFov(bool reset, float extension = 0, float speed = 0)
+	public void SetFov(bool reset, float extension = 0, float speed = 0)
 	{
 		if (maxFov == setFov + extension) return;
 
@@ -151,19 +152,19 @@ public class CameraFollow : MonoBehaviour
 
 	private void CameraEffects()
 	{
-		if (s.PlayerInput.crouching) TiltCamera(false, 1, 8f, 0.15f);
+		if (s.PlayerInput.crouching) SetTilt(false, 1, 8f, 0.15f);
 
-		if (s.PlayerInput.wallRunning)
+		if (s.PlayerMovement.wallRunning)
 		{
-			TiltCamera(false, (s.PlayerInput.isWallRight ? 1 : -1), 18f, 0.13f);
-			ChangeFov(false, 25f, 0.2f);
+			SetTilt(false, (s.PlayerInput.isWallRight ? 1 : -1), 18f, 0.13f);
+			SetFov(false, 25f, 0.2f);
 		}
 
-		if (!s.PlayerInput.wallRunning)
+		if (!s.PlayerMovement.wallRunning)
 		{
-			if (!s.PlayerInput.crouching) TiltCamera(true);
-			if (s.WeaponControls.aiming) ChangeFov(false, -25, 0.2f);
-			else ChangeFov(true);
+			if (!s.PlayerInput.crouching) SetTilt(true);
+			if (s.WeaponControls.aiming) SetFov(false, -25, 0.2f);
+			else SetFov(true);
 		}
 	}
 	#endregion
