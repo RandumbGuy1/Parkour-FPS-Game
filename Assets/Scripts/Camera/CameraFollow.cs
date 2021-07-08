@@ -5,22 +5,16 @@ using System;
 
 public class CameraFollow : MonoBehaviour
 {
-	[Header("Camera Tilt Variables")]
-	[SerializeField] private float cameraTilt = 0f;
-	[SerializeField] private float wallRunRotation = 0f;
-	[SerializeField] private float returnTiltTime;
-
+	private Vector3 wallRunRotation = Vector3.zero;
+	private float desiredWallRunRot = 0f;
 	private int tiltDirection = 1;
-	private float tiltTime = 0, maxCameraTilt = 0f;
+	private float tiltTime = 0, targetCameraTilt = 0f;
 
 	[Header("Fov")]
 	[SerializeField] private float fov;
-	[SerializeField] private float returnFovTime;
 
-	private float maxFov = 0f, setFov, fovTime = 0;
-	private bool resetFov = true, resetTilt = true;
-
-	private Vector2 effectVel = Vector2.zero;
+	private float targetFov = 0f, setFov, fovTime = 0;
+	private Vector3 effectVel = Vector3.zero;
 
 	[Header("Sensitivity")]
 	[SerializeField] private float sensitivity;
@@ -32,7 +26,7 @@ public class CameraFollow : MonoBehaviour
 
 	private Vector2 mouse;
 	private Vector2 rotation;
-	private Vector3 smoothRotation;
+	private Vector2 smoothRotation;
 	public Vector2 rotationDelta { get; private set; }
 
 	[Header("Assignables")]
@@ -73,6 +67,7 @@ public class CameraFollow : MonoBehaviour
 
 		rotation.y += rotationDelta.y;
 		rotation.x -= rotationDelta.x;
+
 		rotation.x = Mathf.Clamp(rotation.x, -upClampAngle, downClampAngle);
 	}
 
@@ -80,13 +75,14 @@ public class CameraFollow : MonoBehaviour
 	{
 		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, rotateSmoothTime.x * Time.deltaTime);
 		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime);
-		smoothRotation.z = cameraTilt;
+
+		CameraWallRunAutoTurn();
 	}
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler(smoothRotation + s.CameraShaker.offset);
-		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y, 0);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + s.CameraShaker.offset);
+		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + desiredWallRunRot, 0);
 
 		cam.transform.localRotation = newCamRot;
 		s.orientation.transform.rotation = newPlayerRot;
@@ -95,44 +91,69 @@ public class CameraFollow : MonoBehaviour
     #region Camera Effects
     private void ChangeTilt()
 	{
-		if (cameraTilt == 0 && resetTilt) return;
-		cameraTilt = Mathf.SmoothDamp(cameraTilt, (resetTilt ? 0 : maxCameraTilt) * tiltDirection, ref effectVel.x, (resetTilt ? returnTiltTime : tiltTime + 0.05f));
+		if (wallRunRotation.z == targetCameraTilt) return;
+		wallRunRotation.z = Mathf.SmoothDamp(wallRunRotation.z, targetCameraTilt * tiltDirection, ref effectVel.x, tiltTime);
 
-		if (!resetTilt) return;
-		if (Math.Abs(cameraTilt) < 0.1f) cameraTilt = 0f;
+		if (Math.Abs(targetCameraTilt - wallRunRotation.z) < 0.01f) wallRunRotation.z = targetCameraTilt;
+	}
+
+	private void CameraWallRunAutoTurn()
+    {
+		desiredWallRunRot += (s.PlayerMovement.CalculateWallRunRotation() * -tiltDirection * 0.2f);
+
+		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.4f);
+
+		if (wallRunRotation.y == targetRot) return;
+		wallRunRotation.y = Mathf.SmoothDamp(wallRunRotation.y, targetRot, ref effectVel.z, 0.3f);
+
+		if (Math.Abs(targetRot - wallRunRotation.y) < 0.01f) wallRunRotation.y = targetRot;
 	}
 
 	private void ChangeFov()
 	{
-		if (fov == setFov && resetFov) return;
-		fov = Mathf.SmoothDamp(fov, (resetFov ? setFov : maxFov), ref effectVel.y, (resetFov ? returnFovTime : fovTime + 0.05f));
+		if (fov == targetFov) return;
+		fov = Mathf.SmoothDamp(fov, targetFov, ref effectVel.y, fovTime);
 
-		if (!resetFov) return;
-		if (maxFov > setFov) if (fov < setFov + 0.01f) fov = setFov;
-		if (maxFov < setFov) if (fov > setFov - 0.01f) fov = setFov;
+		if (Math.Abs(targetFov - fov) < 0.01f) fov = targetFov;
 	}
 
-	public void SetTilt(bool reset, int i = 1, float extension = 0, float speed = 0)
+	public void SetTilt(float target, float speed, int i = 1)
 	{
-		if (maxCameraTilt == extension) return;
+		if (targetCameraTilt == target) return;
 
 		tiltDirection = i;
 		tiltTime = speed;
-		resetTilt = reset;
-		maxCameraTilt = extension;
+		targetCameraTilt = target;
 	}
 
-	public void SetFov(bool reset, float extension = 0, float speed = 0)
+	public void SetFov(float extension = 0, float speed = 0)
 	{
-		if (maxFov == setFov + extension) return;
+		if (targetFov == setFov + extension) return;
 
 		fovTime = speed;
-		resetFov = reset;
-		maxFov = setFov + extension;
+		targetFov = setFov + extension;
 	}
 	#endregion
 
 	#region Process Camera Tilt and Fov
+	private void CameraEffects()
+	{
+		if (s.PlayerInput.crouching) SetTilt(8f, 0.15f, 1);
+
+		if (s.PlayerMovement.wallRunning)
+		{
+			SetTilt(15f, 0.15f, (s.PlayerInput.isWallRight ? 1 : -1));
+			SetFov(25f, 0.2f);
+		}
+
+		if (!s.PlayerMovement.wallRunning)
+		{
+			if (!s.PlayerInput.crouching) SetTilt(0, 0.2f);
+			if (s.WeaponControls.aiming) SetFov(-25, 0.2f);
+			else SetFov(0, 0.3f);
+		}
+	}
+
 	private void SpeedLines()
 	{
 		if (s.PlayerMovement.magnitude >= 25f)
@@ -147,24 +168,6 @@ public class CameraFollow : MonoBehaviour
 		{
 			sprintEffect.Stop();
 			fast = false;
-		}
-	}
-
-	private void CameraEffects()
-	{
-		if (s.PlayerInput.crouching) SetTilt(false, 1, 8f, 0.15f);
-
-		if (s.PlayerMovement.wallRunning)
-		{
-			SetTilt(false, (s.PlayerInput.isWallRight ? 1 : -1), 18f, 0.13f);
-			SetFov(false, 25f, 0.2f);
-		}
-
-		if (!s.PlayerMovement.wallRunning)
-		{
-			if (!s.PlayerInput.crouching) SetTilt(true);
-			if (s.WeaponControls.aiming) SetFov(false, -25, 0.2f);
-			else SetFov(true);
 		}
 	}
 	#endregion

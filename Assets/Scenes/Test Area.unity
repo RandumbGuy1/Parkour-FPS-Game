@@ -3245,15 +3245,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9a6fc1e7db8cdf4a87aab8c6a77642f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraTilt: 0
-  wallRunRotation: 0
-  returnTiltTime: 0.15
   fov: 90
-  returnFovTime: 0.3
   sensitivity: 80
   rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
-  downClampAngle: 70
+  downClampAngle: 80
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078166
@@ -10390,7 +10386,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.2
+  m_Name: Save 4.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

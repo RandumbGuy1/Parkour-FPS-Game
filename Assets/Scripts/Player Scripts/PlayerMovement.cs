@@ -34,7 +34,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
-    private Vector3 idk;
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -246,17 +245,25 @@ public class PlayerMovement : MonoBehaviour
             float wallUpSpeed = velocity.y;
             float wallMagnitude = magnitude;
 
-            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 10f);
+            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 25f);
 
             wallClimb = wallUpSpeed + wallClimbForce;
             wallClimb = Mathf.Clamp(wallClimb, -5f, 10f);
             rb.AddForce(Vector3.up * wallClimb);
-            rb.AddForce(wallMoveDir * wallMagnitude * 0.4f, ForceMode.VelocityChange);
+            rb.AddForce(wallMoveDir * wallMagnitude * 0.15f, ForceMode.VelocityChange);
         }
 
         rb.AddForce(-s.PlayerInput.wallNormal * wallHoldForce);
         rb.AddForce(-transform.up * wallRunGravityForce, ForceMode.Acceleration);
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
+    }
+
+    public float CalculateWallRunRotation()
+    {
+        if (!wallRunning) return 0f;
+        if (Vector3.Dot(s.orientation.forward, s.PlayerInput.wallNormal) > 0) return 0f;
+
+        return Vector3.Angle(s.orientation.forward, wallMoveDir);
     }
 
     private void StopWallRun()
