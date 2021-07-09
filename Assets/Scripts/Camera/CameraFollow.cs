@@ -99,9 +99,9 @@ public class CameraFollow : MonoBehaviour
 
 	private void CameraWallRunAutoTurn()
     {
-		desiredWallRunRot += (s.PlayerMovement.CalculateWallRunRotation() * -tiltDirection * 0.2f);
+		desiredWallRunRot += (s.PlayerMovement.CalculateWallRunRotation() * -tiltDirection * 0.5f);
 
-		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.4f);
+		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.2f);
 
 		if (wallRunRotation.y == targetRot) return;
 		wallRunRotation.y = Mathf.SmoothDamp(wallRunRotation.y, targetRot, ref effectVel.z, 0.3f);
@@ -135,7 +135,7 @@ public class CameraFollow : MonoBehaviour
 	}
 	#endregion
 
-	#region Process Camera Tilt and Fov
+	#region Process Camera Effects
 	private void CameraEffects()
 	{
 		if (s.PlayerInput.crouching) SetTilt(8f, 0.15f, 1);
@@ -143,11 +143,10 @@ public class CameraFollow : MonoBehaviour
 		if (s.PlayerMovement.wallRunning)
 		{
 			SetTilt(15f, 0.15f, (s.PlayerInput.isWallRight ? 1 : -1));
-			SetFov(25f, 0.2f);
+			SetFov(15f, 0.2f);
 		}
-
-		if (!s.PlayerMovement.wallRunning)
-		{
+        else
+        {
 			if (!s.PlayerInput.crouching) SetTilt(0, 0.2f);
 			if (s.WeaponControls.aiming) SetFov(-25, 0.2f);
 			else SetFov(0, 0.3f);
@@ -158,9 +157,12 @@ public class CameraFollow : MonoBehaviour
 	{
 		if (s.PlayerMovement.magnitude >= 25f)
 		{
-			if (!fast) sprintEffect.Play();
-
-			fast = true;
+			if (!fast)
+            {
+				sprintEffect.Play();
+				fast = true;
+			}
+			
 			var em = sprintEffect.emission;
 			em.rateOverTime = s.PlayerMovement.magnitude;
 		}

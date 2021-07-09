@@ -126,7 +126,10 @@ public class PlayerInput : MonoBehaviour
 
         Vector3 normal = col.GetContact(0).normal;
 
-        if (IsFloor(normal)) if (!grounded) Land(LandVel(s.PlayerMovement.magnitude, s.PlayerMovement.velocity.y));
+        float fallSpeed = s.PlayerMovement.velocity.y;
+        float magnitude = s.PlayerMovement.magnitude;
+
+        if (IsFloor(normal)) if (!grounded) Land(Math.Abs(fallSpeed));
 
         if (IsWall(normal, 0.31f))
         {
@@ -203,7 +206,7 @@ public class PlayerInput : MonoBehaviour
 
     private void Land(float impactForce)
     {
-        if (impactForce > 100f)
+        if (impactForce > 30f)
         {
             ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
@@ -216,7 +219,7 @@ public class PlayerInput : MonoBehaviour
         s.CameraLandBob.CameraLand(impactForce);
     }
 
-    float LandVel(float mag, float yMag) => (mag * 0.6f) + Math.Abs(yMag * 4f);
+    float LandVel(float mag, float y) => (mag * 0.1f) + Math.Abs(y);
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;

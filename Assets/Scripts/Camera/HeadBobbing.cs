@@ -25,7 +25,7 @@ public class HeadBobbing : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private ScriptManager s;
 
-    void Update()
+    void LateUpdate()
     {
         timer = s.PlayerMovement.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer + Time.deltaTime : 0f;
 

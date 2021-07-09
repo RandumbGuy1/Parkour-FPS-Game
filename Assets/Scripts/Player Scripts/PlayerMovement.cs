@@ -261,7 +261,7 @@ public class PlayerMovement : MonoBehaviour
     public float CalculateWallRunRotation()
     {
         if (!wallRunning) return 0f;
-        if (Vector3.Dot(s.orientation.forward, s.PlayerInput.wallNormal) > 0) return 0f;
+        if (Vector3.Dot(s.orientation.forward, s.PlayerInput.wallNormal) > 0f) return 0f;
 
         return Vector3.Angle(s.orientation.forward, wallMoveDir);
     }

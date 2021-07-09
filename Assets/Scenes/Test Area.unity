@@ -3977,7 +3977,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bobSmoothTime: 0.05
-  bobMultiplier: 0.02
+  bobMultiplier: 0.08
   maxOffset: 2.5
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -10386,7 +10386,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.3
+  m_Name: Save 4.31
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
