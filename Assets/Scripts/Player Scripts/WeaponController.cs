@@ -12,8 +12,8 @@ public class WeaponController : MonoBehaviour
     private Weapon CurrentWeapon;
     private float timer = 0f;
 
-    private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero;
-    private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero;
+    private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero, lookVel = Vector3.zero;
+    private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero, smoothLookOffset = Vector3.zero;
 
     [Header("Recoil Settings")]
     [SerializeField] private Vector3 recoilPosOffset;
@@ -82,7 +82,7 @@ public class WeaponController : MonoBehaviour
             if (selectedWeapon != previousWeapon) SelectWeapon();
         }
 
-        Vector3 newPos = defaultPos + smoothBob + switchOffsetPos + recoilPos;
+        Vector3 newPos = defaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos;
         Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot);
 
         weaponPos.localPosition = newPos;
@@ -184,11 +184,13 @@ public class WeaponController : MonoBehaviour
     #region Dynamic Weapon Movement
     private Vector3 CalculateBob()
     {
-        Vector3 offset = Vector3.zero;
+        if (timer <= 0) return Vector3.zero;
 
-        if (weapons.Count > 0)
-            if (timer > 0) offset += (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert);
+        return (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * Mathf.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert);
+    }
 
+    private Vector3 CalculateLookOffset()
+    {
         Vector2 camDelta = s.CameraLook.rotationDelta * 0.3f;
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
@@ -199,26 +201,17 @@ public class WeaponController : MonoBehaviour
         float strafeOffset = s.PlayerMovement.relativeVel.x * 0.05f;
         strafeOffset = Mathf.Clamp(strafeOffset, -0.5f, 0.5f);
 
-        offset -= new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f);
-
-        return offset;
+        return -new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f);
     }
 
     private Vector3 CalculateSway()
     {
-        Vector3 offset = Vector3.zero;
+         Vector2 camDelta = s.CameraLook.rotationDelta * swayAmount * 0.5f;
+         camDelta.y -= s.PlayerInput.input.x * swayAmount * 1.5f;
+         camDelta.y = Mathf.Clamp(camDelta.y, -100, 100);
+         camDelta.x = Mathf.Clamp(camDelta.x, -60, 60);
 
-        if (weapons.Count > 0)
-        {
-            Vector2 camDelta = s.CameraLook.rotationDelta * swayAmount * 0.5f;
-            camDelta.y -= s.PlayerInput.input.x * swayAmount * 1.5f;
-            camDelta.y = Mathf.Clamp(camDelta.y, -100, 100);
-            camDelta.x = Mathf.Clamp(camDelta.x, -60, 60);
-
-            offset += Vector3.up * camDelta.y + Vector3.right * camDelta.x * -1.4f;
-        }
-
-        return offset;
+         return Vector3.up * camDelta.y + Vector3.right * camDelta.x * -1.4f;
     }
 
     private void CalculateSwitchOffset()
@@ -265,7 +258,8 @@ public class WeaponController : MonoBehaviour
     {
         timer = s.PlayerMovement.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() + (aiming ? aimPos : Vector3.zero), ref bobVel, bobSmoothTime);
+        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? aimPos : Vector3.zero), ref lookVel, 0.2f);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
         smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? aimRot : Vector3.zero), ref swayVel, swaySmoothTime);
 
         CalculateRecoilOffset();

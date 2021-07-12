@@ -37,9 +37,9 @@ public class HeadBobbing : MonoBehaviour
 
     private Vector3 HeadBob()
     {
-        Vector3 offset = Vector3.zero;
-        if (timer > 0) offset = s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Mathf.Sin(timer * bobSpeed * 2) * bobAmountVert;
-        return offset;
+        if (timer <= 0) return Vector3.zero;
+
+        return s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert;
     }
 
     public void StepUp(Vector3 offset)

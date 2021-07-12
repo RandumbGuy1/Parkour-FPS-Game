@@ -43,8 +43,6 @@ public class WeaponPickup : Interactable
 
     private IEnumerator Pickup()
     {
-        Vector3 vel = Vector3.zero;
-
         float posElapsed = 0f;
         float rotElapsed = 0f;
 
@@ -71,7 +69,7 @@ public class WeaponPickup : Interactable
                 rotElapsed += Time.deltaTime;
             }
 
-            if (posElapsed >= pickupPositionTime && rotElapsed >= pickupRotationTime)
+            if (posElapsed >= pickupPositionTime - 0.01f && rotElapsed >= pickupRotationTime - 0.01f)
             {
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.Euler(0, 0, 0);

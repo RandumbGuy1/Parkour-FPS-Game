@@ -1031,7 +1031,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 3.5
-  pickupRotationTime: 3.5
+  pickupRotationTime: 4
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -1081,12 +1081,12 @@ MonoBehaviour:
   attackRange: 120
   spread: 1.5
   fireRate: 9
-  magazineSize: 45
+  magazineSize: 60
   bulletsPerTap: 1
   reloadTime: 2
   Environment:
     serializedVersion: 2
-    m_Bits: 7936
+    m_Bits: 1792
   attackPoint: {fileID: 1332355919}
 --- !u!1 &302361563
 GameObject:
@@ -3266,7 +3266,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bobSpeed: 8
   bobAmountHoriz: 0.1
-  bobAmountVert: 0.2
+  bobAmountVert: 0.3
   bobSmoothTime: 0.1
   stepSmoothTime: 0.06
   vaultDesync: {x: 0, y: 0, z: 0}
@@ -3316,8 +3316,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  swayAmount: 6
-  swayFrequency: 0.35
+  swayAmount: 5
+  swayFrequency: 0.3
 --- !u!1 &869843952
 GameObject:
   m_ObjectHideFlags: 0
@@ -9153,7 +9153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   pickupPositionTime: 3.5
-  pickupRotationTime: 3.5
+  pickupRotationTime: 4
   description: Pickup Gun
 --- !u!114 &1017722969
 MonoBehaviour:
@@ -9179,7 +9179,7 @@ MonoBehaviour:
   reloadTime: 2
   Environment:
     serializedVersion: 2
-    m_Bits: 3840
+    m_Bits: 1792
   attackPoint: {fileID: 198284364}
 --- !u!1 &1081612406
 GameObject:
@@ -10386,7 +10386,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.31
+  m_Name: Save 4.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10934,9 +10934,9 @@ MonoBehaviour:
   defaultPos: {x: 1.8, y: -0.6, z: 2.6}
   aimPos: {x: -1.8, y: 0.1, z: 0}
   bobAmountHoriz: 0.2
-  bobAmountVert: 0.1
+  bobAmountVert: 0.25
   bobSpeed: 8
-  bobSmoothTime: 0.2
+  bobSmoothTime: 0.1
   defaultRot: {x: 0, y: 18, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
   swayAmount: 10
