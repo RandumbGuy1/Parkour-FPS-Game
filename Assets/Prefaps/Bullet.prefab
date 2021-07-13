@@ -97,7 +97,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 70f87ebc2465b54418353613430c6d59, type: 2}
+  - {fileID: 2100000, guid: fba439ecb5e43954a9acdf817a3d36c4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -118,10 +118,10 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 0.06
+  m_Time: 0.05
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.15
+    widthMultiplier: 0.2
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -135,13 +135,22 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: -2.3595219
-        outSlope: -2.3595219
+        time: 0.62841505
+        value: 0.75438774
+        inSlope: -0.8818204
+        outSlope: -0.8818204
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.09064871
+        inWeight: 0.33333334
+        outWeight: 0.32609233
+      - serializedVersion: 3
+        time: 0.9122925
+        value: 0
+        inSlope: -4.1554384
+        outSlope: -4.1554384
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.19473723
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
@@ -149,7 +158,7 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 0}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -181,7 +190,7 @@ TrailRenderer:
     textureMode: 0
     shadowBias: 0.5
     generateLightingData: 0
-  m_MinVertexDistance: 0.5
+  m_MinVertexDistance: 1
   m_Autodestruct: 0
   m_Emitting: 1
 --- !u!1 &8659643016041422200
@@ -242,7 +251,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 70f87ebc2465b54418353613430c6d59, type: 2}
+  - {fileID: 2100000, guid: fba439ecb5e43954a9acdf817a3d36c4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

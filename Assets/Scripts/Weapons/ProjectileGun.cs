@@ -24,6 +24,7 @@ public class ProjectileGun : Weapon
 
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
+    [SerializeField] private ParticleSystem muzzleFlash;
 
     void Start() => bulletsLeft = magazineSize;
 
@@ -32,6 +33,8 @@ public class ProjectileGun : Weapon
     public override bool OnAttack(Transform cam)
     {
         if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
+
+        if (muzzleFlash != null) muzzleFlash.Play();
 
         Ray ray = cam.GetComponent<Camera>().ViewportPointToRay((Vector3) Vector2.one * 0.5f);
 

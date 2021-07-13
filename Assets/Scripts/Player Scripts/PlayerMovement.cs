@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale * 0.4f;
+        crouchOffset = crouchScale * 0.7f;
     }
 
     #region Movement
@@ -93,16 +93,16 @@ public class PlayerMovement : MonoBehaviour
 
         ProcessInput();
 
-        moveDir = (grounded ? GroundMove(CalculateMultiplier(), vel) : AirMove(CalculateMultiplier()));
+        moveDir = (grounded ? GroundMove(CalculateMultiplier()) : AirMove(CalculateMultiplier()));
         rb.AddForce(moveDir * moveSpeed * 3f, ForceMode.Acceleration);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
     }
 
-    private Vector3 GroundMove(Vector2 multiplier, Vector3 vel)
+    private Vector3 GroundMove(Vector2 multiplier)
     {
-        Friction(vel);
+        Friction();
 
         Vector3 inputDir = CalculateInputDir(input, multiplier);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
@@ -115,8 +115,8 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector2 inputTemp = input;
 
-        if (inputTemp.x > 0 && relativeVel.x > 25f || inputTemp.x < 0 && relativeVel.x < -25f) inputTemp.x = 0f;
-        if (inputTemp.y > 0 && relativeVel.z > 25f || inputTemp.y < 0 && relativeVel.z < -25f) inputTemp.y = 0f;
+        if (inputTemp.x > 0 && relativeVel.x > 23f || inputTemp.x < 0 && relativeVel.x < -23f) inputTemp.x = 0f;
+        if (inputTemp.y > 0 && relativeVel.z > 23f || inputTemp.y < 0 && relativeVel.z < -23f) inputTemp.y = 0f;
 
         return CalculateInputDir(inputTemp, multiplier);
     }
@@ -300,29 +300,28 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Friction
-    private void Friction(Vector3 vel)
+    private void Friction()
     {
         if (jumping) return;
 
-        Vector3 frictionForce = -Vector3.ProjectOnPlane(vel, s.PlayerInput.groundNormal);
-
         if (crouched)
         {
-            rb.AddForce(frictionForce.normalized * slideFriction * 3f * (magnitude * 0.1f));
+            rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (magnitude * 0.1f)); 
             return;
         }
 
-        if (Math.Abs(input.x) < threshold && Math.Abs(relativeVel.x) > threshold || CounterMomentum(input.x, relativeVel.x))
-        rb.AddForce(s.orientation.right * -relativeVel.x * friction * 2f, ForceMode.Acceleration);
+        Vector3 vel = -new Vector3(relativeVel.x * Convert.ToInt32(input.x == 0f || CounterMomentum(input.x, relativeVel.x)), 0, relativeVel.z * Convert.ToInt32(input.y == 0f || CounterMomentum(input.y, relativeVel.z))) * friction * 2f;
 
-        if (Math.Abs(input.y) < threshold && Math.Abs(relativeVel.z) > threshold || CounterMomentum(input.y, relativeVel.z))
-        rb.AddForce(s.orientation.forward * -relativeVel.z * friction * 2f, ForceMode.Acceleration);
+        Vector3 frictionForce = s.orientation.TransformDirection(vel);
+        frictionForce = Vector3.ProjectOnPlane(frictionForce, s.PlayerInput.groundNormal);
+
+        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce, ForceMode.Acceleration);
     }
 
     private bool CounterMomentum(float input, float mag)
     {
         if (input > 0 && mag < -threshold || input < 0 && mag > threshold) return true;
-        else return false;
+        return false;
     }
     #endregion
 
