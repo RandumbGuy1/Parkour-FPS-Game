@@ -99,14 +99,13 @@ public class WeaponController : MonoBehaviour
         switch (CurrentWeapon.weaponType)
         {
             case Weapon.WeaponClass.Ranged:
-                if (s.PlayerInput.reloading)
-                    if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
+                if (s.PlayerInput.reloading) if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
 
                 if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
                 {
                     if (CurrentWeapon.OnAttack(s.cam))
                     {
-                        s.CameraShaker.ShakeOnce(6f, 8f, 0.3f, 0.06f, 4f);
+                        s.CameraShaker.ShakeOnce(11f, 6f, 0.3f, 0.05f, 0.1f);
                         desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.8f, 1.2f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                         desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                     }
@@ -195,11 +194,11 @@ public class WeaponController : MonoBehaviour
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
 
-        float fallSpeed = s.PlayerMovement.velocity.y * 0.03f;
-        fallSpeed = Mathf.Clamp(fallSpeed, -1f, 1f);
+        float fallSpeed = s.PlayerMovement.velocity.y * 0.05f;
+        fallSpeed = Mathf.Clamp(fallSpeed, -0.8f, 0.8f);
 
-        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.05f;
-        strafeOffset = Mathf.Clamp(strafeOffset, -0.5f, 0.5f);
+        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.06f;
+        strafeOffset = Mathf.Clamp(strafeOffset, -0.25f, 0.25f);
 
         return -new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f);
     }
