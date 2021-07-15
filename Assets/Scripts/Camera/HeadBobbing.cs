@@ -27,7 +27,7 @@ public class HeadBobbing : MonoBehaviour
 
     void LateUpdate()
     {
-        timer = s.PlayerMovement.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer + Time.deltaTime : 0f;
+        timer = s.PlayerMovement.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref vel, bobSmoothTime);
         Vector3 newPos = s.playerHead.position + smoothOffset + vaultDesync;
@@ -41,7 +41,7 @@ public class HeadBobbing : MonoBehaviour
 
         return s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert;
     }
-
+    
     public void StepUp(Vector3 offset)
     {
         vaultDesync = Vector3.zero + offset;

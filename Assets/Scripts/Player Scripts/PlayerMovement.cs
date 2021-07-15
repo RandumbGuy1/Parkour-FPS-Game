@@ -22,6 +22,7 @@ public class PlayerMovement : MonoBehaviour
     private float crouchVel = 0f;
     private float crouchOffset;
     private bool crouched = false;
+    private bool canUnCrouch = true;
     private Vector3 playerScale;
 
     [Header("WallRunning")]
@@ -73,7 +74,7 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        crouchOffset = crouchScale * 0.7f;
+        crouchOffset = crouchScale * 0.0f;
     }
 
     #region Movement
@@ -285,7 +286,14 @@ public class PlayerMovement : MonoBehaviour
     private void Crouch(Vector3 dir)
     {
         crouched = true;
+
         if (grounded) if (magnitude > 0.5f) rb.AddForce(dir * slideForce * magnitude);
+    }
+
+    private void UnCrouch()
+    {
+        crouched = false;
+        rb.velocity *= 0.7f;
     }
 
     private void UpdateCrouchScale()
@@ -304,7 +312,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (jumping) return;
 
-        if (crouched)
+        if (crouched && canUnCrouch)
         {
             rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (magnitude * 0.1f)); 
             return;
@@ -347,11 +355,8 @@ public class PlayerMovement : MonoBehaviour
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
         if (crouching && !wallRunning && !crouched) Crouch(moveDir);
-        if (!crouching && crouched)
-        {
-            crouched = false;
-            rb.velocity *= 0.8f;
-        }
+        if (crouched) canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
+        if (!crouching && crouched && canUnCrouch) UnCrouch();
 
         UpdateCrouchScale();
 
@@ -377,7 +382,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting || wallRunning) return new Vector2(0f, 0f);
 
-        if (grounded) return (crouched ? new Vector2(0.01f, 0.01f) : new Vector2(1f, 1.05f));
+        if (grounded) return (crouched ? new Vector2(0.1f, 0.1f) : new Vector2(1f, 1.05f));
 
         if (crouched) return new Vector2(0.4f, 0.3f);
 

@@ -20,6 +20,9 @@ public class CameraShaker : MonoBehaviour
     private Vector3 headSwayOffset = Vector3.zero;
     private float headSwayScroller = 0;
 
+    [Header("Assignables")]
+    [SerializeField] private ScriptManager s;
+
     public class ShakeEvent
     {
         AnimationCurve blendOverLifetime;
@@ -77,10 +80,7 @@ public class CameraShaker : MonoBehaviour
             displacement = Vector3.SmoothDamp(displacement, noise, ref vel, smoothness);
         }
 
-        public bool Alive()
-        {
-            return timeRemaining > 0f;
-        }
+        public bool Alive() => timeRemaining > 0f;
     }
 
     List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
@@ -107,12 +107,15 @@ public class CameraShaker : MonoBehaviour
             }
         }
 
-        headSwayScroller += Time.deltaTime * swayFrequency;
+        if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f)
+        {
+            headSwayScroller += Time.deltaTime * swayFrequency;
 
-        headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
-        headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 5f) * 0.9f;
+            headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
+            headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 5f) * 0.9f;
 
-        headSwayOffset -= (Vector3) Vector2.one * 0.5f;
+            headSwayOffset -= (Vector3)Vector2.one * 0.5f;     
+        }
 
         rotationOffset += headSwayOffset * swayAmount;
 

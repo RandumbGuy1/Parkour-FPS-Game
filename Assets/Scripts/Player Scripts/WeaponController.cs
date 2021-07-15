@@ -194,11 +194,11 @@ public class WeaponController : MonoBehaviour
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
 
-        float fallSpeed = s.PlayerMovement.velocity.y * 0.05f;
-        fallSpeed = Mathf.Clamp(fallSpeed, -0.8f, 0.8f);
+        float fallSpeed = s.PlayerMovement.velocity.y * 0.02f;
+        fallSpeed = Mathf.Clamp(fallSpeed, -0.5f, 0.5f);
 
-        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.06f;
-        strafeOffset = Mathf.Clamp(strafeOffset, -0.25f, 0.25f);
+        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.03f;
+        strafeOffset = Mathf.Clamp(strafeOffset, -0.2f, 0.2f);
 
         return -new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f);
     }
