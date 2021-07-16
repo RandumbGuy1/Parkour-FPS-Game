@@ -12,9 +12,11 @@ public class Projectile : MonoBehaviour
         Invoke("Explode", lifeTime);
     }
 
-    void OnCollisionEnter()
+    void OnCollisionEnter(Collision col)
     {
-        Invoke("Explode", 0.01f);
+        ObjectPooler.Instance.SpawnParticle("LaserImpactFX", transform.position, Quaternion.LookRotation(col.GetContact(0).normal));
+
+        Invoke("Explode", 0.03f);
     }
 
     void Explode()

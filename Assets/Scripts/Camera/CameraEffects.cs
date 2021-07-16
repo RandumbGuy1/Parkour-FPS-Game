@@ -27,8 +27,8 @@ public class CameraEffects : MonoBehaviour
 		Vector3 offset = Vector3.zero;
 
 		if (desiredOffset >= 0f) return offset;
-
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 4f * Time.deltaTime);
+		
+		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7f * Time.deltaTime);
 		offset.y = Mathf.SmoothDamp(transform.localPosition.y, desiredOffset, ref vel, bobSmoothTime);
 
 		if (desiredOffset >= -0.01f) desiredOffset = 0f;
@@ -39,7 +39,7 @@ public class CameraEffects : MonoBehaviour
 	public void CameraLand(float mag)
 	{
 		float magnitude = (mag * bobMultiplier);
-		magnitude = Mathf.Round(magnitude * 10.0f) * 0.1f;
+		magnitude = Mathf.Round(magnitude * 100f) * 0.01f;
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 		if (magnitude < 0.5f) magnitude = 0f;
