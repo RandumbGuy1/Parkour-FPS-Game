@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float crouchScale;
     [SerializeField] private float crouchSmoothTime;
     [SerializeField] private float slideForce;
+    public bool canCrouchWalk = true;
     private float crouchVel = 0f;
     private float crouchOffset;
     private bool crouched = false;
@@ -293,6 +294,8 @@ public class PlayerMovement : MonoBehaviour
     private void UnCrouch()
     {
         crouched = false;
+        canCrouchWalk = true;
+
         rb.velocity *= 0.7f;
     }
 
@@ -312,7 +315,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (jumping) return;
 
-        if (crouched && canUnCrouch)
+        if (crouched && canUnCrouch && !canCrouchWalk)
         {
             rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (magnitude * 0.1f)); 
             return;
@@ -326,11 +329,7 @@ public class PlayerMovement : MonoBehaviour
         if (frictionForce != Vector3.zero) rb.AddForce(frictionForce, ForceMode.Acceleration);
     }
 
-    private bool CounterMomentum(float input, float mag)
-    {
-        if (input > 0 && mag < -threshold || input < 0 && mag > threshold) return true;
-        return false;
-    }
+    private bool CounterMomentum(float input, float mag) => (input > 0 && mag < -threshold || input < 0 && mag > threshold);
     #endregion
 
     #region Input
@@ -355,7 +354,12 @@ public class PlayerMovement : MonoBehaviour
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
 
         if (crouching && !wallRunning && !crouched) Crouch(moveDir);
-        if (crouched) canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
+        if (crouched)
+        {
+            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
+            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f; 
+        }
+
         if (!crouching && crouched && canUnCrouch) UnCrouch();
 
         UpdateCrouchScale();
@@ -382,7 +386,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting || wallRunning) return new Vector2(0f, 0f);
 
-        if (grounded) return (crouched ? new Vector2(0.1f, 0.1f) : new Vector2(1f, 1.05f));
+        if (grounded) return (crouched ? new Vector2(0.2f, 0.2f) : new Vector2(1f, 1.05f));
 
         if (crouched) return new Vector2(0.4f, 0.3f);
 
@@ -391,6 +395,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float ControlMaxSpeed()
     {
+        if (crouched && canCrouchWalk) return maxGroundSpeed * 0.6f;
         if (crouched) return maxSlideSpeed;
         if (jumping) return maxAirSpeed;
         if (grounded) return maxGroundSpeed;
@@ -398,8 +403,5 @@ public class PlayerMovement : MonoBehaviour
         return maxAirSpeed;
     }
 
-    void ResetWallJump()
-    {
-        readyToWallJump = true;
-    }
+    void ResetWallJump() => readyToWallJump = true;
 }
