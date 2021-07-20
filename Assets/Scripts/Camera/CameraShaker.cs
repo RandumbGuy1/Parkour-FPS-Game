@@ -12,16 +12,7 @@ public class CameraShaker : MonoBehaviour
       new Keyframe(1.0f, 0.0f));
 
     public Vector3 offset { get; private set; }
-
-    [Header("Head Sway Settings")]
-    [SerializeField] private float swayAmount;
-    [SerializeField] private float swayFrequency;
-
-    private Vector3 headSwayOffset = Vector3.zero;
-    private float headSwayScroller = 0;
-
-    [Header("Assignables")]
-    [SerializeField] private ScriptManager s;
+    private List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
 
     public class ShakeEvent
     {
@@ -58,12 +49,9 @@ public class CameraShaker : MonoBehaviour
         public void UpdateShake()
         {
             float offsetDelta = Time.deltaTime * frequency;
-
             timeRemaining -= Time.deltaTime;
 
-            noiseOffset.x += offsetDelta;
-            noiseOffset.y += offsetDelta;
-            noiseOffset.z += offsetDelta;
+            noiseOffset += Vector3.one * offsetDelta;
 
             noise.x = Mathf.PerlinNoise(noiseOffset.x, 1f);
             noise.y = Mathf.PerlinNoise(noiseOffset.y, 2f);
@@ -80,13 +68,10 @@ public class CameraShaker : MonoBehaviour
             displacement = Vector3.SmoothDamp(displacement, noise, ref vel, smoothness);
         }
 
-        public bool Alive() => timeRemaining > 0f;
+        public bool Finished() => timeRemaining < 0f;
     }
 
-    List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
-
-    public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, float randomness) => 
-        shakeEvents.Add(new ShakeEvent(magnitude, frequency, duration, smoothness, randomness, blendOverLifetime));
+    public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, float randomness) => shakeEvents.Add(new ShakeEvent(magnitude, frequency, duration, smoothness, randomness, blendOverLifetime));
 
     void LateUpdate()
     {
@@ -98,26 +83,16 @@ public class CameraShaker : MonoBehaviour
             {
                 ShakeEvent shake = shakeEvents[i];
 
-                if (!shake.Alive()) shakeEvents.RemoveAt(i);
-                else
+                if (shake.Finished())
                 {
-                    shake.UpdateShake();
-                    rotationOffset += shake.displacement;
+                    shakeEvents.RemoveAt(i);
+                    continue;
                 }
+
+                shake.UpdateShake();
+                rotationOffset += shake.displacement;
             }
         }
-
-        if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f)
-        {
-            headSwayScroller += Time.deltaTime * swayFrequency;
-
-            headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
-            headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 5f) * 0.9f;
-
-            headSwayOffset -= (Vector3)Vector2.one * 0.5f;     
-        }
-
-        rotationOffset += headSwayOffset * swayAmount;
 
         offset = rotationOffset;
     }

@@ -29,6 +29,14 @@ public class CameraFollow : MonoBehaviour
 	private Vector2 smoothRotation;
 	public Vector2 rotationDelta { get; private set; }
 
+	[Header("Head Sway Settings")]
+	[SerializeField] private float swayAmount;
+	[SerializeField] private float swayFrequency;
+
+	private Vector3 finalSwayOffset = Vector3.zero;
+	private Vector3 headSwayOffset = Vector3.zero;
+	private float headSwayScroller = 0;
+
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
 	[SerializeField] private ParticleSystem sprintEffect;
@@ -59,11 +67,22 @@ public class CameraFollow : MonoBehaviour
 		ApplyRotation();
 
 		cam.fieldOfView = fov;
+
+		if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f)
+		{
+			headSwayScroller += Time.deltaTime * swayFrequency;
+
+			headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
+			headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
+
+			headSwayOffset -= (Vector3)Vector2.one * 0.5f;
+			finalSwayOffset = headSwayOffset * swayAmount;
+		}
 	}
 
 	void CalcRotation()
 	{
-		rotationDelta = mouse * sensitivity * 0.01f;
+		rotationDelta = mouse * sensitivity * Time.smoothDeltaTime;
 
 		rotation.y += rotationDelta.y;
 		rotation.x -= rotationDelta.x;
@@ -81,7 +100,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + s.CameraShaker.offset);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.offset);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + desiredWallRunRot, 0);
 
 		cam.transform.localRotation = newCamRot;

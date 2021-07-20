@@ -3258,6 +3258,8 @@ MonoBehaviour:
   rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
   downClampAngle: 80
+  swayAmount: 6
+  swayFrequency: 0.4
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078166
@@ -3324,9 +3326,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  swayAmount: 6
-  swayFrequency: 0.3
-  s: {fileID: 1650519438}
 --- !u!1 &869843952
 GameObject:
   m_ObjectHideFlags: 0
@@ -5584,7 +5583,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.8
+  m_Name: Save 4.9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

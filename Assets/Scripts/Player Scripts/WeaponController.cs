@@ -105,7 +105,7 @@ public class WeaponController : MonoBehaviour
                 {
                     if (CurrentWeapon.OnAttack(s.cam))
                     {
-                        s.CameraShaker.ShakeOnce(11f, 6f, 0.3f, 0.05f, 0.1f);
+                        s.CameraShaker.ShakeOnce(11f, 6f, 0.3f, 0.1f, 0.1f);
                         desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.8f, 1.2f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                         desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                     }
