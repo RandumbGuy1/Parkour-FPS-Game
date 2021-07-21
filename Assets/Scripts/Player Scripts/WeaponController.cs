@@ -105,7 +105,7 @@ public class WeaponController : MonoBehaviour
                 {
                     if (CurrentWeapon.OnAttack(s.cam))
                     {
-                        s.CameraShaker.ShakeOnce(11f, 6f, 0.3f, 0.1f, 0.1f);
+                        s.CameraShaker.ShakeOnce(12f, 12.5f, 0.1f, 0.2f);
                         desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.8f, 1.2f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                         desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                     }
@@ -116,7 +116,7 @@ public class WeaponController : MonoBehaviour
                 if (s.PlayerInput.rightClick) CurrentWeapon.SecondaryAction();
 
                 if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
-                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f, 4f);
+                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
                 break;
 
         }
@@ -130,6 +130,7 @@ public class WeaponController : MonoBehaviour
 
         weapons.Add(obj);
         obj.transform.SetParent(weaponPos);
+        obj.GetComponent<BoxCollider>().enabled = false;
 
         selectedWeapon = weapons.Count - 1;
         SelectWeapon(false);
@@ -169,6 +170,7 @@ public class WeaponController : MonoBehaviour
 
         rb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
+        weapons[selectedWeapon].GetComponent<BoxCollider>().enabled = true;
         weapons[selectedWeapon].SetActive(true);
         weapons.RemoveAt(selectedWeapon);
 

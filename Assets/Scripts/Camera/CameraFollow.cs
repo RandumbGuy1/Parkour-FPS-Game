@@ -82,7 +82,7 @@ public class CameraFollow : MonoBehaviour
 
 	void CalcRotation()
 	{
-		rotationDelta = mouse * sensitivity * Time.smoothDeltaTime;
+		rotationDelta = mouse * sensitivity * 0.02f;
 
 		rotation.y += rotationDelta.y;
 		rotation.x -= rotationDelta.x;

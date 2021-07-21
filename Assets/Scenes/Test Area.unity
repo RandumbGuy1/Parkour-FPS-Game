@@ -3984,8 +3984,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bobSmoothTime: 0.05
-  bobMultiplier: 0.08
+  bobSmoothTime: 0.045
+  bobMultiplier: 0.09
   maxOffset: 2.5
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -5583,7 +5583,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 4.9
+  m_Name: Save 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

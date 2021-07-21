@@ -28,7 +28,7 @@ public class CameraEffects : MonoBehaviour
 
 		if (desiredOffset >= 0f) return offset;
 		
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7f * Time.deltaTime);
+		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 8f * Time.deltaTime);
 		offset.y = Mathf.SmoothDamp(transform.localPosition.y, desiredOffset, ref vel, bobSmoothTime);
 
 		if (desiredOffset >= -0.01f) desiredOffset = 0f;

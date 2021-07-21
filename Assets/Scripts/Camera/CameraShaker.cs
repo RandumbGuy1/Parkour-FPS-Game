@@ -24,14 +24,17 @@ public class CameraShaker : MonoBehaviour
         float frequency;
         float trama = 0f;
         float smoothness;
-
+        /*
         private Vector3 noise = Vector3.zero;
         private Vector3 noiseOffset = Vector3.zero;
-        private Vector3 vel = Vector3.zero;
+        */
+        private Vector3 targetDir = Vector3.zero;
+        private Vector3 smoothDir = Vector3.zero;
 
+        private Vector3 vel = Vector3.zero;
         public Vector3 displacement = Vector3.zero;
 
-        public ShakeEvent(float magnitude, float frequency, float duration, float smoothness, float randomness, AnimationCurve blendOverLifetime)
+        public ShakeEvent(float magnitude, float frequency, float duration, float smoothness, AnimationCurve blendOverLifetime)
         {
             this.blendOverLifetime = blendOverLifetime;
             this.magnitude = magnitude;
@@ -41,15 +44,23 @@ public class CameraShaker : MonoBehaviour
 
             timeRemaining = this.duration;
 
-            noiseOffset.x = Random.Range(0f, randomness);
-            noiseOffset.y = Random.Range(0f, randomness);
-            noiseOffset.z = Random.Range(0f, randomness);
+            targetDir = Vector3.left;
+            /*
+            noiseOffset.x = Random.Range(0f, 32f);
+            noiseOffset.y = Random.Range(0f, 32f);
+            noiseOffset.z = Random.Range(0f, 32f);
+            */
         }
-
+        
         public void UpdateShake()
         {
-            float offsetDelta = Time.deltaTime * frequency;
             timeRemaining -= Time.deltaTime;
+
+            float agePercent = 1f - (timeRemaining / duration);
+            trama = blendOverLifetime.Evaluate(agePercent);
+            trama = Mathf.Clamp(trama, 0f, 1f);
+            /*
+            float offsetDelta = Time.deltaTime * frequency;
 
             noiseOffset += Vector3.one * offsetDelta;
 
@@ -64,14 +75,17 @@ public class CameraShaker : MonoBehaviour
             trama = blendOverLifetime.Evaluate(agePercent);
             trama = Mathf.Clamp(trama, 0f, 1f);
             noise *= trama;
+            */
+            if ((targetDir - smoothDir).sqrMagnitude < 0.6f) targetDir = (-targetDir + Random.insideUnitSphere * 0.6f).normalized;
+            smoothDir = Vector3.SmoothDamp(smoothDir, targetDir, ref vel, smoothness);
 
-            displacement = Vector3.SmoothDamp(displacement, noise, ref vel, smoothness);
+            displacement = (smoothDir * magnitude) * trama;
         }
 
-        public bool Finished() => timeRemaining < 0f;
+        public bool Finished() => timeRemaining <= 0f;
     }
 
-    public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, float randomness) => shakeEvents.Add(new ShakeEvent(magnitude, frequency, duration, smoothness, randomness, blendOverLifetime));
+    public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness) => shakeEvents.Add(new ShakeEvent(magnitude, frequency, duration, smoothness, blendOverLifetime));
 
     void LateUpdate()
     {
