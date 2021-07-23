@@ -130,7 +130,6 @@ public class WeaponController : MonoBehaviour
 
         weapons.Add(obj);
         obj.transform.SetParent(weaponPos);
-        obj.GetComponent<BoxCollider>().enabled = false;
 
         selectedWeapon = weapons.Count - 1;
         SelectWeapon(false);
@@ -158,8 +157,11 @@ public class WeaponController : MonoBehaviour
         weapons[selectedWeapon].transform.SetParent(null);
 
         rb.isKinematic = false;
+        rb.detectCollisions = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
+
         rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.08f) + 1f), ForceMode.VelocityChange);
 
         Vector3 rand = Vector3.zero;
@@ -170,7 +172,6 @@ public class WeaponController : MonoBehaviour
 
         rb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
-        weapons[selectedWeapon].GetComponent<BoxCollider>().enabled = true;
         weapons[selectedWeapon].SetActive(true);
         weapons.RemoveAt(selectedWeapon);
 

@@ -96,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
         ProcessInput();
 
         moveDir = (grounded ? GroundMove(CalculateMultiplier()) : AirMove(CalculateMultiplier()));
-        rb.AddForce(moveDir * moveSpeed * 0.04f, ForceMode.VelocityChange);
+        rb.AddForce(moveDir * moveSpeed * 0.035f, ForceMode.VelocityChange);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;

@@ -1031,8 +1031,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  pickupPositionTime: 3.5
-  pickupRotationTime: 4
+  pickupPositionTime: 0.3
+  pickupRotationTime: 0.3
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -4348,8 +4348,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  pickupPositionTime: 3.5
-  pickupRotationTime: 4
+  pickupPositionTime: 0.3
+  pickupRotationTime: 0.3
   description: Pickup Gun
 --- !u!114 &1017722969
 MonoBehaviour:
@@ -5583,7 +5583,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 5
+  m_Name: Save 5.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6137,7 +6137,7 @@ MonoBehaviour:
   recoilSmoothTime: 0.05
   reloadRotOffset: {x: 720, y: 0, z: 0}
   reloadSmoothTime: 0.6
-  defaultPos: {x: 1.8, y: -0.6, z: 2.6}
+  defaultPos: {x: 2, y: -0.6, z: 2.6}
   aimPos: {x: -1.8, y: 0.1, z: 0}
   bobAmountHoriz: 0.15
   bobAmountVert: 0.2

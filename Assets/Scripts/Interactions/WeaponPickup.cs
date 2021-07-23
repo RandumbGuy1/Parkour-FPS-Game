@@ -12,7 +12,6 @@ public class WeaponPickup : Interactable
     [SerializeField] private string description;
 
     private Rigidbody rb;
-    private BoxCollider bc;
 
     void Awake()
     {
@@ -35,48 +34,33 @@ public class WeaponPickup : Interactable
 
     public override void OnInteract()
     {
+        rb.interpolation = RigidbodyInterpolation.None;
         rb.isKinematic = true;
         rb.useGravity = false;
+        rb.detectCollisions = false;
+
         StopAllCoroutines();
         StartCoroutine(Pickup());
     }
 
     private IEnumerator Pickup()
     {
-        float posElapsed = 0f;
-        float rotElapsed = 0f;
+        Vector3 vel = Vector3.zero;
 
-        float t = 0f;
-        float u = 0f;
-
-        while (rb.isKinematic)
+        while (transform.localPosition.sqrMagnitude > 0.01f || transform.localEulerAngles.sqrMagnitude > 0.01f)
         {
-            if (posElapsed < pickupPositionTime)
-            {
-                t = posElapsed / pickupPositionTime;
-                t = Mathf.Sin(t * Mathf.PI * 0.5f);
+            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, Vector3.zero, ref vel, pickupPositionTime);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(Vector3.zero), 1/pickupRotationTime * Time.deltaTime);
 
-                transform.localPosition = Vector3.Lerp(transform.localPosition, Vector3.zero, t);
-                posElapsed += Time.deltaTime;
-            }
-
-            if (rotElapsed < pickupRotationTime)
-            {
-                u = rotElapsed / pickupRotationTime;
-                u = Mathf.Sin(u * Mathf.PI * 0.5f);
-
-                transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(0, 0, 0), u);
-                rotElapsed += Time.deltaTime;
-            }
-
-            if (posElapsed >= pickupPositionTime - 0.01f && rotElapsed >= pickupRotationTime - 0.01f)
-            {
-                transform.localPosition = Vector3.zero;
-                transform.localRotation = Quaternion.Euler(0, 0, 0);
-                break;
-            }
+            if (!rb.isKinematic) break;
 
             yield return null;
+        }
+
+        if (rb.isKinematic)
+        {
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.Euler(Vector3.zero);
         }
     }
 }
