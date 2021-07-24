@@ -216,7 +216,7 @@ public class PlayerInput : MonoBehaviour
             velocityOverLifetime.z = magnitude.z;
         }
             
-        s.CameraLandBob.CameraLand(impactForce);
+        s.CameraHeadBob.CameraLand(impactForce);
     }
 
     float LandVel(float mag, float y) => (mag * 0.1f) + Math.Abs(y);

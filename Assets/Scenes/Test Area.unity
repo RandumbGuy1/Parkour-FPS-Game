@@ -3217,7 +3217,6 @@ GameObject:
   m_Component:
   - component: {fileID: 838078164}
   - component: {fileID: 838078165}
-  - component: {fileID: 838078166}
   - component: {fileID: 838078167}
   m_Layer: 0
   m_Name: Camera
@@ -3262,25 +3261,6 @@ MonoBehaviour:
   swayFrequency: 0.4
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
---- !u!114 &838078166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 838078163}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 335552ddfaccd6e4caeb7bb0ebe435e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bobSpeed: 8
-  bobAmountHoriz: 0.1
-  bobAmountVert: 0.3
-  bobSmoothTime: 0.1
-  stepSmoothTime: 0.06
-  vaultDesync: {x: 0, y: 0, z: 0}
-  s: {fileID: 1650519438}
 --- !u!114 &838078167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3895,8 +3875,8 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
-  - component: {fileID: 963194229}
   - component: {fileID: 963194230}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3981,12 +3961,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ecde889fa6c26ce48bb85c956385fe1b, type: 3}
+  m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bobSmoothTime: 0.045
-  bobMultiplier: 0.09
+  landBobSmoothTime: 0.045
+  landBobMultiplier: 0.09
   maxOffset: 2.5
+  bobSpeed: 8
+  bobAmountHoriz: 0.1
+  bobAmountVert: 0.3
+  bobSmoothTime: 0.1
+  stepSmoothTime: 0.06
+  vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
@@ -6086,8 +6072,7 @@ MonoBehaviour:
   PlayerInput: {fileID: 1650519435}
   WeaponControls: {fileID: 1650519440}
   CameraLook: {fileID: 838078165}
-  CameraLandBob: {fileID: 963194229}
-  CameraHeadBob: {fileID: 838078166}
+  CameraHeadBob: {fileID: 963194229}
   CameraShaker: {fileID: 838078167}
   orientation: {fileID: 1277575616}
   playerHead: {fileID: 32658971}

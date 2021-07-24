@@ -11,8 +11,7 @@ public class ScriptManager : MonoBehaviour
 
     [Header("Camera Scripts")]
     public CameraFollow CameraLook;
-    public CameraEffects CameraLandBob;
-    public HeadBobbing CameraHeadBob;
+    public CameraBobbing CameraHeadBob;
     public CameraShaker CameraShaker;
 
     [Header("Assignables")]
