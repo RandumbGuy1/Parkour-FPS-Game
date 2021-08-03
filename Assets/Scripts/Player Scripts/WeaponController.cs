@@ -59,7 +59,6 @@ public class WeaponController : MonoBehaviour
 
     [Header("Assignables")]
     [SerializeField] private Transform weaponPos;
-
     private ScriptManager s;
 
     void Awake() => s = GetComponent<ScriptManager>();
@@ -105,7 +104,7 @@ public class WeaponController : MonoBehaviour
                 {
                     if (CurrentWeapon.OnAttack(s.cam))
                     {
-                        s.CameraShaker.ShakeOnce(12f, 12.5f, 0.1f, 0.2f);
+                        s.CameraShaker.ShakeOnce(12.5f, 12.5f, 0.5f, 0.17f);
                         desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.8f, 1.2f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                         desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.3f)) * CurrentWeapon.recoilForce;
                     }

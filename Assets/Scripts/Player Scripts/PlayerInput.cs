@@ -7,7 +7,7 @@ using System;
 public class PlayerInput : MonoBehaviour
 {
     public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
-
+    
     public Vector3 groundNormal { get; private set; }
     public Vector3 wallNormal { get; private set; }
 
@@ -19,7 +19,6 @@ public class PlayerInput : MonoBehaviour
     [Header("States")]
     public bool grounded;
     public bool nearWall;
-    public bool onRamp;
     public bool reachedMaxSlope;
 
     public bool isWallLeft { get; private set; }
@@ -57,55 +56,57 @@ public class PlayerInput : MonoBehaviour
     [Header("Assignables")]
     private ScriptManager s;
 
-    void Awake()
-    {
-        s = GetComponent<ScriptManager>();
-    }
+    void Awake() => s = GetComponent<ScriptManager>();
 
     void FixedUpdate()
     {
-        UpdateCollisions();
+        UpdateGroundCollisions();
+        UpdateWallCollisions();
+
+        reachedMaxSlope = (Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
+
         s.PlayerMovement.SetInput(input, jumping, crouching, grounded);
         s.PlayerMovement.Movement();
     }
 
     #region Collision Calculations
-    private void UpdateCollisions()
+    private void UpdateGroundCollisions()
     {
-        if (grounded) 
+        if (!grounded) return;
+
+        if (!cancelGround) cancelGround = true;
+        else 
         {
-            if (!cancelGround) cancelGround = true;
-            else 
+            groundCancelSteps++;
+
+            if ((float)groundCancelSteps > groundCancelDelay)
             {
-                groundCancelSteps++;
-                if ((float) groundCancelSteps > groundCancelDelay)
-                {
-                    onRamp = false;
-                    reachedMaxSlope = false;
-                    groundNormal = Vector3.up;
-                    grounded = false;
-                }
+                groundNormal = Vector3.up;
+                grounded = false;
             }
         }
+    }
 
-        if (nearWall)
+    private void UpdateWallCollisions()
+    {
+        if (!nearWall) return;
+
+        float dot = Vector3.Dot(s.orientation.right, wallNormal);
+
+        isWallLeft = dot > 0.8f;
+        isWallRight = dot < -0.8f;
+
+        if (!cancelWall) cancelWall = true;
+        else
         {
-            float dot = Vector3.Dot(s.orientation.right, wallNormal);
+            wallCancelSteps++;
 
-            isWallLeft = dot > 0.8f;
-            isWallRight = dot < -0.8f;
-
-            if (!cancelWall) cancelWall = true;
-            else
+            if ((float)wallCancelSteps > wallCancelDelay)
             {
-                wallCancelSteps++;
-                if ((float) wallCancelSteps > wallCancelDelay)
-                {
-                    nearWall = false;
-                    wallNormal = Vector3.zero;
-                    isWallLeft = false;
-                    isWallRight = false;
-                }
+                nearWall = false;
+                wallNormal = Vector3.zero;
+                isWallLeft = false;
+                isWallRight = false;
             }
         }
     }
@@ -181,8 +182,6 @@ public class PlayerInput : MonoBehaviour
             {
                 if (Ground != (Ground | 1 << layer)) continue;
 
-                onRamp = normal.y < 1f;
-
                 grounded = true;
                 cancelGround = false;
                 groundCancelSteps = 0;
@@ -198,8 +197,6 @@ public class PlayerInput : MonoBehaviour
                 wallCancelSteps = 0;
                 wallNormal = normal;
             }
-
-            reachedMaxSlope = Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
         }
     }
     #endregion
