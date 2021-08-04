@@ -45,6 +45,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float slideFriction;
     [SerializeField] private float threshold;
 
+    [Header("Collision")]
+    [SerializeField] private LayerMask GroundSnapLayer;
+
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
 
@@ -58,10 +61,9 @@ public class PlayerMovement : MonoBehaviour
     public float magnitude { get; private set; }
     public Vector3 velocity { get; private set; }
 
-    [Header("Assignables")]
     private ScriptManager s;
     private Rigidbody rb;
-
+    
     void Awake()
     {
         s = GetComponent<ScriptManager>();
@@ -134,11 +136,12 @@ public class PlayerMovement : MonoBehaviour
         float speed = magnitude;
 
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || vaulting || grounded) return false;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, s.PlayerInput.Ground)) return false;
+        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
 
         s.PlayerInput.grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
+
         if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot)).normalized * speed;
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
 
