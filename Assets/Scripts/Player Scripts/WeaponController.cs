@@ -15,9 +15,17 @@ public class WeaponController : MonoBehaviour
     private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero, lookVel = Vector3.zero;
     private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero, smoothLookOffset = Vector3.zero;
 
+    [Header("Idle Settings")]
+    [SerializeField] private Vector3 defaultPos;
+    [SerializeField] private Vector3 defaultRot;
+    [Space(10)]
+    [SerializeField] private Vector3 aimPos;
+    [SerializeField] private Vector3 aimRot;
+
     [Header("Recoil Settings")]
     [SerializeField] private Vector3 recoilPosOffset;
     [SerializeField] private Vector3 recoilRotOffset;
+    [Space(10)]
     [SerializeField] private float recoilSmoothTime;
 
     private Vector3 desiredRecoilRot = Vector3.zero, desiredRecoilPos = Vector3.zero;
@@ -26,28 +34,26 @@ public class WeaponController : MonoBehaviour
 
     [Header("Reload Settings")]
     [SerializeField] private Vector3 reloadRotOffset;
+    [Space(10)]
     [SerializeField] private float reloadSmoothTime;
 
     private Vector3 reloadRot = Vector3.zero;
     private Vector3 reloadRotVel = Vector3.zero;
 
     [Header("Bob Settings")]
-    [SerializeField] private Vector3 defaultPos;
-    [SerializeField] private Vector3 aimPos;
     [SerializeField] private float bobAmountHoriz;
     [SerializeField] private float bobAmountVert;
     [SerializeField] private float bobSpeed;
     [SerializeField] private float bobSmoothTime;
 
     [Header("Sway Settings")]
-    [SerializeField] private Vector3 defaultRot;
-    [SerializeField] private Vector3 aimRot;
     [SerializeField] private float swayAmount;
     [SerializeField] private float swaySmoothTime;
 
     [Header("Weapon Switching Settings")]
     [SerializeField] private Vector3 switchPosOffset;
     [SerializeField] private Vector3 switchRotOffset;
+    [Space(10)]
     [SerializeField] private float switchPosTime;
     [SerializeField] private float switchRotTime;
 
@@ -81,8 +87,8 @@ public class WeaponController : MonoBehaviour
             if (selectedWeapon != previousWeapon) SelectWeapon();
         }
 
-        Vector3 newPos = defaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos;
-        Quaternion newRot = Quaternion.Euler(defaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot);
+        Vector3 newPos = (CurrentWeapon != null ? CurrentWeapon.defaultPos : defaultPos) + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos;
+        Quaternion newRot = Quaternion.Euler((CurrentWeapon != null ? CurrentWeapon.defaultRot : defaultRot) + smoothSway + switchOffsetRot + recoilRot + reloadRot);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -93,7 +99,7 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
+        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 0.01f && switchOffsetRot.sqrMagnitude < 0.01f && reloadRot.sqrMagnitude < 0.01f;
 
         switch (CurrentWeapon.weaponType)
         {
@@ -162,7 +168,7 @@ public class WeaponController : MonoBehaviour
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
 
-        rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.08f) + 1f), ForceMode.VelocityChange);
+        rb.AddForce(s.cam.transform.forward * throwForce * ((s.PlayerMovement.magnitude * 0.08f) + 1f) + Vector3.up * 2f, ForceMode.VelocityChange);
 
         Vector3 rand = Vector3.zero;
 
@@ -188,7 +194,7 @@ public class WeaponController : MonoBehaviour
     {
         if (timer <= 0) return Vector3.zero;
 
-        return (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * Mathf.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert);
+        return (Vector3.right * Mathf.Cos(timer * bobSpeed) * (CurrentWeapon != null ? CurrentWeapon.bobAmountHoriz : bobAmountHoriz)) + (Vector3.up * Mathf.Abs(Mathf.Sin(timer * bobSpeed)) * (CurrentWeapon != null ? CurrentWeapon.bobAmountVert : bobAmountVert));
     }
 
     private Vector3 CalculateLookOffset()
@@ -208,8 +214,8 @@ public class WeaponController : MonoBehaviour
 
     private Vector3 CalculateSway()
     {
-         Vector2 camDelta = s.CameraLook.rotationDelta * swayAmount * 0.5f;
-         camDelta.y -= s.PlayerInput.input.x * swayAmount * 1.5f;
+         Vector2 camDelta = s.CameraLook.rotationDelta * (CurrentWeapon != null ? CurrentWeapon.swayAmount : swayAmount) * 0.5f;
+         camDelta.y -= s.PlayerInput.input.x * (CurrentWeapon != null ? CurrentWeapon.swayAmount : swayAmount) * 1.5f;
          camDelta.y = Mathf.Clamp(camDelta.y, -100, 100);
          camDelta.x = Mathf.Clamp(camDelta.x, -60, 60);
 

@@ -40,8 +40,7 @@ public class CameraBobbing : MonoBehaviour
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
 
-        if (vaultDesync.sqrMagnitude > 0.01f) vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, stepSmoothTime);
-        else if (vaultDesync != Vector3.zero) vaultDesync = Vector3.zero;
+        SmoothStepUp();
 
         Vector3 newPos = CalculateLandOffset() + smoothOffset + vaultDesync;
 		transform.localPosition = newPos;
@@ -76,6 +75,15 @@ public class CameraBobbing : MonoBehaviour
         if (timer <= 0) return Vector3.zero;
 
         return s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert;
+    }
+
+    private void SmoothStepUp()
+    {
+        if (vaultDesync == Vector3.zero) return;
+
+        vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, stepSmoothTime);
+
+        if (vaultDesync.sqrMagnitude < 0.001f) vaultDesync = Vector3.zero;
     }
 
     public void StepUp(Vector3 offset) => vaultDesync = Vector3.zero + offset;
