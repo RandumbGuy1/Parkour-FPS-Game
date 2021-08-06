@@ -5712,7 +5712,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 5.4
+  m_Name: Save 5.51
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6129,7 +6129,6 @@ Transform:
   m_Children:
   - {fileID: 32658971}
   - {fileID: 1277575616}
-  - {fileID: 2073544792}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6183,18 +6182,15 @@ MonoBehaviour:
   jumpForce: 48
   maxJumpSteps: 10
   crouchScale: 1
-  crouchSmoothTime: 0.1
+  crouchSmoothTime: 0.06
   slideForce: 80
-  canCrouchWalk: 1
   wallRunGravityForce: 10
   wallJumpForce: 45
   wallHoldForce: 50
   wallRunForce: 8
   wallClimbForce: 5
-  wallRunning: 0
   vaultDuration: 0.08
   vaultForce: 10
-  vaulting: 0
   friction: 4.5
   slideFriction: 15
   threshold: 0.05
@@ -6221,9 +6217,9 @@ MonoBehaviour:
   CameraShaker: {fileID: 838078167}
   orientation: {fileID: 1277575616}
   playerHead: {fileID: 32658971}
-  groundCheck: {fileID: 2073544792}
   cam: {fileID: 963194228}
   rb: {fileID: 1650519430}
+  cc: {fileID: 1650519431}
 --- !u!114 &1650519439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8097,36 +8093,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2067588101}
   m_CullTransparentMesh: 0
---- !u!1 &2073544791
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2073544792}
-  m_Layer: 0
-  m_Name: Ground Check
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2073544792
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2073544791}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.9, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1650519434}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2080955617
 GameObject:
   m_ObjectHideFlags: 0

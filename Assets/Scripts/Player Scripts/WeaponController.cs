@@ -99,30 +99,37 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 0.01f && switchOffsetRot.sqrMagnitude < 0.01f && reloadRot.sqrMagnitude < 0.01f;
+        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
 
+        if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick && canAttack : s.PlayerInput.leftClick && canAttack)  Attack();
+        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick))
+        {
+            CurrentWeapon.SecondaryAction();
+            reloadRot = reloadRotOffset;
+        }
+    }
+    #endregion
+
+    #region Weapon Actions
+    void Attack()
+    {
         switch (CurrentWeapon.weaponType)
         {
             case Weapon.WeaponClass.Ranged:
-                if (s.PlayerInput.reloading) if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
-
-                if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
+                if (CurrentWeapon.OnAttack(s.cam))
                 {
-                    if (CurrentWeapon.OnAttack(s.cam))
-                    {
-                        s.CameraShaker.ShakeOnce(8f, 12.5f, 0.45f, 0.16f);
+                    s.CameraShaker.ShakeOnce(8f, 12.5f, 0.45f, 0.16f);
 
-                        desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                        desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                    }
+                    desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
                 }
                 break;
 
             case Weapon.WeaponClass.Melee:
-                if (s.PlayerInput.rightClick) CurrentWeapon.SecondaryAction();
-
-                if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick : s.PlayerInput.leftClick && canAttack)
-                    if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
+                if (CurrentWeapon.OnAttack(s.cam))
+                {
+                    s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
+                }
                 break;
 
         }

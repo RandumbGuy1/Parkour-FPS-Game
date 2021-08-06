@@ -63,7 +63,7 @@ public class PlayerInput : MonoBehaviour
         UpdateGroundCollisions();
         UpdateWallCollisions();
 
-        reachedMaxSlope = (Physics.Raycast(s.groundCheck.position, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
+        reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
 
         s.PlayerMovement.SetInput(input, jumping, crouching, grounded);
         s.PlayerMovement.Movement();
@@ -115,7 +115,7 @@ public class PlayerInput : MonoBehaviour
     {
         if (!nearWall) return false;
         if (reachedMaxSlope || s.PlayerMovement.vaulting || grounded || crouching) return false;
-        return !Physics.Raycast(s.groundCheck.position, Vector3.down, minimumJumpHeight, Ground);
+        return !Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, minimumJumpHeight, Ground);
     }
     #endregion
 
@@ -143,7 +143,7 @@ public class PlayerInput : MonoBehaviour
             Vector3 vel = s.PlayerMovement.velocity;
             vel.y = 0f;
 
-            Vector3 moveDir = s.orientation.forward * input.y + s.orientation.right * input.x;
+            Vector3 moveDir = s.PlayerMovement.moveDir;
             Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
          
             if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
@@ -152,7 +152,7 @@ public class PlayerInput : MonoBehaviour
             if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
             Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
-            float distance = vaultPoint.y - s.groundCheck.position.y;
+            float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
             if (distance > vaultOffset) return;
 

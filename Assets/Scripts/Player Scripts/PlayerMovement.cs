@@ -18,7 +18,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float crouchScale;
     [SerializeField] private float crouchSmoothTime;
     [SerializeField] private float slideForce;
-    public bool canCrouchWalk = true;
     private float crouchVel = 0f;
     private bool crouched = false;
     private bool canUnCrouch = true;
@@ -30,7 +29,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallHoldForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
-    public bool wallRunning = false;
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
@@ -38,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
     [SerializeField] private float vaultForce;
-    public bool vaulting = false;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
@@ -55,11 +52,17 @@ public class PlayerMovement : MonoBehaviour
     private bool jumping;
     private bool crouching;
     private bool grounded;
-    private Vector3 moveDir;
-    public bool moving { get; private set; }
-    public Vector3 relativeVel { get; private set; }
+
+    public Vector3 moveDir { get { return CalculateInputDir(input); } }
+
     public float magnitude { get; private set; }
+    public Vector3 relativeVel { get; private set; }
     public Vector3 velocity { get; private set; }
+
+    public bool canCrouchWalk { get; private set; } = true;
+    public bool wallRunning { get; private set; } = false;
+    public bool vaulting { get; private set; } = false;
+    public bool moving { get; private set; }
 
     private ScriptManager s;
     private Rigidbody rb;
@@ -79,46 +82,41 @@ public class PlayerMovement : MonoBehaviour
     public void Movement()
     {
         rb.AddForce(Vector3.down * 3f);
-        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 30f, ForceMode.Acceleration);
+        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
         rb.useGravity = !(vaulting || wallRunning);
+        relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
 
-        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        float maxSpeed = ControlMaxSpeed();
-        float coefficientOfFriction = moveSpeed * 0.05f / maxSpeed;
-
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
-
+        ControlSpeed();
         ProcessInput();
 
-        moveDir = (grounded ? GroundMove(CalculateMultiplier()) : AirMove(CalculateMultiplier()));
+        Vector3 moveDir = (grounded ? GroundMovement() : AirMovement());
         rb.AddForce(moveDir * moveSpeed * 0.05f, ForceMode.VelocityChange);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
     }
 
-    private Vector3 GroundMove(Vector2 multiplier)
+    private Vector3 GroundMovement()
     {
         Friction();
         SlopeMovement();
 
-        Vector3 inputDir = CalculateInputDir(input, multiplier);
+        Vector3 inputDir = CalculateInputDir(input);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
         return dot < 0f ? slopeDir : inputDir;
     }
 
-    private Vector3 AirMove(Vector2 multiplier)
+    private Vector3 AirMovement()
     {
         Vector2 inputTemp = input;
 
         if (inputTemp.x > 0 && relativeVel.x > 23f || inputTemp.x < 0 && relativeVel.x < -23f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && relativeVel.z > 23f || inputTemp.y < 0 && relativeVel.z < -23f) inputTemp.y = 0f;
 
-        return CalculateInputDir(inputTemp, multiplier);
+        return CalculateInputDir(inputTemp);
     }
 
     private void SlopeMovement()
@@ -126,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
         if (s.PlayerInput.groundNormal.y >= 1f) return;
 
         Vector3 gravityForce = Physics.gravity - Vector3.Project(Physics.gravity, s.PlayerInput.groundNormal);
-        rb.AddForce(-gravityForce, ForceMode.Acceleration);
+        rb.AddForce(-gravityForce * 1.1f, ForceMode.Acceleration);
     }
     #endregion
 
@@ -136,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
         float speed = magnitude;
 
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || vaulting || grounded) return false;
-        if (!Physics.Raycast(s.groundCheck.position, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
+        if (!Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
 
         s.PlayerInput.grounded = true;
 
@@ -146,6 +144,14 @@ public class PlayerMovement : MonoBehaviour
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
 
         return true;
+    }
+
+    private void RecordMovementSteps()
+    {
+        if (stepsSinceLastJumped < maxJumpSteps) stepsSinceLastJumped++;
+
+        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
+        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
     }
     #endregion
 
@@ -265,9 +271,27 @@ public class PlayerMovement : MonoBehaviour
             Invoke("ResetWallJump", 0.3f);
         }
     }
+
+    private void ManageWallMovement()
+    {
+        if (s.PlayerInput.nearWall && s.PlayerInput.isWallLeft && s.PlayerInput.CanWallJump() && input.x < 0 || s.PlayerInput.nearWall && s.PlayerInput.isWallRight && s.PlayerInput.CanWallJump() && input.x > 0) wallRunning = true;
+
+        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
+
+        if (!s.PlayerInput.CanWallJump() || !s.PlayerInput.isWallRight && !s.PlayerInput.isWallLeft)
+        {
+            wallRunning = false;
+            canAddWallRunForce = true;
+        }
+
+        if (wallRunning && !grounded) WallRun();
+
+        if (s.PlayerInput.isWallLeft && input.x > 0 && wallRunning || s.PlayerInput.isWallRight && input.x < 0 && wallRunning && readyToWallJump)
+            StopWallRun();
+    }
     #endregion 
 
-    #region Sliding
+    #region Crouching And Sliding
     private void Crouch(Vector3 dir)
     {
         crouched = true;
@@ -291,6 +315,21 @@ public class PlayerMovement : MonoBehaviour
         if (crouching && transform.localScale.y < crouchScale + 0.01f) transform.localScale = new Vector3(playerScale.x, crouchScale, playerScale.z);
         if (!crouching && transform.localScale.y > playerScale.y - 0.01f) transform.localScale = playerScale;
     }
+
+    private void ManageCrouching()
+    {
+        if (crouching && !wallRunning && !crouched) Crouch(moveDir);
+
+        if (crouched)
+        {
+            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
+            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
+        }
+
+        if (!crouching && crouched && canUnCrouch) UnCrouch();
+
+        UpdateCrouchScale();
+    }
     #endregion
 
     #region Friction
@@ -311,6 +350,27 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
+    #region Limiting Speed
+    void ControlSpeed()
+    {
+        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+        float maxSpeed = CalculateMaxSpeed();
+        float coefficientOfFriction = moveSpeed * 0.05f / maxSpeed;
+
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
+    }
+
+    private float CalculateMaxSpeed()
+    {
+        if (crouched && canCrouchWalk) return maxGroundSpeed * 0.6f;
+        if (crouched) return maxSlideSpeed;
+        if (jumping) return maxAirSpeed;
+        if (grounded) return maxGroundSpeed;
+
+        return maxAirSpeed;
+    }
+    #endregion
+
     #region Input
     public void SetInput(Vector2 input, bool jumping, bool crouching, bool grounded)
     {
@@ -327,39 +387,12 @@ public class PlayerMovement : MonoBehaviour
     private void ProcessInput()
     {
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
-        if (stepsSinceLastJumped < maxJumpSteps) stepsSinceLastJumped++;
 
-        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
-        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
+        RecordMovementSteps();
 
-        if (crouching && !wallRunning && !crouched) Crouch(moveDir);
-        if (crouched)
-        {
-            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
-            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f; 
-        }
-
-        if (!crouching && crouched && canUnCrouch) UnCrouch();
-
-        UpdateCrouchScale();
-
-        if (s.PlayerInput.nearWall && s.PlayerInput.isWallLeft && s.PlayerInput.CanWallJump() && input.x < 0 || s.PlayerInput.nearWall && s.PlayerInput.isWallRight && s.PlayerInput.CanWallJump() && input.x > 0) wallRunning = true;
-
-        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
-        if (!s.PlayerInput.CanWallJump() || !s.PlayerInput.isWallRight && !s.PlayerInput.isWallLeft)
-        {
-            wallRunning = false;
-            canAddWallRunForce = true;
-        }
-
-        if (wallRunning && !grounded) WallRun();
-
-        if (s.PlayerInput.isWallLeft && input.x > 0 && wallRunning || s.PlayerInput.isWallRight && input.x < 0 && wallRunning && readyToWallJump) 
-            StopWallRun();
+        ManageCrouching();
+        ManageWallMovement();
     }
-
-    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier) => s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
-    #endregion
 
     public Vector2 CalculateMultiplier()
     {
@@ -372,15 +405,13 @@ public class PlayerMovement : MonoBehaviour
         return new Vector2(0.4f, 0.6f);
     }
 
-    private float ControlMaxSpeed()
+    private Vector3 CalculateInputDir(Vector2 input)
     {
-        if (crouched && canCrouchWalk) return maxGroundSpeed * 0.6f;
-        if (crouched) return maxSlideSpeed;
-        if (jumping) return maxAirSpeed;
-        if (grounded) return maxGroundSpeed;
+        Vector2 multiplier = CalculateMultiplier();
 
-        return maxAirSpeed;
+        return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     }
+    #endregion
 
     void ResetWallJump() => readyToWallJump = true;
 

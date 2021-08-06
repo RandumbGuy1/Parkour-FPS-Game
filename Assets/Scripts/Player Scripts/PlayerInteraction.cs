@@ -56,11 +56,10 @@ public class PlayerInteraction : MonoBehaviour
         if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables))
         {
             Interactable interactable = hit.transform.GetComponent<Interactable>();
-            GameObject obj = hit.transform.gameObject;
 
             if (interactable == null)
             {
-                if (Input.GetMouseButtonDown(0) && heldObj == null) Pickup(obj);
+                if (Input.GetMouseButtonDown(0) && heldObj == null) Pickup(hit.transform.gameObject);
                 return;
             }
 
@@ -75,7 +74,7 @@ public class PlayerInteraction : MonoBehaviour
             textDisplay.SetActive(true);
             interactionText.text = text;
 
-            if (s.PlayerInput.interacting) Interact(interactable, obj);
+            if (s.PlayerInput.interacting) Interact(interactable);
         }
         else if (interactionText.text != " ")
         {
@@ -84,7 +83,7 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    private void Interact(Interactable interactable, GameObject obj)
+    private void Interact(Interactable interactable)
     {
          switch (interactable.type)
          {
@@ -93,7 +92,7 @@ public class PlayerInteraction : MonoBehaviour
                  break;
 
             case Interactable.InteractionType.WeaponPickup:
-                s.WeaponControls.AddWeapon(obj);
+                s.WeaponControls.AddWeapon(interactable.gameObject);
                 interactable.OnInteract();
                 break;
          }
@@ -102,12 +101,12 @@ public class PlayerInteraction : MonoBehaviour
     private void CheckObject()
     {
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
-        followVel = Vector3.ClampMagnitude(followVel, 25f);
+        followVel = Vector3.ClampMagnitude(followVel, 50f);
 
         if ((grabPos.position - heldObj.transform.position).sqrMagnitude < 8f) 
-            objRb.velocity = Vector3.SmoothDamp(objRb.velocity, Vector3.zero, ref vel, 0.2f);
+            objRb.velocity = Vector3.SmoothDamp(objRb.velocity, Vector3.zero, ref vel, 0.16f);
 
-        objRb.AddForce(followVel * objSpeed * 0.08f, ForceMode.VelocityChange);
+        objRb.AddForce(followVel * objSpeed * 0.1f, ForceMode.VelocityChange);
     }
 
     private void Pickup(GameObject obj)

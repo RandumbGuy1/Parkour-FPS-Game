@@ -17,7 +17,9 @@ public class ScriptManager : MonoBehaviour
     [Header("Assignables")]
     public Transform orientation;
     public Transform playerHead;
-    public Transform groundCheck;
     public Transform cam;
     public Rigidbody rb;
+    public CapsuleCollider cc;
+
+    public Vector3 bottomCapsuleSphereOrigin { get { return transform.position - Vector3.up * (cc.height - cc.radius); } }
 }
