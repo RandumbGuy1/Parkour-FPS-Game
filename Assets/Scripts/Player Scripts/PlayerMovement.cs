@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed;
     [SerializeField] private float maxGroundSpeed;
+    [Space(10)]
     [SerializeField] private float maxAirSpeed;
     [SerializeField] private float maxSlideSpeed;
 
@@ -23,46 +24,72 @@ public class PlayerMovement : MonoBehaviour
     private bool canUnCrouch = true;
     private Vector3 playerScale;
 
+    public bool canCrouchWalk { get; private set; } = true;
+
     [Header("WallRunning")]
     [SerializeField] private float wallRunGravityForce;
     [SerializeField] private float wallJumpForce;
     [SerializeField] private float wallHoldForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
+    [Space(10)]
+    [SerializeField] private float minimumJumpHeight;
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
 
+    public bool nearWall { get; private set; } = false;
+    public bool isWallLeft { get; private set; } = false;
+    public bool isWallRight { get; private set; } = false;
+    public bool wallRunning { get; private set; } = false;
+
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
     [SerializeField] private float vaultForce;
+    [SerializeField] private float vaultOffset;
+
+    public bool vaulting { get; private set; } = false;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
     [SerializeField] private float slideFriction;
-    [SerializeField] private float threshold;
 
     [Header("Collision")]
     [SerializeField] private LayerMask GroundSnapLayer;
+    [SerializeField] private LayerMask Ground;
+    [SerializeField] private LayerMask Environment;
+    [Space(10)]
+    [SerializeField] private float groundCancelDelay;
+    [SerializeField] private float wallCancelDelay;
+    [Space(10)]
+    [SerializeField] [Range(0f, 90f)] private float maxSlopeAngle;
+
+    private bool cancelWall = true;
+    private int wallCancelSteps = 0;
+
+    private bool cancelGround = false;
+    private int groundCancelSteps = 0;
 
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
 
+    public Vector3 groundNormal { get; private set; }
+    public Vector3 wallNormal { get; private set; }
+
+    public bool grounded { get; private set; } = false;
+    public bool reachedMaxSlope { get; private set; } = false;
+
     private Vector2 input;
     private bool jumping;
     private bool crouching;
-    private bool grounded;
 
     public Vector3 moveDir { get { return CalculateInputDir(input); } }
+    public bool moving { get; private set; }
 
     public float magnitude { get; private set; }
     public Vector3 relativeVel { get; private set; }
     public Vector3 velocity { get; private set; }
 
-    public bool canCrouchWalk { get; private set; } = true;
-    public bool wallRunning { get; private set; } = false;
-    public bool vaulting { get; private set; } = false;
-    public bool moving { get; private set; }
 
     private ScriptManager s;
     private Rigidbody rb;
@@ -76,13 +103,24 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
+        s.PlayerMovement.CalculateInputDir(input);
+    }
+
+    void FixedUpdate()
+    {
+        UpdateGroundCollisions();
+        UpdateWallCollisions();
+
+        Movement();
     }
 
     #region Movement
-    public void Movement()
+    private void Movement()
     {
+        reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
+
         rb.AddForce(Vector3.down * 3f);
-        if (s.PlayerInput.reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
+        if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
         rb.useGravity = !(vaulting || wallRunning);
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -91,7 +129,7 @@ public class PlayerMovement : MonoBehaviour
         ProcessInput();
 
         Vector3 moveDir = (grounded ? GroundMovement() : AirMovement());
-        rb.AddForce(moveDir * moveSpeed * 0.05f, ForceMode.VelocityChange);
+        rb.AddForce(moveDir * moveSpeed * 0.045f, ForceMode.VelocityChange);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
@@ -103,7 +141,7 @@ public class PlayerMovement : MonoBehaviour
         SlopeMovement();
 
         Vector3 inputDir = CalculateInputDir(input);
-        Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, s.PlayerInput.groundNormal);
+        Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
         return dot < 0f ? slopeDir : inputDir;
@@ -121,9 +159,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void SlopeMovement()
     {
-        if (s.PlayerInput.groundNormal.y >= 1f) return;
+        if (groundNormal.y >= 1f) return;
 
-        Vector3 gravityForce = Physics.gravity - Vector3.Project(Physics.gravity, s.PlayerInput.groundNormal);
+        Vector3 gravityForce = Physics.gravity - Vector3.Project(Physics.gravity, groundNormal);
         rb.AddForce(-gravityForce * 1.1f, ForceMode.Acceleration);
     }
     #endregion
@@ -136,7 +174,7 @@ public class PlayerMovement : MonoBehaviour
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || vaulting || grounded) return false;
         if (!Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
 
-        s.PlayerInput.grounded = true;
+        grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
 
@@ -155,12 +193,104 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
+    #region Collision Calculations
+    private void UpdateGroundCollisions()
+    {
+        if (!grounded) return;
+
+        if (!cancelGround) cancelGround = true;
+        else
+        {
+            groundCancelSteps++;
+
+            if ((float)groundCancelSteps > groundCancelDelay)
+            {
+                groundNormal = Vector3.up;
+                grounded = false;
+            }
+        }
+    }
+
+    private void UpdateWallCollisions()
+    {
+        if (!nearWall) return;
+
+        float dot = Vector3.Dot(s.orientation.right, wallNormal);
+
+        isWallLeft = dot > 0.8f;
+        isWallRight = dot < -0.8f;
+
+        if (!cancelWall) cancelWall = true;
+        else
+        {
+            wallCancelSteps++;
+
+            if ((float)wallCancelSteps > wallCancelDelay)
+            {
+                nearWall = false;
+                wallNormal = Vector3.zero;
+                isWallLeft = false;
+                isWallRight = false;
+            }
+        }
+    }
+    #endregion
+
+    #region Collision Detection
+    void OnCollisionStay(Collision col)
+    {
+        int layer = col.gameObject.layer;
+
+        for (int i = 0; i < col.contactCount; i++)
+        {
+            Vector3 normal = col.GetContact(i).normal;
+
+            if (IsFloor(normal))
+            {
+                if (Ground != (Ground | 1 << layer)) continue;
+
+                grounded = true;
+                cancelGround = false;
+                groundCancelSteps = 0;
+                groundNormal = normal;
+            }
+
+            if (IsWall(normal, 0.1f))
+            {
+                if (Environment != (Environment | 1 << layer)) continue;
+
+                nearWall = true;
+                cancelWall = false;
+                wallCancelSteps = 0;
+                wallNormal = normal;
+            }
+        }
+    }
+    private void Land(float impactForce)
+    {
+        if (impactForce > 30f)
+        {
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
+
+            Vector3 magnitude = s.rb.velocity;
+
+            velocityOverLifetime.x = magnitude.x;
+            velocityOverLifetime.z = magnitude.z;
+        }
+
+        s.CameraHeadBob.CameraLand(impactForce);
+    }
+
+    bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
+    bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;
+    #endregion
+
     #region Jumping
     private void Jump()
     {
         stepsSinceLastJumped = 0;
 
-        s.PlayerInput.grounded = false;
+        grounded = false;
         rb.useGravity = true;
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
@@ -169,7 +299,52 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Vaulting
-    public IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
+    void OnCollisionEnter(Collision col)
+    {
+        int layer = col.gameObject.layer;
+        if (Ground != (Ground | 1 << layer)) return;
+
+        Vector3 normal = col.GetContact(0).normal;
+
+        if (IsFloor(normal)) if (!grounded) Land(Math.Abs(velocity.y));
+
+        if (IsWall(normal, 0.31f))
+        {
+            if (vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
+
+            Vector3 vaultDir = normal;
+            vaultDir.y = 0f;
+            vaultDir.Normalize();
+
+            Vector3 vel = velocity;
+            vel.y = 0f;
+
+            Vector3 moveDir = this.moveDir;
+            Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
+
+            if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
+            if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
+            if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
+            if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
+
+            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
+            float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
+
+            if (distance > vaultOffset) return;
+
+            if (distance < 3.5f)
+            {
+                s.CameraHeadBob.StepUp(transform.position - vaultPoint);
+                transform.position = vaultPoint;
+                rb.velocity = vel;
+                return;
+            }
+
+            StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+        }
+    }
+
+    private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
@@ -182,7 +357,7 @@ public class PlayerMovement : MonoBehaviour
         float elapsed = 0f;
         float vaultDuration = this.vaultDuration + distance;
 
-        s.PlayerInput.grounded = false;
+        grounded = false;
 
         while (elapsed < vaultDuration)
         {
@@ -198,6 +373,7 @@ public class PlayerMovement : MonoBehaviour
         vaulting = false;
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
         rb.velocity = normal * vaultForce * 0.5f;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
     }
@@ -209,13 +385,13 @@ public class PlayerMovement : MonoBehaviour
         if (readyToWallJump)
         {
             readyToWallJump = false;
-            s.PlayerInput.grounded = false;
-            s.PlayerInput.nearWall = false;
+            grounded = false;
+            nearWall = false;
 
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
             rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
-            rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce, ForceMode.Impulse);
+            rb.AddForce(wallNormal * wallJumpForce, ForceMode.Impulse);
 
             CancelInvoke("ResetWallJump");
             Invoke("ResetWallJump", 0.3f);
@@ -226,8 +402,8 @@ public class PlayerMovement : MonoBehaviour
     {
         float wallClimb = 0f;
 
-        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, s.PlayerInput.wallNormal);
-        wallMoveDir = Vector3.Cross(wallUpCross, s.PlayerInput.wallNormal);
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, wallNormal);
+        wallMoveDir = Vector3.Cross(wallUpCross, wallNormal);
 
         if (canAddWallRunForce)
         {
@@ -245,17 +421,9 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(wallMoveDir * wallMagnitude * 0.15f, ForceMode.VelocityChange);
         }
 
-        rb.AddForce(-s.PlayerInput.wallNormal * wallHoldForce);
+        rb.AddForce(-wallNormal * wallHoldForce);
         rb.AddForce(-transform.up * wallRunGravityForce, ForceMode.Acceleration);
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
-    }
-
-    public float CalculateWallRunRotation()
-    {
-        if (!wallRunning) return 0f;
-        if (Vector3.Dot(s.orientation.forward, s.PlayerInput.wallNormal) > 0f) return 0f;
-
-        return Vector3.Angle(s.orientation.forward, wallMoveDir);
     }
 
     private void StopWallRun()
@@ -263,22 +431,37 @@ public class PlayerMovement : MonoBehaviour
         if (wallRunning && readyToWallJump)
         {
             readyToWallJump = false;
-            s.PlayerInput.nearWall = false;
+            nearWall = false;
 
-            rb.AddForce(s.PlayerInput.wallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
+            rb.AddForce(wallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
 
             CancelInvoke("ResetWallJump");
             Invoke("ResetWallJump", 0.3f);
         }
     }
 
+    public bool CanWallJump()
+    {
+        if (!nearWall) return false;
+        if (reachedMaxSlope || vaulting || grounded || crouching) return false;
+        return !Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, minimumJumpHeight, Ground);
+    }
+
+    public float CalculateWallRunRotation()
+    {
+        if (!wallRunning) return 0f;
+        if (Vector3.Dot(s.orientation.forward, wallNormal) > 0f) return 0f;
+
+        return Vector3.Angle(s.orientation.forward, wallMoveDir);
+    }
+
     private void ManageWallMovement()
     {
-        if (s.PlayerInput.nearWall && s.PlayerInput.isWallLeft && s.PlayerInput.CanWallJump() && input.x < 0 || s.PlayerInput.nearWall && s.PlayerInput.isWallRight && s.PlayerInput.CanWallJump() && input.x > 0) wallRunning = true;
+        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
 
-        if (s.PlayerInput.CanWallJump() && jumping && readyToWallJump) WallJump();
+        if (CanWallJump() && jumping && readyToWallJump) WallJump();
 
-        if (!s.PlayerInput.CanWallJump() || !s.PlayerInput.isWallRight && !s.PlayerInput.isWallLeft)
+        if (!CanWallJump() || !isWallRight && !isWallLeft)
         {
             wallRunning = false;
             canAddWallRunForce = true;
@@ -286,7 +469,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (wallRunning && !grounded) WallRun();
 
-        if (s.PlayerInput.isWallLeft && input.x > 0 && wallRunning || s.PlayerInput.isWallRight && input.x < 0 && wallRunning && readyToWallJump)
+        if (isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning && readyToWallJump)
             StopWallRun();
     }
     #endregion 
@@ -322,7 +505,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouched)
         {
-            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, s.PlayerInput.Environment);
+            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
             canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
         }
 
@@ -344,7 +527,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vector3 frictionForce = (-s.orientation.right * relativeVel.x * Convert.ToInt32(input.x == 0f || CounterMomentum(input.x, relativeVel.x)) + -s.orientation.forward * relativeVel.z * Convert.ToInt32(input.y == 0f || CounterMomentum(input.y, relativeVel.z))) * friction * 2f;
-        frictionForce = Vector3.ProjectOnPlane(frictionForce, s.PlayerInput.groundNormal);
+        frictionForce = Vector3.ProjectOnPlane(frictionForce, groundNormal);
 
         if (frictionForce != Vector3.zero) rb.AddForce(frictionForce, ForceMode.Acceleration);
     }
@@ -355,7 +538,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         float maxSpeed = CalculateMaxSpeed();
-        float coefficientOfFriction = moveSpeed * 0.05f / maxSpeed;
+        float coefficientOfFriction = moveSpeed * 0.045f / maxSpeed;
 
         if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
     }
@@ -372,14 +555,13 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Input
-    public void SetInput(Vector2 input, bool jumping, bool crouching, bool grounded)
+    public void SetInput(Vector2 input, bool jumping, bool crouching)
     {
         this.input = input;
         this.input = Vector2.ClampMagnitude(this.input, 1f);
 
         this.jumping = jumping;
         this.crouching = crouching;
-        this.grounded = grounded;
 
         moving = input != Vector2.zero;
     }
@@ -415,5 +597,9 @@ public class PlayerMovement : MonoBehaviour
 
     void ResetWallJump() => readyToWallJump = true;
 
-    bool CounterMomentum(float input, float mag) => (input > 0 && mag < -threshold || input < 0 && mag > threshold);
+    bool CounterMomentum(float input, float mag)
+    {
+        float threshold = 0.05f;
+        return (input > 0 && mag < -threshold || input < 0 && mag > threshold);
+    }
 }

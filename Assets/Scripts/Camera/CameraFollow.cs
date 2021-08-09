@@ -161,7 +161,7 @@ public class CameraFollow : MonoBehaviour
 
 		if (s.PlayerMovement.wallRunning)
 		{
-			SetTilt(15f, 0.15f, (s.PlayerInput.isWallRight ? 1 : -1));
+			SetTilt(15f, 0.15f, (s.PlayerMovement.isWallRight ? 1 : -1));
 			SetFov(15f, 0.2f);
 		}
         else

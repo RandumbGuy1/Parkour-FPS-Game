@@ -24,6 +24,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private GameObject textDisplay;
     [SerializeField] private TextMeshProUGUI interactionText;
     [SerializeField] private Transform grabPos;
+    private LineRenderer lr;
 
     private GameObject heldObj;
     private Rigidbody objRb;
@@ -32,6 +33,7 @@ public class PlayerInteraction : MonoBehaviour
     void Awake()
     {
         s = GetComponent<ScriptManager>();
+        lr = grabPos.GetComponent<LineRenderer>();
     }
 
     void FixedUpdate()
@@ -48,6 +50,10 @@ public class PlayerInteraction : MonoBehaviour
     void GrabInput()
     {
         if (heldObj == null) return;
+
+        lr.SetPosition(0, grabPos.position);
+        lr.SetPosition(1, heldObj.transform.position);
+
         if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
     }
 
@@ -103,8 +109,8 @@ public class PlayerInteraction : MonoBehaviour
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
         followVel = Vector3.ClampMagnitude(followVel, 50f);
 
-        if ((grabPos.position - heldObj.transform.position).sqrMagnitude < 8f) 
-            objRb.velocity = Vector3.SmoothDamp(objRb.velocity, Vector3.zero, ref vel, 0.16f);
+        if ((grabPos.position - heldObj.transform.position).sqrMagnitude < 20f) objRb.drag = 8f;
+        else objRb.drag = 3f;
 
         objRb.AddForce(followVel * objSpeed * 0.1f, ForceMode.VelocityChange);
     }
@@ -119,10 +125,12 @@ public class PlayerInteraction : MonoBehaviour
             storedAngularDrag = objRb.angularDrag;
 
             objRb.useGravity = false;
-            objRb.drag = 3.5f;
+            objRb.drag = 3f;
             objRb.angularDrag = 0.05f;
             heldObj = obj;
         }
+
+        lr.positionCount = 2;
     }
 
     private void Drop()
@@ -138,11 +146,13 @@ public class PlayerInteraction : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
-        objRb.velocity *= throwForce * (s.PlayerMovement.magnitude * 0.01f + 1f) * 1.5f;
+        objRb.velocity *= throwForce * ((s.PlayerMovement.magnitude * 0.01f) + 1f) * 2f;
         objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
         heldObj = null;
         objRb.transform.parent = null;
         objRb = null;
+
+        lr.positionCount = 0;
     }
 }

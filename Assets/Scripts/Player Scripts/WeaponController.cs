@@ -271,7 +271,7 @@ public class WeaponController : MonoBehaviour
 
     private void ProcessMovement()
     {
-        timer = s.PlayerMovement.moving && s.PlayerInput.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
+        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
 
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? aimPos : Vector3.zero), ref lookVel, 0.2f);
         smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
