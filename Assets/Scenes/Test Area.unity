@@ -1113,9 +1113,9 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.2
   swayAmount: 6
-  shootForce: 165
+  shootForce: 75
   attackRange: 120
-  spread: 1.25
+  spread: 3
   fireRate: 9
   magazineSize: 120
   bulletsPerTap: 1
@@ -3311,8 +3311,8 @@ MonoBehaviour:
   rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
   downClampAngle: 80
-  swayAmount: 6
-  swayFrequency: 0.4
+  swayAmount: 0
+  swayFrequency: 0
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078167
@@ -4486,9 +4486,9 @@ MonoBehaviour:
   bobAmountHoriz: 0.2
   bobAmountVert: 0.3
   swayAmount: 12
-  shootForce: 165
+  shootForce: 80
   attackRange: 90
-  spread: 1
+  spread: 8
   fireRate: 6.5
   magazineSize: 12
   bulletsPerTap: 1
@@ -5810,7 +5810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 5.6
+  m_Name: Save 5.7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

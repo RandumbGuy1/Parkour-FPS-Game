@@ -36,27 +36,30 @@ public class ProjectileGun : Weapon
 
         if (muzzleFlash != null) muzzleFlash.Play();
 
-        Ray ray = cam.GetComponent<Camera>().ViewportPointToRay((Vector3) Vector2.one * 0.5f);
-
-        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
-        Vector3 dir = (targetPoint - attackPoint.position).normalized;
+        Ray ray = cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+  
+        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange)); 
+        Vector3 dir = (targetPoint - attackPoint.position);  
 
         for (int i = 0; i < bulletsPerTap; i++)
         {
             bulletsLeft--;
 
-            Vector2 rand = Vector3.zero;
-            rand.x = Random.Range(-1f, 1f) * spread * 0.01f;
-            rand.y = Random.Range(-1f, 1f) * spread * 0.01f;
+            Vector2 rand = Vector2.zero;
+            rand.x = ((int) Random.Range(-1f, 1f)) * spread * 0.001f;
+            rand.y = ((int) Random.Range(-1f, 1f)) * spread * 0.001f;
 
-            Vector3 spreadDir = dir + (cam.right * rand.x) + (Vector3.up * rand.y);
+            Vector3 spreadDir = dir.normalized + (Vector3) rand;
+
+            float distanceForce = (dir.magnitude * 0.1f);
+            distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
 
             GameObject bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity);
             bullet.transform.up = spreadDir;
 
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
             rb.velocity = Vector3.zero;
-            rb.AddForce(bullet.transform.up * shootForce, ForceMode.Impulse);
+            rb.AddForce(bullet.transform.up * distanceForce * shootForce, ForceMode.Impulse);
         }
 
         if (readyToShoot)
