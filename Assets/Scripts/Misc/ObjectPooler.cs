@@ -16,10 +16,7 @@ public class ObjectPooler : MonoBehaviour
     public List<Pool> pools;
     public Dictionary<string, Queue<GameObject>> poolDictionary;
 
-    void Awake()
-    {
-        Instance = this;
-    }
+    void Awake() => Instance = this;
 
     void Start()
     {
@@ -47,9 +44,9 @@ public class ObjectPooler : MonoBehaviour
 
         GameObject spawnedObject = poolDictionary[tag].Dequeue();
 
-        spawnedObject.SetActive(true);
         spawnedObject.transform.position = position;
         spawnedObject.transform.rotation = rotation;
+        spawnedObject.SetActive(true);
 
         poolDictionary[tag].Enqueue(spawnedObject);
 

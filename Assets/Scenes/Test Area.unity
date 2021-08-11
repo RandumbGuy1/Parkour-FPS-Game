@@ -1061,8 +1061,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  pickupPositionTime: 0.3
-  pickupRotationTime: 0.3
+  pickupPositionTime: 0.25
+  pickupRotationTime: 0.2
   description: Pickup Gun
 --- !u!65 &299661634
 BoxCollider:
@@ -1108,12 +1108,12 @@ MonoBehaviour:
   weaponType: 0
   automatic: 1
   recoilForce: 15
-  defaultPos: {x: 2, y: -0.6, z: 4}
+  defaultPos: {x: 2, y: -0.4, z: 3.6}
   defaultRot: {x: -0.45, y: 18, z: 0}
   bobAmountHoriz: 0.2
   bobAmountVert: 0.2
   swayAmount: 6
-  shootForce: 75
+  shootForce: 80
   attackRange: 120
   spread: 3
   fireRate: 9
@@ -4463,8 +4463,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  pickupPositionTime: 0.3
-  pickupRotationTime: 0.3
+  pickupPositionTime: 0.25
+  pickupRotationTime: 0.2
   description: Pickup Gun
 --- !u!114 &1017722969
 MonoBehaviour:
@@ -5810,7 +5810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 5.7
+  m_Name: Save 5.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6259,7 +6259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30
+  moveSpeed: 31
   maxGroundSpeed: 20
   maxAirSpeed: 50
   maxSlideSpeed: 60
@@ -6277,7 +6277,7 @@ MonoBehaviour:
   vaultDuration: 0.08
   vaultForce: 10
   vaultOffset: 6
-  friction: 4.5
+  friction: 5
   slideFriction: 15
   GroundSnapLayer:
     serializedVersion: 2
@@ -6330,7 +6330,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 3072
   interactionRange: 8
-  interactionRadius: 0.8
+  interactionRadius: 0.3
   throwForce: 0.5
   objSpeed: 15
   maxGrabDistance: 6
@@ -6354,7 +6354,7 @@ MonoBehaviour:
   aiming: 0
   defaultPos: {x: 2, y: -0.6, z: 4}
   defaultRot: {x: -0.45, y: 18, z: 0}
-  aimPos: {x: -2, y: -0.1, z: 0}
+  aimPos: {x: -2, y: -0.3, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
   recoilPosOffset: {x: 0, y: -0.01, z: -0.06}
   recoilRotOffset: {x: -0.6, y: 0, z: 0}
@@ -7226,6 +7226,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Muzzle Flash
+      objectReference: {fileID: 0}
+    - target: {fileID: 9217522446149738974, guid: fc46dc40c34745c40acbc1fb514568f0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fc46dc40c34745c40acbc1fb514568f0, type: 3}

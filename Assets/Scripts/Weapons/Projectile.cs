@@ -8,22 +8,28 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float lifeTime;
 
     private Rigidbody rb;
+    private TrailRenderer tr;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        tr = GetComponent<TrailRenderer>();
+    }
 
     void OnEnable()
     {
-        rb = GetComponent<Rigidbody>();
+        tr.Clear();
 
         rb.detectCollisions = true;
-        rb.isKinematic = false;
-        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
+        CancelInvoke("Explode");
         Invoke("Explode", lifeTime);
     }
 
     void OnCollisionEnter(Collision col)
     {
         CancelInvoke("Explode");
-        Invoke("Explode", 0.01f);
+        Invoke("Explode", 0.005f);
 
         ContactPoint contact = col.GetContact(0);
         ObjectPooler.Instance.SpawnParticle("LaserImpactFX", transform.position, Quaternion.LookRotation(contact.normal));
@@ -33,10 +39,7 @@ public class Projectile : MonoBehaviour
     {
         if (!gameObject.activeSelf) return;
 
-        gameObject.SetActive(false);
-
         rb.detectCollisions = false;
-        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-        rb.isKinematic = true;
+        gameObject.SetActive(false);
     }
 }

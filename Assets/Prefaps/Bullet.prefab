@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 6567576493705845590}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.109}
-  m_LocalScale: {x: 0.2, y: 0.6, z: 0.2}
+  m_LocalScale: {x: 0.3, y: 0.6, z: 0.3}
   m_Children:
   - {fileID: 8938504787533473003}
   m_Father: {fileID: 0}
@@ -61,8 +61,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.15
-  m_Height: 0.5
+  m_Radius: 0.3
+  m_Height: 0.7
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-5057600694651610068
@@ -77,7 +77,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8b9b711ff1e0ec4d8580e7b64cbd0ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifeTime: 1
+  lifeTime: 1.5
 --- !u!96 &-4907684775474906716
 TrailRenderer:
   serializedVersion: 2
@@ -127,30 +127,30 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.83333397
-        inSlope: 0
-        outSlope: 0
+        value: 0.68889046
+        inSlope: 1.2468619
+        outSlope: 1.2468619
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.33333334
+        outWeight: 0.2080852
       - serializedVersion: 3
-        time: 0.5781322
-        value: 0.439487
-        inSlope: -1.9592978
-        outSlope: -1.9592978
+        time: 0.69846654
+        value: 0.32837528
+        inSlope: -1.837923
+        outSlope: -1.837923
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.28307837
+        outWeight: 0.36564583
       - serializedVersion: 3
         time: 0.98495483
         value: 0
-        inSlope: -0.44335765
-        outSlope: -0.44335765
+        inSlope: 0.21923803
+        outSlope: 0.21923803
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.3267366
+        inWeight: 0.79606265
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
@@ -190,7 +190,7 @@ TrailRenderer:
     textureMode: 0
     shadowBias: 0.5
     generateLightingData: 0
-  m_MinVertexDistance: 1
+  m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 1
 --- !u!1 &8659643016041422200
@@ -241,7 +241,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8659643016041422200}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1

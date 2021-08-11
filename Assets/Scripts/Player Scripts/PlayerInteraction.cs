@@ -34,6 +34,8 @@ public class PlayerInteraction : MonoBehaviour
     {
         s = GetComponent<ScriptManager>();
         lr = grabPos.GetComponent<LineRenderer>();
+
+        lr.positionCount = 0;
     }
 
     void FixedUpdate()
@@ -47,17 +49,30 @@ public class PlayerInteraction : MonoBehaviour
         GrabInput();
     }
 
-    void GrabInput()
+    private void LateUpdate() => DrawGrabLine();
+
+    void DrawGrabLine()
     {
         if (heldObj == null) return;
 
         lr.SetPosition(0, grabPos.position);
         lr.SetPosition(1, heldObj.transform.position);
 
+        float vel = (grabPos.position - heldObj.transform.position).sqrMagnitude * 0.006f;
+        vel = Mathf.Clamp(vel, 0.02f, 0.15f);
+
+        lr.startWidth = vel;
+        lr.endWidth = vel;
+    }
+
+    void GrabInput()
+    {
+        if (heldObj == null) return;
+
         if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
     }
 
-    void CheckForInteractable()
+    private void CheckForInteractable()
     {
         if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables))
         {
