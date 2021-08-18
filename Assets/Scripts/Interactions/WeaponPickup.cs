@@ -13,7 +13,10 @@ public class WeaponPickup : Interactable
 
     private Rigidbody rb;
 
-    void Awake() => rb = GetComponent<Rigidbody>();
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
 
     void OnDisable()
     {
@@ -33,7 +36,6 @@ public class WeaponPickup : Interactable
     {
         rb.interpolation = RigidbodyInterpolation.None;
         rb.isKinematic = true;
-        rb.useGravity = false;
         rb.detectCollisions = false;
 
         StopAllCoroutines();

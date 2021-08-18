@@ -68,6 +68,7 @@ public class WeaponController : MonoBehaviour
 
     [Header("Assignables")]
     [SerializeField] private Transform weaponPos;
+    [SerializeField] private Transform weaponEmptyGameObject;
     private ScriptManager s;
 
     void Awake()
@@ -180,19 +181,17 @@ public class WeaponController : MonoBehaviour
 
     private void Drop()
     {
-        Rigidbody rb = weapons[selectedWeapon].GetComponent<Rigidbody>();
-  
-        weapons[selectedWeapon].SetActive(true);
-        weapons[selectedWeapon].transform.SetParent(null);
+        Rigidbody rb = weapons[selectedWeapon].gameObject.GetComponent<Rigidbody>();
 
-        weapons[selectedWeapon].transform.localScale = Vector3.one;
+        rb.transform.SetParent(weaponEmptyGameObject);
+        rb.gameObject.SetActive(true);
+        rb.transform.localScale = Vector3.one;
 
         rb.isKinematic = false;
-        rb.useGravity = true;
         rb.detectCollisions = true;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.interpolation = RigidbodyInterpolation.Extrapolate;
 
-        rb.velocity = s.rb.velocity;
+        rb.velocity = s.rb.velocity * 1f;
         rb.AddForce(s.cam.forward * throwForce + Vector3.up * 1.3f, ForceMode.Impulse);
 
         Vector3 rand = Vector3.zero;
