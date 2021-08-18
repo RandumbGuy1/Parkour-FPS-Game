@@ -13,10 +13,7 @@ public class WeaponPickup : Interactable
 
     private Rigidbody rb;
 
-    void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-    }
+    void Awake() => rb = GetComponent<Rigidbody>();
 
     void OnDisable()
     {
@@ -47,12 +44,10 @@ public class WeaponPickup : Interactable
     {
         Vector3 vel = Vector3.zero;
 
-        while (transform.localPosition.sqrMagnitude > 0.01f || transform.localEulerAngles.sqrMagnitude > 0.01f)
+        while ((transform.localPosition.sqrMagnitude > 0.01f || transform.localEulerAngles.sqrMagnitude > 0.05f) && rb.isKinematic)
         {
             transform.localPosition = Vector3.SmoothDamp(transform.localPosition, Vector3.zero, ref vel, pickupPositionTime);
-            transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(Vector3.zero), 1/pickupRotationTime * Time.deltaTime);
-
-            if (!rb.isKinematic) break;
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(Vector3.zero), (1 / pickupRotationTime) * Time.deltaTime);
 
             yield return null;
         }
