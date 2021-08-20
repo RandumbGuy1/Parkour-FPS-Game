@@ -68,7 +68,8 @@ public class CameraFollow : MonoBehaviour
 
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
-		if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f)
+
+		if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f && s.CameraShaker.offset.sqrMagnitude < 0.01f)
 		{
 			headSwayScroller += Time.deltaTime * swayFrequency;
 

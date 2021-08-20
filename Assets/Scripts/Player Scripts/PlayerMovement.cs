@@ -83,13 +83,12 @@ public class PlayerMovement : MonoBehaviour
     private bool jumping;
     private bool crouching;
 
-    public Vector3 moveDir { get { return CalculateInputDir(input); } }
+    public Vector3 inputDir { get { return CalculateInputDir(input, Vector2.one); } }
     public bool moving { get; private set; }
 
     public float magnitude { get; private set; }
     public Vector3 relativeVel { get; private set; }
     public Vector3 velocity { get; private set; }
-
 
     private ScriptManager s;
     private Rigidbody rb;
@@ -103,7 +102,6 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
 
         playerScale = transform.localScale;
-        s.PlayerMovement.CalculateInputDir(input);
     }
 
     void FixedUpdate()
@@ -140,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
         Friction();
         SlopeMovement();
 
-        Vector3 inputDir = CalculateInputDir(input);
+        Vector3 inputDir = CalculateInputDir(input, CalculateMultiplier());
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, groundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
@@ -154,7 +152,7 @@ public class PlayerMovement : MonoBehaviour
         if (inputTemp.x > 0 && relativeVel.x > 23f || inputTemp.x < 0 && relativeVel.x < -23f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && relativeVel.z > 23f || inputTemp.y < 0 && relativeVel.z < -23f) inputTemp.y = 0f;
 
-        return CalculateInputDir(inputTemp);
+        return CalculateInputDir(inputTemp, CalculateMultiplier());
     }
 
     private void SlopeMovement()
@@ -319,7 +317,7 @@ public class PlayerMovement : MonoBehaviour
             Vector3 vel = velocity;
             vel.y = 0f;
 
-            Vector3 moveDir = this.moveDir;
+            Vector3 moveDir = inputDir;
             Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
 
             if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
@@ -444,33 +442,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!nearWall) return false;
         if (reachedMaxSlope || vaulting || grounded || crouching) return false;
-        return !Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, minimumJumpHeight, Ground);
+
+        return !Physics.CheckSphere(s.bottomCapsuleSphereOrigin + Vector3.down * minimumJumpHeight, 0.3f, Ground);
     }
 
     public float CalculateWallRunRotation()
     {
-        if (!wallRunning) return 0f;
-        if (Vector3.Dot(s.orientation.forward, wallNormal) > 0f) return 0f;
+        if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0f) return 0f;
 
         return Vector3.Angle(s.orientation.forward, wallMoveDir);
-    }
-
-    private void ManageWallMovement()
-    {
-        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
-
-        if (CanWallJump() && jumping && readyToWallJump) WallJump();
-
-        if (!CanWallJump() || !isWallRight && !isWallLeft)
-        {
-            wallRunning = false;
-            canAddWallRunForce = true;
-        }
-
-        if (wallRunning && !grounded) WallRun();
-
-        if (isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning && readyToWallJump)
-            StopWallRun();
     }
     #endregion 
 
@@ -497,21 +477,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouching && transform.localScale.y < crouchScale + 0.01f) transform.localScale = new Vector3(playerScale.x, crouchScale, playerScale.z);
         if (!crouching && transform.localScale.y > playerScale.y - 0.01f) transform.localScale = playerScale;
-    }
-
-    private void ManageCrouching()
-    {
-        if (crouching && !wallRunning && !crouched) Crouch(moveDir);
-
-        if (crouched)
-        {
-            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
-            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
-        }
-
-        if (!crouching && crouched && canUnCrouch) UnCrouch();
-
-        UpdateCrouchScale();
     }
     #endregion
 
@@ -572,8 +537,30 @@ public class PlayerMovement : MonoBehaviour
 
         RecordMovementSteps();
 
-        ManageCrouching();
-        ManageWallMovement();
+        if (crouching && !wallRunning && !crouched) Crouch(inputDir);
+
+        if (crouched)
+        {
+            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
+            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
+        }
+
+        if (!crouching && crouched && canUnCrouch) UnCrouch();
+
+        UpdateCrouchScale();
+
+        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
+
+        if (CanWallJump() && jumping && readyToWallJump) WallJump();
+
+        if (!CanWallJump() || !isWallRight && !isWallLeft)
+        {
+            wallRunning = false;
+            canAddWallRunForce = true;
+        }
+
+        if (wallRunning && !grounded) WallRun();
+        if (isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning && readyToWallJump) StopWallRun();
     }
 
     public Vector2 CalculateMultiplier()
@@ -587,10 +574,8 @@ public class PlayerMovement : MonoBehaviour
         return new Vector2(0.4f, 0.6f);
     }
 
-    private Vector3 CalculateInputDir(Vector2 input)
+    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier)
     {
-        Vector2 multiplier = CalculateMultiplier();
-
         return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
     }
     #endregion

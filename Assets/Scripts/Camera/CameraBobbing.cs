@@ -27,8 +27,7 @@ public class CameraBobbing : MonoBehaviour
     [Header("Step Settings")]
     [SerializeField] private float stepSmoothTime;
 
-    [HideInInspector]
-    public Vector3 vaultDesync = Vector3.zero;
+    public Vector3 vaultDesync { get; private set; } = Vector3.zero;
     private Vector3 vaultVel = Vector3.zero;
 
     [Header("Assignables")]
@@ -36,7 +35,7 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
+        timer = (s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk || s.PlayerMovement.wallRunning) && s.PlayerMovement.moving && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
 
@@ -72,9 +71,10 @@ public class CameraBobbing : MonoBehaviour
 
     private Vector3 HeadBob()
     {
-        if (timer <= 0) return Vector3.zero;
+        float amp = s.PlayerMovement.magnitude * 0.065f;
+        amp = Mathf.Clamp(amp, 1f, 2f);
 
-        return s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert;
+        return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert * amp);
     }
 
     private void SmoothStepUp()

@@ -838,7 +838,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198284363}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.554, z: 1.162}
+  m_LocalPosition: {x: 0, y: 0.527, z: 1.315}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1017722965}
@@ -1110,9 +1110,9 @@ MonoBehaviour:
   recoilForce: 15
   defaultPos: {x: 2, y: -0.4, z: 3.6}
   defaultRot: {x: -0.45, y: 18, z: 0}
-  bobAmountHoriz: 0.1
-  bobAmountVert: 0.1
-  swayAmount: 6
+  aimPos: {x: -2, y: -0.3, z: 0}
+  aimRot: {x: 0, y: -18, z: 0}
+  weight: 1.5
   shootForce: 80
   attackRange: 120
   spread: 3
@@ -3312,8 +3312,8 @@ MonoBehaviour:
   rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
   downClampAngle: 80
-  swayAmount: 0
-  swayFrequency: 0
+  swayAmount: 6
+  swayFrequency: 0.3
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078167
@@ -4102,7 +4102,6 @@ MonoBehaviour:
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
   stepSmoothTime: 0.06
-  vaultDesync: {x: 0, y: 0, z: 0}
   s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
@@ -4485,9 +4484,9 @@ MonoBehaviour:
   recoilForce: 15
   defaultPos: {x: 2, y: -0.6, z: 2.5}
   defaultRot: {x: -0.45, y: 18, z: 0}
-  bobAmountHoriz: 0.1
-  bobAmountVert: 0.15
-  swayAmount: 12
+  aimPos: {x: -2, y: -0.02, z: 0}
+  aimRot: {x: 0.5, y: -18, z: 0}
+  weight: 1
   shootForce: 80
   attackRange: 90
   spread: 8
@@ -5812,7 +5811,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 6.1
+  m_Name: Save 6.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6453,8 +6452,8 @@ MonoBehaviour:
   defaultRot: {x: -0.45, y: 18, z: 0}
   aimPos: {x: -2, y: -0.3, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
-  recoilPosOffset: {x: 0, y: -0.01, z: -0.06}
-  recoilRotOffset: {x: -0.6, y: 0, z: 0}
+  recoilPosOffset: {x: 0, y: 0, z: -0.06}
+  recoilRotOffset: {x: -0.7, y: 0, z: 0}
   recoilSmoothTime: 0.045
   reloadRotOffset: {x: 720, y: 0, z: 0}
   reloadSmoothTime: 0.6

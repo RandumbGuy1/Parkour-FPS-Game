@@ -18,9 +18,10 @@ public abstract class Weapon : MonoBehaviour
     public Vector3 defaultPos;
     public Vector3 defaultRot;
 
-    public float bobAmountHoriz;
-    public float bobAmountVert;
-    public float swayAmount;
+    public Vector3 aimPos;
+    public Vector3 aimRot;
+
+    public float weight;
 
     public abstract bool OnAttack(Transform cam);
     public abstract bool SecondaryAction();
