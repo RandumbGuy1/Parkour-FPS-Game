@@ -117,7 +117,7 @@ public class PlayerMovement : MonoBehaviour
     {
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
 
-        rb.AddForce(Vector3.down * 3f);
+        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.6f - 1f), ForceMode.Acceleration);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
         rb.useGravity = !(vaulting || wallRunning);
@@ -160,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
         if (groundNormal.y >= 1f) return;
 
         Vector3 gravityForce = Physics.gravity - Vector3.Project(Physics.gravity, groundNormal);
-        rb.AddForce(-gravityForce * 1.1f, ForceMode.Acceleration);
+        rb.AddForce(-gravityForce * (rb.velocity.y > 0 ? 0.9f : 1.4f), ForceMode.Acceleration);
     }
     #endregion
 
@@ -235,6 +235,20 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Collision Detection
+    void OnCollisionEnter(Collision col)
+    {
+        int layer = col.gameObject.layer;
+        if (Ground != (Ground | 1 << layer)) return;
+
+        Vector3 normal = col.GetContact(0).normal;
+
+        if (IsFloor(normal)) if (!grounded) Land(Math.Abs(velocity.y));
+
+        if (Environment != (Environment | 1 << layer)) return;
+
+        CheckForVault(normal);
+    }
+
     void OnCollisionStay(Collision col)
     {
         int layer = col.gameObject.layer;
@@ -297,49 +311,41 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Vaulting
-    void OnCollisionEnter(Collision col)
+    private void CheckForVault(Vector3 normal)
     {
-        int layer = col.gameObject.layer;
-        if (Ground != (Ground | 1 << layer)) return;
+        if (!IsWall(normal, 0.31f)) return;
 
-        Vector3 normal = col.GetContact(0).normal;
+        if (vaulting || wallRunning || crouching || reachedMaxSlope) return;
 
-        if (IsFloor(normal)) if (!grounded) Land(Math.Abs(velocity.y));
+        Vector3 vaultDir = normal;
+        vaultDir.y = 0f;
+        vaultDir.Normalize();
 
-        if (IsWall(normal, 0.31f))
+        Vector3 vel = velocity;
+        vel.y = 0f;
+
+        Vector3 moveDir = inputDir;
+        Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
+
+        if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
+        if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
+        if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
+        if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
+
+        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
+        float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
+
+        if (distance > vaultOffset) return;
+
+        if (distance < 3.5f)
         {
-            if (vaulting || wallRunning || crouching || reachedMaxSlope || Environment != (Environment | 1 << layer)) return;
-
-            Vector3 vaultDir = normal;
-            vaultDir.y = 0f;
-            vaultDir.Normalize();
-
-            Vector3 vel = velocity;
-            vel.y = 0f;
-
-            Vector3 moveDir = inputDir;
-            Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
-
-            if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
-            if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
-            if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
-            if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
-
-            Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
-            float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
-
-            if (distance > vaultOffset) return;
-
-            if (distance < 3.5f)
-            {
-                s.CameraHeadBob.StepUp(transform.position - vaultPoint);
-                transform.position = vaultPoint;
-                rb.velocity = vel;
-                return;
-            }
-
-            StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+            s.CameraHeadBob.StepUp(transform.position - vaultPoint);
+            transform.position = vaultPoint;
+            rb.velocity = vel;
+            return;
         }
+
+        StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)

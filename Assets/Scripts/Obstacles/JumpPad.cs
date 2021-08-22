@@ -11,7 +11,7 @@ public class JumpPad : MonoBehaviour
         Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
         if (rb == null) return;
 
-        Vector3 dir = (transform.position - col.transform.position).normalized;
+        Vector3 dir = (transform.position - col.transform.position).normalized * 3f;
         dir.y = 0f;
 
         Vector3 boostDir = (dir + Vector3.up * 5f) * boostForce;
