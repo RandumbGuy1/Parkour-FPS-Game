@@ -276,8 +276,8 @@ public class WeaponController : MonoBehaviour
     {
         if (desiredRecoilPos == Vector3.zero && desiredRecoilRot == Vector3.zero) return;
 
-        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, 3f * Time.deltaTime);
-        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, 3f * Time.deltaTime);
+        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, 8.5f * Time.deltaTime);
+        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, 8.5f * Time.deltaTime);
 
         recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, recoilSmoothTime);
         recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, recoilSmoothTime);

@@ -350,6 +350,7 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
         vaulting = true;
@@ -377,6 +378,7 @@ public class PlayerMovement : MonoBehaviour
         vaulting = false;
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         rb.velocity = normal * vaultForce * 0.5f;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
