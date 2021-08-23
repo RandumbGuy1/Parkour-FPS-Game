@@ -5,16 +5,18 @@ using UnityEngine;
 public class ButtonDoor : Interactable
 {
     [Header("Door Interaction")]
-    public Transform door;
+    [SerializeField] private Transform door;
     [Space(15)]
-    public float openSmoothTime;
-    public float doorOffset;
-    public float buttonOffset;
-    public bool useOnce;
+    [SerializeField] private float openSmoothTime;
+    [SerializeField] private float doorOffset;
+    [SerializeField] private float buttonOffset;
+    [SerializeField] private bool useOnce;
 
     [Header("Interaction Hints")]
-    public string openHint;
-    public string closeHint;
+    [SerializeField] private string openHint;
+    [SerializeField] private string closeHint;
+
+    private Outline outline;
 
     private Vector3 originalButtonPos;
     private Vector3 originalDoorPos;
@@ -23,6 +25,14 @@ public class ButtonDoor : Interactable
     private Vector3 bOffset;
 
     private bool opened = false;
+
+    private void Awake()
+    {
+        outline = GetComponent<Outline>();
+        if (outline == null) return;
+
+        outline.enabled = false;
+    }
 
     void Start()
     {
@@ -37,8 +47,7 @@ public class ButtonDoor : Interactable
 
     public override string GetDescription()
     {
-        if (!opened) return openHint;
-        else return closeHint;
+        return (opened ? closeHint : openHint);
     }
 
     public override void OnInteract()
@@ -46,6 +55,16 @@ public class ButtonDoor : Interactable
         opened = !opened;
         StopAllCoroutines();
         StartCoroutine(OpenDoor(opened));
+    }
+
+    public override void OnStartHover()
+    {
+        if (outline != null) outline.enabled = true;
+    }
+
+    public override void OnEndHover()
+    {
+        if (outline != null) outline.enabled = false;
     }
 
     private IEnumerator OpenDoor(bool opened)

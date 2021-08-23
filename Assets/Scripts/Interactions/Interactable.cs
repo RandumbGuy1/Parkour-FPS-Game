@@ -13,5 +13,8 @@ public abstract class Interactable : MonoBehaviour
     public InteractionType type;
 
     public abstract string GetDescription();
+
     public abstract void OnInteract();
+    public abstract void OnStartHover();
+    public abstract void OnEndHover();
 }

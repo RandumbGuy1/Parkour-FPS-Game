@@ -12,10 +12,16 @@ public class WeaponPickup : Interactable
     [SerializeField] private string description;
 
     private Rigidbody rb;
+    private Outline outline;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        outline = GetComponent<Outline>();
+        if (outline == null) return;
+
+        outline.enabled = false;
     }
 
     void OnDisable()
@@ -26,10 +32,9 @@ public class WeaponPickup : Interactable
         transform.localRotation = Quaternion.Euler(0, 0, 0);
     }
 
-    public override string GetDescription()
+    public override string GetDescription() 
     {
-        if (!rb.isKinematic) return description;
-        else return null;
+        return (rb.isKinematic ? null: description);
     }
 
     public override void OnInteract()
@@ -40,6 +45,16 @@ public class WeaponPickup : Interactable
 
         StopAllCoroutines();
         StartCoroutine(Pickup());
+    }
+
+    public override void OnStartHover()
+    {
+        if (outline != null) outline.enabled = true;
+    }
+
+    public override void OnEndHover()
+    {
+        if (outline != null) outline.enabled = false;
     }
 
     private IEnumerator Pickup()

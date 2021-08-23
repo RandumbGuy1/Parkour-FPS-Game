@@ -15,8 +15,6 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private float objSpeed;
     [SerializeField] private float maxGrabDistance;
 
-    private Vector3 smoothVel = Vector3.zero;
-    private Vector3 vel = Vector3.zero;
     private float storedDrag;
     private float storedAngularDrag;
 
@@ -29,6 +27,8 @@ public class PlayerInteraction : MonoBehaviour
     private GameObject heldObj;
     private Rigidbody objRb;
     private ScriptManager s;
+
+    private Interactable interactable;
 
     void Awake()
     {
@@ -51,40 +51,38 @@ public class PlayerInteraction : MonoBehaviour
 
     private void LateUpdate() => DrawGrabLine();
 
-    void DrawGrabLine()
-    {
-        if (heldObj == null) return;
-
-        lr.SetPosition(0, grabPos.position);
-        lr.SetPosition(1, heldObj.transform.position);
-
-        float vel = (grabPos.position - heldObj.transform.position).sqrMagnitude * 0.006f;
-        vel = Mathf.Clamp(vel, 0.02f, 0.15f);
-
-        lr.startWidth = vel;
-        lr.endWidth = vel;
-    }
-
-    void GrabInput()
-    {
-        if (heldObj == null) return;
-
-        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
-    }
-
     private void CheckForInteractable()
     {
         if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables))
         {
-            Interactable interactable = hit.transform.GetComponent<Interactable>();
+            GameObject currentleyLookingAt = hit.transform.gameObject;
 
             if (interactable == null)
             {
-                if (Input.GetMouseButtonDown(0) && heldObj == null) Pickup(hit.transform.gameObject);
+                Interactable interactableTemp = hit.transform.GetComponent<Interactable>();
+
+                if (interactableTemp == null)
+                {
+                    if (Input.GetMouseButtonDown(0) && heldObj == null) Pickup(hit.transform.gameObject);
+                    return;
+                }
+
+                interactable = interactableTemp;
+                interactable.OnStartHover();
+
+            }
+            else if (currentleyLookingAt != interactable.gameObject)
+            {
+                interactable.OnEndHover();
+                interactable = null;
+
+                textDisplay.SetActive(false);
+                interactionText.text = " ";
                 return;
             }
 
             string text = interactable.GetDescription();
+
             if (text == null)
             {
                 textDisplay.SetActive(false);
@@ -96,11 +94,17 @@ public class PlayerInteraction : MonoBehaviour
             interactionText.text = text;
 
             if (s.PlayerInput.interacting) Interact(interactable);
+
         }
         else if (interactionText.text != " ")
         {
             textDisplay.SetActive(false);
             interactionText.text = " ";
+
+            if (interactable == null) return;
+
+            interactable.OnEndHover();
+            interactable = null;
         }
     }
 
@@ -117,6 +121,27 @@ public class PlayerInteraction : MonoBehaviour
                 interactable.OnInteract();
                 break;
          }
+    }
+
+    void DrawGrabLine()
+    {
+        if (heldObj == null) return;
+
+        lr.SetPosition(0, grabPos.position);
+        lr.SetPosition(1, heldObj.transform.position);
+
+        float vel = (grabPos.position - heldObj.transform.position).sqrMagnitude * 0.007f;
+        vel = Mathf.Clamp(vel, 0.02f, 0.15f);
+
+        lr.startWidth = vel;
+        lr.endWidth = vel;
+    }
+
+    void GrabInput()
+    {
+        if (heldObj == null) return;
+
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
     }
 
     private void CheckObject()
