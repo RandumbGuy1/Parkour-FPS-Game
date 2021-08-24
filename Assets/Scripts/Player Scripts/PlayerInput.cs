@@ -19,11 +19,11 @@ public class PlayerInput : MonoBehaviour
     public bool leftHoldClick { get { return Input.GetMouseButton(0); } }
 
     [Header("KeyBinds")]
-    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
-    [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private KeyCode dropKey = KeyCode.Q;
-    [SerializeField] private KeyCode reloadKey = KeyCode.R;
+    public KeyCode jumpKey = KeyCode.Space;
+    public KeyCode crouchKey = KeyCode.LeftControl;
+    public KeyCode interactKey = KeyCode.E;
+    public KeyCode dropKey = KeyCode.Q;
+    public KeyCode reloadKey = KeyCode.R;
 
     [Header("Assignables")]
     private ScriptManager s;

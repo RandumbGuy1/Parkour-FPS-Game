@@ -116,9 +116,9 @@ public class PlayerMovement : MonoBehaviour
     private void Movement()
     {
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
-
-        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.6f - 1f), ForceMode.Acceleration);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
+
+        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.65f - 1f), ForceMode.Acceleration);
 
         rb.useGravity = !(vaulting || wallRunning);
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -126,8 +126,7 @@ public class PlayerMovement : MonoBehaviour
         ControlSpeed();
         ProcessInput();
 
-        Vector3 moveDir = (grounded ? GroundMovement() : AirMovement());
-        rb.AddForce(moveDir * moveSpeed * 0.045f, ForceMode.VelocityChange);
+        rb.AddForce((grounded ? GroundMovement() : AirMovement()) * moveSpeed * 0.1f, ForceMode.Impulse);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
@@ -350,7 +349,6 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
-        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
         vaulting = true;
@@ -378,7 +376,6 @@ public class PlayerMovement : MonoBehaviour
         vaulting = false;
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         rb.velocity = normal * vaultForce * 0.5f;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);

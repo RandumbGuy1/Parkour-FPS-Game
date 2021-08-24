@@ -7,7 +7,8 @@ public class WeaponController : MonoBehaviour
     [Header("Equip Settings")]
     [SerializeField] private float throwForce;
     [SerializeField] private int selectedWeapon;
-    public bool aiming = false;
+    [SerializeField] private int maxWeapons;
+    public bool aiming { get; private set; } = false;
 
     private Weapon CurrentWeapon;
     private float timer = 0f;
@@ -88,8 +89,8 @@ public class WeaponController : MonoBehaviour
         if (weapons.Count > 0)
         {
             if (s.PlayerInput.dropping) Drop();
-            if (Input.GetKeyDown(KeyCode.Alpha1)) selectedWeapon = 0;
-            if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count >= 2) selectedWeapon = 1;
+
+            for (int i = 1; i < maxWeapons + 1; i++) if (Input.GetKeyDown(i.ToString()) && weapons.Count >= i) selectedWeapon = i - 1;
 
             ProcessMovement();
             ProcessWeaponInput();
@@ -160,8 +161,12 @@ public class WeaponController : MonoBehaviour
         obj.transform.SetParent(weaponPos, true);
         obj.transform.localScale = Vector3.one;
 
-        selectedWeapon = weapons.Count - 1;
-        SelectWeapon(false);
+        if (weapons.Count > maxWeapons) Drop(false);
+        else
+        {
+            selectedWeapon = weapons.Count - 1;
+            SelectWeapon(false);
+        }
     }
 
     private void SelectWeapon(bool switching = true)
@@ -179,7 +184,7 @@ public class WeaponController : MonoBehaviour
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
     }
 
-    private void Drop()
+    private void Drop(bool switching = true)
     {
         Rigidbody rb = weapons[selectedWeapon].gameObject.GetComponent<Rigidbody>();
 
@@ -207,7 +212,7 @@ public class WeaponController : MonoBehaviour
         if (weapons.Count > 0)
         {
             selectedWeapon = weapons.Count - 1;
-            SelectWeapon();
+            SelectWeapon(switching);
         }
     }
     #endregion
