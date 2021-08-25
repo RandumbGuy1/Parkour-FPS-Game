@@ -89,8 +89,7 @@ public class ProjectileGun : Weapon
         reloading = false;
     }
 
-    private void ResetShot()
-    {
-        readyToShoot = true;
-    }
+    private void ResetShot() => readyToShoot = true;
+
+    public override string DisplayMetrics() => (bulletsLeft / bulletsPerTap).ToString() + " / " + (magazineSize / bulletsPerTap).ToString();
 }

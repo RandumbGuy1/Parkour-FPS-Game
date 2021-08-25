@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class WeaponController : MonoBehaviour
 {
@@ -57,6 +58,8 @@ public class WeaponController : MonoBehaviour
     [Space(10)]
     [SerializeField] private float switchPosTime;
     [SerializeField] private float switchRotTime;
+    [Space(10)]
+    [SerializeField] private float slideTilt;
 
     private Vector3 switchOffsetPos = Vector3.zero, switchOffsetRot = Vector3.zero;
     private Vector3 switchPosVel = Vector3.zero, switchRotVel = Vector3.zero;
@@ -70,6 +73,7 @@ public class WeaponController : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private Transform weaponPos;
     [SerializeField] private Transform weaponEmptyGameObject;
+    [SerializeField] private TextMeshProUGUI ammoText;
     private ScriptManager s;
 
     void Awake()
@@ -78,6 +82,8 @@ public class WeaponController : MonoBehaviour
 
         smoothDefaultPos = defaultPos;
         smoothDefaultRot = defaultRot;
+
+        ammoText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -95,12 +101,9 @@ public class WeaponController : MonoBehaviour
             ProcessMovement();
             ProcessWeaponInput();
 
-            CalculateDefaultValues();
-            CalculateRecoilOffset();
-            CalculateSwitchOffset();
-            CalculateReloadOffset();
-
             if (selectedWeapon != previousWeapon) SelectWeapon();
+
+            if (CurrentWeapon != null) ammoText.text = CurrentWeapon.DisplayMetrics();
         }
 
         Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos; 
@@ -117,12 +120,8 @@ public class WeaponController : MonoBehaviour
 
         bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
 
-        if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick && canAttack : s.PlayerInput.leftClick && canAttack)  Attack();
-        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick))
-        {
-            CurrentWeapon.SecondaryAction();
-            reloadRot = reloadRotOffset;
-        }
+        if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick && canAttack : s.PlayerInput.leftClick && canAttack) Attack();
+        if ((CurrentWeapon.weaponType == Weapon.WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
     }
     #endregion
 
@@ -138,16 +137,14 @@ public class WeaponController : MonoBehaviour
 
                     desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
                     desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+
+                    s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
                 }
                 break;
 
             case Weapon.WeaponClass.Melee:
-                if (CurrentWeapon.OnAttack(s.cam))
-                {
-                    s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
-                }
+                if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
                 break;
-
         }
     }
     #endregion
@@ -155,6 +152,8 @@ public class WeaponController : MonoBehaviour
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
+        ammoText.gameObject.SetActive(true);
+
         CurrentWeapon = obj.GetComponent<Weapon>();
 
         weapons.Add(obj);
@@ -211,9 +210,10 @@ public class WeaponController : MonoBehaviour
 
         if (weapons.Count > 0)
         {
-            selectedWeapon = weapons.Count - 1;
+            selectedWeapon = (selectedWeapon + 1 < weapons.Count ? selectedWeapon : weapons.Count - 1);
             SelectWeapon(switching);
         }
+        else ammoText.gameObject.SetActive(false);
     }
     #endregion
 
@@ -313,11 +313,16 @@ public class WeaponController : MonoBehaviour
 
     private void ProcessMovement()
     {
-        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && !s.PlayerInput.crouching && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
+        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
 
         smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentWeapon != null ? CurrentWeapon.aimRot : aimRot) : Vector3.zero), ref swayVel, swaySmoothTime);
-        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? (CurrentWeapon != null ? CurrentWeapon.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);      
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentWeapon != null ? CurrentWeapon.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.crouching ? Vector3.forward * slideTilt : Vector3.zero), ref swayVel, swaySmoothTime);
+        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? (CurrentWeapon != null ? CurrentWeapon.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
+
+        CalculateDefaultValues();
+        CalculateRecoilOffset();
+        CalculateSwitchOffset();
+        CalculateReloadOffset();
     }
     #endregion
 }

@@ -548,6 +548,8 @@ public class PlayerMovement : MonoBehaviour
         {
             canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
             canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
+
+            if (grounded) rb.AddForce(Vector3.down * 20f);
         }
 
         if (!crouching && crouched && canUnCrouch) UnCrouch();
