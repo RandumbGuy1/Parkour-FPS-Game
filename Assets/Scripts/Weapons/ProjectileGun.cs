@@ -2,13 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ProjectileGun : Weapon
+public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 {
+    public WeaponClass weaponType { get { return type; } }
+    public Sprite itemSprite { get { return weaponSprite; } }
+
+    public bool automatic { get { return weaponAutomatic; } }
+    public float weight { get { return weaponWeight; } }
+    public float recoilForce { get { return weaponRecoilForce; } }
+
+    [Header("Weapon Class")]
+    [SerializeField] private WeaponClass type;
+
+    [Header("Weapon Artwork")]
+    [SerializeField] private Sprite weaponSprite;
+
+    [Header("Weapon Holding Settings")]
+    [SerializeField] private float weaponWeight;
+    [SerializeField] private bool weaponAutomatic;
+
     [Header("Shooting Settings")]
     [SerializeField] private float shootForce;
     [SerializeField] private float attackRange;
     [SerializeField] private float spread;
     [SerializeField] private float fireRate;
+    [SerializeField] private float weaponRecoilForce;
 
     [Header("Reload Settings")]
     [SerializeField] private int magazineSize;
@@ -30,26 +48,26 @@ public class ProjectileGun : Weapon
 
     void OnEnable() => reloading = false;
 
-    public override bool OnAttack(Transform cam)
+    public bool OnAttack(Transform cam)
     {
         if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
 
         if (muzzleFlash != null) muzzleFlash.Play();
 
         Ray ray = cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-  
-        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange)); 
-        Vector3 dir = (targetPoint - attackPoint.position);  
+
+        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
+        Vector3 dir = (targetPoint - attackPoint.position);
 
         for (int i = 0; i < bulletsPerTap; i++)
         {
             bulletsLeft--;
 
             Vector2 rand = Vector2.zero;
-            rand.x = ((int) Random.Range(-1f, 1f)) * spread * 0.001f;
-            rand.y = ((int) Random.Range(-1f, 1f)) * spread * 0.001f;
+            rand.x = (Random.Range(-1f, 1f)) * spread * 0.003f;
+            rand.y = (Random.Range(-1f, 1f)) * spread * 0.003f;
 
-            Vector3 spreadDir = dir.normalized + (Vector3) rand;
+            Vector3 spreadDir = dir.normalized + (Vector3)rand;
 
             float distanceForce = (dir.magnitude * 0.1f);
             distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
@@ -71,7 +89,7 @@ public class ProjectileGun : Weapon
         return true;
     }
 
-    public override bool SecondaryAction()
+    public bool SecondaryAction()
     {
         if (bulletsLeft >= magazineSize || reloading) return false;
 
@@ -91,5 +109,7 @@ public class ProjectileGun : Weapon
 
     private void ResetShot() => readyToShoot = true;
 
-    public override string DisplayMetrics() => (bulletsLeft / bulletsPerTap).ToString() + " / " + (magazineSize / bulletsPerTap).ToString();
+    public string ReadData() => (bulletsLeft / bulletsPerTap).ToString() + " / " + (magazineSize / bulletsPerTap).ToString();
+
+    public bool OnUse() => true;
 }
