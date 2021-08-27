@@ -22,4 +22,9 @@ public class ScriptManager : MonoBehaviour
     public CapsuleCollider cc;
 
     public Vector3 bottomCapsuleSphereOrigin { get { return transform.position - Vector3.up * (cc.height - cc.radius); } }
+
+    private void Awake()
+    {
+        Application.targetFrameRate = 80;
+    }
 }
