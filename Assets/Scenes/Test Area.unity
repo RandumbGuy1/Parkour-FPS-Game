@@ -201,9 +201,13 @@ MonoBehaviour:
   spread: 4
   fireRate: 6
   weaponRecoilForce: 25
+  weaponRecoilSmoothTime: 0.05
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
+  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 2
+  reloadTime: 0.8
+  weaponReloadRotOffset: {x: 720, y: 0, z: 0}
   Environment:
     serializedVersion: 2
     m_Bits: 1792
@@ -1492,7 +1496,7 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 1
   weaponSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 3.2}
+  weaponDefaultPos: {x: 2, y: -0.6, z: 3.4}
   weaponDefaultRot: {x: -0.45, y: 18, z: 0}
   weaponAimPos: {x: -2, y: -0.1, z: -0.5}
   weaponAimRot: {x: 0, y: -18, z: 0}
@@ -1502,9 +1506,13 @@ MonoBehaviour:
   spread: 2
   fireRate: 9
   weaponRecoilForce: 15
+  weaponRecoilSmoothTime: 0.05
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.06}
+  weaponRecoilRotOffset: {x: -1.1, y: 0, z: 0}
   magazineSize: 80
   bulletsPerTap: 1
-  reloadTime: 2.2
+  reloadTime: 0.8
+  weaponReloadRotOffset: {x: 720, y: 0, z: 0}
   Environment:
     serializedVersion: 2
     m_Bits: 1792
@@ -7076,9 +7084,13 @@ MonoBehaviour:
   spread: 4
   fireRate: 6
   weaponRecoilForce: 25
+  weaponRecoilSmoothTime: 0.05
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
+  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 2
+  reloadTime: 0.8
+  weaponReloadRotOffset: {x: 720, y: 0, z: 0}
   Environment:
     serializedVersion: 2
     m_Bits: 1792
@@ -8146,9 +8158,13 @@ MonoBehaviour:
   spread: 4
   fireRate: 6
   weaponRecoilForce: 25
+  weaponRecoilSmoothTime: 0.05
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
+  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 2
+  reloadTime: 0.8
+  weaponReloadRotOffset: {x: 720, y: 0, z: 0}
   Environment:
     serializedVersion: 2
     m_Bits: 1792
@@ -12211,7 +12227,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 6.9
+  m_Name: Save 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12858,11 +12874,6 @@ MonoBehaviour:
   defaultRot: {x: -0.45, y: 18, z: 0}
   aimPos: {x: -2, y: -0.3, z: 0}
   aimRot: {x: 0, y: -18, z: 0}
-  recoilPosOffset: {x: 0, y: 0, z: -0.07}
-  recoilRotOffset: {x: -1.2, y: 0, z: 0}
-  recoilSmoothTime: 0.05
-  reloadRotOffset: {x: 720, y: 0, z: 0}
-  reloadSmoothTime: 0.6
   bobAmountHoriz: 0.1
   bobAmountVert: 0.2
   bobSpeed: 8
@@ -14360,9 +14371,13 @@ MonoBehaviour:
   spread: 4
   fireRate: 6
   weaponRecoilForce: 25
+  weaponRecoilSmoothTime: 0.05
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
+  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 2
+  reloadTime: 0.8
+  weaponReloadRotOffset: {x: 720, y: 0, z: 0}
   Environment:
     serializedVersion: 2
     m_Bits: 1792

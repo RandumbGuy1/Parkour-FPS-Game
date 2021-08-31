@@ -27,20 +27,9 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Vector3 aimPos;
     [SerializeField] private Vector3 aimRot;
 
-    [Header("Recoil Settings")]
-    [SerializeField] private Vector3 recoilPosOffset;
-    [SerializeField] private Vector3 recoilRotOffset;
-    [Space(10)]
-    [SerializeField] private float recoilSmoothTime;
-
     private Vector3 desiredRecoilRot = Vector3.zero, desiredRecoilPos = Vector3.zero;
     private Vector3 recoilRot = Vector3.zero, recoilPos = Vector3.zero;
     private Vector3 recoilRotVel = Vector3.zero, recoilPosVel = Vector3.zero;
-
-    [Header("Reload Settings")]
-    [SerializeField] private Vector3 reloadRotOffset;
-    [Space(10)]
-    [SerializeField] private float reloadSmoothTime;
 
     private Vector3 reloadRot = Vector3.zero;
     private Vector3 reloadRotVel = Vector3.zero;
@@ -136,7 +125,7 @@ public class WeaponController : MonoBehaviour
         bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
 
         if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick && canAttack : s.PlayerInput.leftClick && canAttack) Attack();
-        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = reloadRotOffset;
+        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = CurrentWeapon.reloadRotOffset;
     }
     #endregion
 
@@ -150,8 +139,8 @@ public class WeaponController : MonoBehaviour
                 {
                     s.CameraShaker.ShakeOnce(8f, 12.5f, 0.45f, 0.16f);
 
-                    desiredRecoilPos = recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                    desiredRecoilRot = recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
 
                     s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
                 }
@@ -302,22 +291,23 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateReloadOffset()
     {
-        if (reloadRot == Vector3.zero) return;
+        if (CurrentWeapon == null || reloadRot == Vector3.zero) return;
 
-        reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, reloadSmoothTime);
+        reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, CurrentWeapon.reloadSmoothTime);
 
         if (reloadRot.sqrMagnitude < 0.001f) reloadRot = Vector3.zero;
     }
 
     private void CalculateRecoilOffset()
     {
-        if (desiredRecoilPos == Vector3.zero && desiredRecoilRot == Vector3.zero) return;
+        if (CurrentWeapon == null || desiredRecoilPos == Vector3.zero && desiredRecoilRot == Vector3.zero) return;
 
         desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, 9f * Time.deltaTime);
         desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, 9f * Time.deltaTime);
 
-        recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, recoilSmoothTime);
-        recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, recoilSmoothTime);
+        float smoothing = CurrentWeapon.recoilSmoothTime;
+        recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, smoothing);
+        recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, smoothing);
         
         if (desiredRecoilPos.sqrMagnitude < 0.001f && desiredRecoilRot.sqrMagnitude < 0.001f)
         {

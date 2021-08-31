@@ -8,7 +8,11 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public Sprite itemSprite { get { return weaponSprite; } }
 
     public bool automatic { get { return weaponAutomatic; } }
+
     public float recoilForce { get { return weaponRecoilForce; } }
+    public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
+    public Vector3 recoilPosOffset { get { return weaponRecoilPosOffset; } }
+    public Vector3 recoilRotOffset { get { return weaponRecoilRotOffset; } }
 
     public Vector3 defaultPos { get { return weaponDefaultPos; } }
     public Vector3 defaultRot { get { return weaponDefaultRot; } }
@@ -17,6 +21,9 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public Vector3 aimRot { get { return weaponAimRot; } }
 
     public float weight { get { return weaponWeight; } }
+
+    public Vector3 reloadRotOffset { get { return weaponReloadRotOffset; } }
+    public float reloadSmoothTime { get { return reloadTime; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
@@ -39,12 +46,18 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float attackRange;
     [SerializeField] private float spread;
     [SerializeField] private float fireRate;
+
+    [Header("Recoil Settings")]
     [SerializeField] private float weaponRecoilForce;
+    [SerializeField] private float weaponRecoilSmoothTime;
+    [SerializeField] private Vector3 weaponRecoilPosOffset;
+    [SerializeField] private Vector3 weaponRecoilRotOffset;
 
     [Header("Reload Settings")]
     [SerializeField] private int magazineSize;
     [SerializeField] private int bulletsPerTap;
     [SerializeField] private float reloadTime;
+    [SerializeField] private Vector3 weaponReloadRotOffset;
 
     private int bulletsLeft;
     private bool readyToShoot = true;
