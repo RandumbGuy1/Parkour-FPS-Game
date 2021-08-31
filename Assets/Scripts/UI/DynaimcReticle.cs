@@ -18,10 +18,10 @@ public class DynaimcReticle : MonoBehaviour
     private float size;
     private float newSize;
 
-    void LateUpdate()
-    {
-        Reticle();
-    }
+    private float vel = 0f;
+
+    private void OnDisable() => size = minSize;
+    void LateUpdate() => Reticle();
 
     private void Reticle()
     {
@@ -30,7 +30,7 @@ public class DynaimcReticle : MonoBehaviour
         newSize = Mathf.Pow((s.PlayerMovement.magnitude + (s.CameraLook.rotationDelta.sqrMagnitude * 6f)) * 5f, 1.3f);
         newSize = Mathf.Clamp(newSize, (aiming ? minAimSize : minSize), (aiming ? minAimSize : maxSize));
 
-        size = Mathf.Lerp(size, newSize, smoothTime * Time.deltaTime);
+        size = Mathf.SmoothDamp(size, newSize, ref vel, smoothTime);
         reticle.sizeDelta = new Vector2(size, size);
     }
 }

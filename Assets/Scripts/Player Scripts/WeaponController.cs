@@ -79,6 +79,9 @@ public class WeaponController : MonoBehaviour
     [Space(10)]
     [SerializeField] private TextMeshProUGUI ammoText;
     [SerializeField] private Image itemArt;
+    [Space(10)]
+    [SerializeField] private GameObject weaponReticle;
+    [SerializeField] private GameObject circleCursor;
     private ScriptManager s;
 
     void Awake()
@@ -89,6 +92,9 @@ public class WeaponController : MonoBehaviour
         smoothDefaultRot = defaultRot;
 
         ammoText.gameObject.SetActive(false);
+
+        weaponReticle.gameObject.SetActive(false);
+        circleCursor.gameObject.SetActive(true);
     }
 
     void Update()
@@ -163,6 +169,9 @@ public class WeaponController : MonoBehaviour
     {
         ammoText.gameObject.SetActive(true);
 
+        weaponReticle.gameObject.SetActive(true);
+        circleCursor.gameObject.SetActive(false);
+
         CurrentWeapon = obj.GetComponent<IWeapon>();
         CurrentItem = obj.GetComponent<IItem>();
 
@@ -230,7 +239,13 @@ public class WeaponController : MonoBehaviour
             selectedWeapon = (selectedWeapon + 1 < weapons.Count ? selectedWeapon : weapons.Count - 1);
             SelectWeapon();
         }
-        else if (weapons.Count == 0) ammoText.gameObject.SetActive(false);
+        else if (weapons.Count == 0)
+        {
+            weaponReticle.gameObject.SetActive(false);
+            circleCursor.gameObject.SetActive(true);
+
+            ammoText.gameObject.SetActive(false);
+        }
     }
     #endregion
 
