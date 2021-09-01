@@ -64,15 +64,15 @@ public class CameraBobbing : MonoBehaviour
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 		if (magnitude < 0.5f) magnitude = 0f;
-		if (s.PlayerInput.crouching) magnitude = 0.9f;
+		if (s.PlayerInput.crouching) magnitude *= 0.83f;
 
 		desiredOffset -= magnitude;
 	}
 
     private Vector3 HeadBob()
     {
-        float amp = s.PlayerMovement.magnitude * 0.065f;
-        amp = Mathf.Clamp(amp, 1f, 2f);
+        float amp = s.PlayerMovement.magnitude * 0.068f * (s.PlayerMovement.wallRunning ? 1.3f : 1f);
+        amp = Mathf.Clamp(amp, 1f, 2.1f);
 
         return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert * amp);
     }

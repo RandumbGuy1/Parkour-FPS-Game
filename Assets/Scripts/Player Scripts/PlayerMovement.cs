@@ -118,7 +118,7 @@ public class PlayerMovement : MonoBehaviour
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.65f - 1f), ForceMode.Acceleration);
+        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
 
         rb.useGravity = !(vaulting || wallRunning);
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -549,7 +549,7 @@ public class PlayerMovement : MonoBehaviour
             canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
             canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
 
-            if (grounded) rb.AddForce(Vector3.down * 20f);
+            rb.AddForce(Vector3.down * 25f);
         }
 
         if (!crouching && crouched && canUnCrouch) UnCrouch();

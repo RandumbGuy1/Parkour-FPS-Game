@@ -90,7 +90,7 @@ public class WeaponController : MonoBehaviour
     {
         float previousWeapon = selectedWeapon;
 
-        if (s.PlayerInput.rightClick) aiming = !aiming;
+        if (s.PlayerInput.middleClick) aiming = !aiming;
 
         if (weapons.Count > 0)
         {

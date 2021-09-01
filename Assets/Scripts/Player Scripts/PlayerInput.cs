@@ -14,6 +14,7 @@ public class PlayerInput : MonoBehaviour
     public bool dropping { get { return Input.GetKeyDown(dropKey); } }
     public bool reloading { get { return Input.GetKeyDown(reloadKey); } }
 
+    public bool middleClick { get { return Input.GetMouseButtonDown(2); } }
     public bool rightClick { get { return Input.GetMouseButtonDown(1); } }
     public bool leftClick { get { return Input.GetMouseButtonDown(0); } }
     public bool leftHoldClick { get { return Input.GetMouseButton(0); } }
