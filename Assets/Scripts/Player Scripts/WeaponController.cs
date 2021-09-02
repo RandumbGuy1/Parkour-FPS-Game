@@ -122,7 +122,7 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f;
+        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
 
         if (CurrentWeapon.automatic ? s.PlayerInput.leftHoldClick && canAttack : s.PlayerInput.leftClick && canAttack) Attack();
         if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.reloading : s.PlayerInput.rightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = CurrentWeapon.reloadRotOffset;
@@ -147,7 +147,13 @@ public class WeaponController : MonoBehaviour
                 break;
 
             case WeaponClass.Melee:
-                if (CurrentWeapon.OnAttack(s.cam)) s.CameraShaker.ShakeOnce(10f, 8f, 0.3f, 0.1f);
+                if (CurrentWeapon.OnAttack(s.cam))
+                {
+                    desiredRecoilPos = CurrentWeapon.recoilPosOffset;
+                    desiredRecoilRot = CurrentWeapon.recoilRotOffset;
+
+                    s.CameraShaker.ShakeOnce(6f, 8f, 1f, 0.14f);
+                }
                 break;
         }
     }
@@ -302,8 +308,8 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null || desiredRecoilPos == Vector3.zero && desiredRecoilRot == Vector3.zero) return;
 
-        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, 9f * Time.deltaTime);
-        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, 9f * Time.deltaTime);
+        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, (CurrentWeapon.weaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
+        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, (CurrentWeapon.weaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
 
         float smoothing = CurrentWeapon.recoilSmoothTime;
         recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, smoothing);
