@@ -42,7 +42,6 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private float weaponWeight;
 
     [Header("Attack Settings")]
-    [SerializeField] private float attackRadius;
     [SerializeField] private float swingForce;
     [SerializeField] private float hitboxActive;
     [SerializeField] private LayerMask AttackLayer;
@@ -54,54 +53,68 @@ public class Sword : MonoBehaviour, IItem, IWeapon
 
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private BoxCollider bc;
+    private Transform cam;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        bc = GetComponent<BoxCollider>();
+    }
 
     public bool OnAttack(Transform cam)
     {
-        StopAllCoroutines();
-        StartCoroutine(AttackHitBox(cam));
+        this.cam = cam;
+
+        CancelInvoke("RevertAttackHitBox");
+        Invoke("AttackHitBox", 0.05f);
 
         return true;
     }
 
-    private IEnumerator AttackHitBox(Transform cam)
+    private void AttackHitBox()
     {
-        float elapsed = 0f;
+        bc.isTrigger = true;
+        rb.detectCollisions = true;
 
-        while (elapsed < hitboxActive)
-        {
-            Collider[] colliders = Physics.OverlapCapsule(transform.position + transform.up, transform.position - transform.up, attackRadius, AttackLayer);
-
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                Rigidbody rb = colliders[i].GetComponent<Rigidbody>();
-
-                if (rb != null)
-                {
-                    Vector3 dirToLaunch = ((colliders[i].transform.position - transform.position) + cam.forward * 2f).normalized;
-
-                    rb.AddForce(dirToLaunch * swingForce, ForceMode.Impulse);
-                    rb.AddTorque(dirToLaunch * swingForce, ForceMode.Impulse);
-                }
-            }
-
-            elapsed += Time.fixedDeltaTime;
-
-            yield return new WaitForFixedUpdate();
-        }
+        Invoke("RevertAttackHitBox", hitboxActive);
     }
 
+    private void RevertAttackHitBox()
+    {
+        bc.isTrigger = false;
+        rb.detectCollisions = false;
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        int layer = col.gameObject.layer;
+        if (AttackLayer != (AttackLayer | 1 << layer)) return;
+
+        Rigidbody rb = col.GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + Vector3.up * 2f * 0.3f + cam.forward;
+
+            rb.AddForce(dirToLaunch * swingForce * 0.5f, ForceMode.Impulse);
+            rb.AddTorque(dirToLaunch * swingForce * 0.5f, ForceMode.Impulse);
+        }
+    }
+   
     public bool SecondaryAction()
     {
         return true;
     }
 
-    public string ReadData() => "holding a sword (no way)";
-
-    public bool OnUse() => true;
-
-    void OnDrawGizmosSelected()
+    public void OnDrop()
     {
-        Gizmos.DrawWireSphere(transform.position + transform.up, attackRadius);
-        Gizmos.DrawWireSphere(transform.position - transform.up, attackRadius);
+        CancelInvoke("RevertAttackHitBox");
+
+        bc.isTrigger = false;
+        rb.detectCollisions = true;
     }
+
+    public string ReadData() => "sword stats";
 }

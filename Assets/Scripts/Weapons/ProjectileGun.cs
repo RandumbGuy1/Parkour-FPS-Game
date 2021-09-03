@@ -137,5 +137,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     public string ReadData() => (bulletsLeft / bulletsPerTap).ToString() + " / " + (magazineSize / bulletsPerTap).ToString();
 
-    public bool OnUse() => true;
+    public void OnDrop()
+    {
+        //wow such empty
+    }
 }

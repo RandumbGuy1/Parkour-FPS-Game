@@ -11,6 +11,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private int selectedWeapon;
     [SerializeField] private int maxWeapons;
     public bool aiming { get; private set; } = false;
+    public bool holdingWeapon { get; private set; } = false;
 
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
@@ -115,6 +116,8 @@ public class WeaponController : MonoBehaviour
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
+
+        holdingWeapon = weapons.Count > 0;
     }
 
     #region Weapon Input
@@ -215,6 +218,8 @@ public class WeaponController : MonoBehaviour
         rb.isKinematic = false;
         rb.detectCollisions = true;
         rb.interpolation = RigidbodyInterpolation.Extrapolate;
+
+        CurrentItem.OnDrop();
 
         rb.velocity = s.rb.velocity * 1f;
         rb.AddForce(s.cam.forward * throwForce + Vector3.up * 1.3f, ForceMode.Impulse);

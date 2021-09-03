@@ -53,7 +53,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private void CheckForInteractable()
     {
-        if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables))
+        if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables, QueryTriggerInteraction.Ignore))
         {
             GameObject currentleyLookingAt = hit.transform.gameObject;
 
@@ -63,7 +63,7 @@ public class PlayerInteraction : MonoBehaviour
 
                 if (interactableTemp == null)
                 {
-                    if (Input.GetMouseButtonDown(0) && heldObj == null) Pickup(hit.transform.gameObject);
+                    if (Input.GetMouseButtonDown(0) && heldObj == null && !s.WeaponControls.holdingWeapon) Pickup(hit.transform.gameObject);
                     return;
                 }
 

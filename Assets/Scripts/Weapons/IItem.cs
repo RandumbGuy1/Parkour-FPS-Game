@@ -15,5 +15,5 @@ public interface IItem
     Sprite itemSprite { get; }
 
     string ReadData();
-    bool OnUse();
+    void OnDrop();
 }
