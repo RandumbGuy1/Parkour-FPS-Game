@@ -37,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private bool readyToWallJump = true;
+    private float camTurnVel = 0f;
 
     public bool nearWall { get; private set; } = false;
     public bool isWallLeft { get; private set; } = false;
@@ -118,7 +119,7 @@ public class PlayerMovement : MonoBehaviour
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if (rb.velocity.y < 0f || rb.IsSleeping()) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
+        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !wallRunning && !vaulting) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
 
         rb.useGravity = !(vaulting || wallRunning);
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -277,6 +278,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
     private void Land(float impactForce)
     {
         if (impactForce > 30f)
@@ -389,7 +391,6 @@ public class PlayerMovement : MonoBehaviour
         {
             readyToWallJump = false;
             grounded = false;
-            nearWall = false;
 
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
@@ -405,20 +406,21 @@ public class PlayerMovement : MonoBehaviour
     {
         float wallClimb = 0f;
 
-        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * input.y, wallNormal);
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * (input.y != 0f ? input.y : 1f), wallNormal);
         wallMoveDir = Vector3.Cross(wallUpCross, wallNormal);
 
         if (canAddWallRunForce)
         {
             canAddWallRunForce = false;
             rb.useGravity = false;
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.8f, rb.velocity.z);
 
             float wallUpSpeed = velocity.y;
             float wallMagnitude = magnitude;
 
             wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 25f);
 
-            wallClimb = wallUpSpeed + wallClimbForce;
+            wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
             wallClimb = Mathf.Clamp(wallClimb, -5f, 10f);
             rb.AddForce(Vector3.up * wallClimb);
             rb.AddForce(wallMoveDir * wallMagnitude * 0.15f, ForceMode.VelocityChange);
@@ -451,11 +453,11 @@ public class PlayerMovement : MonoBehaviour
         return !Physics.CheckSphere(s.bottomCapsuleSphereOrigin + Vector3.down * minimumJumpHeight, 0.3f, Ground);
     }
 
-    public float CalculateWallRunRotation()
+    public float CalculateWallRunRotation(float rot)
     {
-        if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0f) return 0f;
+        if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0.3f || input.y < 0) return 0f;
 
-        return Vector3.Angle(s.orientation.forward, wallMoveDir);
+        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + wallNormal * 0.2f).normalized, Vector3.up), ref camTurnVel, 0.4f);
     }
     #endregion 
 
@@ -574,7 +576,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting || wallRunning) return new Vector2(0f, 0f);
 
-        if (grounded) return (crouched ? new Vector2(0.2f, 0.2f) : new Vector2(1f, 1.05f));
+        if (grounded) return (crouched ? new Vector2(0.08f, 0.08f) : new Vector2(1f, 1.05f));
 
         if (crouched) return new Vector2(0.4f, 0.3f);
 

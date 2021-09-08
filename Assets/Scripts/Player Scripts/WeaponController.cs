@@ -67,7 +67,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Transform weaponPos;
     [SerializeField] private Transform weaponEmptyGameObject;
     [Space(10)]
-    [SerializeField] private TextMeshProUGUI ammoText;
+    [SerializeField] private TextMeshProUGUI weaponDataText;
     [SerializeField] private Image itemArt;
     [Space(10)]
     [SerializeField] private GameObject weaponReticle;
@@ -81,7 +81,7 @@ public class WeaponController : MonoBehaviour
         smoothDefaultPos = defaultPos;
         smoothDefaultRot = defaultRot;
 
-        ammoText.gameObject.SetActive(false);
+        weaponDataText.gameObject.SetActive(false);
 
         weaponReticle.gameObject.SetActive(false);
         circleCursor.gameObject.SetActive(true);
@@ -106,7 +106,7 @@ public class WeaponController : MonoBehaviour
 
             if (CurrentItem != null)
             {
-                ammoText.text = CurrentItem.ReadData();
+                weaponDataText.text = CurrentItem.ReadData();
                 itemArt.sprite = CurrentItem.itemSprite;
             }
         }
@@ -165,7 +165,7 @@ public class WeaponController : MonoBehaviour
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
-        ammoText.gameObject.SetActive(true);
+        weaponDataText.gameObject.SetActive(true);
 
         weaponReticle.gameObject.SetActive(true);
         circleCursor.gameObject.SetActive(false);
@@ -244,7 +244,7 @@ public class WeaponController : MonoBehaviour
             weaponReticle.gameObject.SetActive(false);
             circleCursor.gameObject.SetActive(true);
 
-            ammoText.gameObject.SetActive(false);
+            weaponDataText.gameObject.SetActive(false);
         }
     }
     #endregion

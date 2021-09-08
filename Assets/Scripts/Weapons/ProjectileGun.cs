@@ -135,7 +135,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     private void ResetShot() => readyToShoot = true;
 
-    public string ReadData() => (bulletsLeft / bulletsPerTap).ToString() + " / " + (magazineSize / bulletsPerTap).ToString();
+   public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=24>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
 
     public void OnDrop()
     {

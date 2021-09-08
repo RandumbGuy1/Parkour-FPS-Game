@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Sword : MonoBehaviour, IItem, IWeapon
 {
@@ -116,5 +117,5 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         rb.detectCollisions = true;
     }
 
-    public string ReadData() => "sword stats";
+    public string ReadData() => " ";
 }

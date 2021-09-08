@@ -71,10 +71,13 @@ public class CameraBobbing : MonoBehaviour
 
     private Vector3 HeadBob()
     {
+        float speedAmp = s.PlayerMovement.magnitude * 0.065f;
+        speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
+       
         float amp = s.PlayerMovement.magnitude * 0.068f * (s.PlayerMovement.wallRunning ? 1.3f : 1f);
-        amp = Mathf.Clamp(amp, 1f, 2.1f);
+        amp = Mathf.Clamp(amp, 1f, 2.15f);
 
-        return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed)) * bobAmountVert * amp);
+        return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed * speedAmp) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * bobAmountVert * amp);
     }
 
     private void SmoothStepUp()

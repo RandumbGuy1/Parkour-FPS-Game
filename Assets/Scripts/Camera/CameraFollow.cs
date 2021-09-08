@@ -96,37 +96,39 @@ public class CameraFollow : MonoBehaviour
 		smoothRotation.x = Mathf.Lerp(smoothRotation.x, rotation.x, rotateSmoothTime.x * Time.deltaTime);
 		smoothRotation.y = Mathf.Lerp(smoothRotation.y, rotation.y,  rotateSmoothTime.y * Time.deltaTime);
 
-		CameraWallRunAutoTurn();
+		wallRunRotation.y += s.PlayerMovement.CalculateWallRunRotation(transform.rotation.y);
 	}
 
 	void ApplyRotation()
 	{
 		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.offset);
-		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + desiredWallRunRot, 0);
+		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
 		s.orientation.transform.rotation = newPlayerRot;
 	}
 
     #region Camera Effects
-    private void ChangeTilt()
-	{
-		if (wallRunRotation.z == targetCameraTilt) return;
-		wallRunRotation.z = Mathf.SmoothDamp(wallRunRotation.z, targetCameraTilt * tiltDirection, ref effectVel.x, tiltTime);
-
-		if (Math.Abs(targetCameraTilt - wallRunRotation.z) < 0.01f) wallRunRotation.z = targetCameraTilt;
-	}
-
 	private void CameraWallRunAutoTurn()
     {
+		/*
 		desiredWallRunRot += (s.PlayerMovement.CalculateWallRunRotation() * -tiltDirection * 0.5f);
 
-		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.2f);
+		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.3f);
 
 		if (wallRunRotation.y == targetRot) return;
 		wallRunRotation.y = Mathf.SmoothDamp(wallRunRotation.y, targetRot, ref effectVel.z, 0.3f);
 
 		if (Math.Abs(targetRot - wallRunRotation.y) < 0.01f) wallRunRotation.y = targetRot;
+		*/
+	}
+
+	private void ChangeTilt()
+	{
+		if (wallRunRotation.z == targetCameraTilt) return;
+		wallRunRotation.z = Mathf.SmoothDamp(wallRunRotation.z, targetCameraTilt * tiltDirection, ref effectVel.x, tiltTime);
+
+		if (Math.Abs(targetCameraTilt - wallRunRotation.z) < 0.01f) wallRunRotation.z = targetCameraTilt;
 	}
 
 	private void ChangeFov()
