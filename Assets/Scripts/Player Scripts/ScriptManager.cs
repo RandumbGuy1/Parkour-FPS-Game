@@ -25,6 +25,6 @@ public class ScriptManager : MonoBehaviour
 
     private void Awake()
     {
-        Application.targetFrameRate = 70;
+        Application.targetFrameRate = 80;
     }
 }

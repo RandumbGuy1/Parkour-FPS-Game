@@ -72,6 +72,8 @@ public class WeaponController : MonoBehaviour
     [Space(10)]
     [SerializeField] private GameObject weaponReticle;
     [SerializeField] private GameObject circleCursor;
+    [Space(10)]
+    [SerializeField] private ValueSlider slider;
     private ScriptManager s;
 
     void Awake()
@@ -156,6 +158,8 @@ public class WeaponController : MonoBehaviour
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset;
 
                     s.CameraShaker.ShakeOnce(6f, 8f, 1f, 0.14f);
+
+                    slider.SetSliderCooldown(1, 0.1f);
                 }
                 break;
         }

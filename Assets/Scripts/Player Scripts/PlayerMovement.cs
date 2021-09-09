@@ -406,7 +406,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float wallClimb = 0f;
 
-        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward * (input.y != 0f ? input.y : 1f), wallNormal);
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward, wallNormal);
         wallMoveDir = Vector3.Cross(wallUpCross, wallNormal);
 
         if (canAddWallRunForce)
@@ -455,9 +455,9 @@ public class PlayerMovement : MonoBehaviour
 
     public float CalculateWallRunRotation(float rot)
     {
-        if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0.3f || input.y < 0) return 0f;
+        if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0.35f || input.y < 0) return 0f;
 
-        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + wallNormal * 0.2f).normalized, Vector3.up), ref camTurnVel, 0.4f);
+        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + wallNormal * 0.25f).normalized, Vector3.up), ref camTurnVel, 0.35f);
     }
     #endregion 
 

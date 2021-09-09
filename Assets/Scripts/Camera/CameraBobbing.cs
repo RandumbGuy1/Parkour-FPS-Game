@@ -20,14 +20,14 @@ public class CameraBobbing : MonoBehaviour
     [SerializeField] private float bobAmountVert;
     [Range(0f, 0.5f)] [SerializeField] private float bobSmoothTime;
 
-    private float timer;
     private Vector3 bobVel = Vector3.zero;
+    private float timer;
     private Vector3 smoothOffset = Vector3.zero;
 
     [Header("Step Settings")]
     [SerializeField] private float stepSmoothTime;
 
-    public Vector3 vaultDesync { get; private set; } = Vector3.zero;
+    private Vector3 vaultDesync;
     private Vector3 vaultVel = Vector3.zero;
 
     [Header("Assignables")]
@@ -35,7 +35,7 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        timer = (s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk || s.PlayerMovement.wallRunning) && s.PlayerMovement.moving && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
+        timer = (s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.moving || s.PlayerMovement.wallRunning) && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
 
@@ -47,12 +47,12 @@ public class CameraBobbing : MonoBehaviour
 
 	private Vector3 CalculateLandOffset()
 	{
-		if (desiredOffset >= 0f) return Vector3.zero;
-
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 8f * Time.deltaTime);
+		if (bobOffset > -0.0001f && desiredOffset >= 0f) return Vector3.zero;
+        print(1);
+		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.deltaTime);
 		bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
-		if (desiredOffset >= -0.01f) desiredOffset = 0f;
+		if (desiredOffset >= -0.001f) desiredOffset = 0f;
 
 		return Vector3.up * bobOffset;
 	}
@@ -64,9 +64,13 @@ public class CameraBobbing : MonoBehaviour
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 		if (magnitude < 0.5f) magnitude = 0f;
-		if (s.PlayerInput.crouching) magnitude *= 0.83f;
+		if (s.PlayerInput.crouching)
+        {
+            magnitude *= 0.83f;
+            magnitude = Mathf.Clamp(magnitude, 0f, 1.8f);
+        }
 
-		desiredOffset -= magnitude;
+        desiredOffset -= magnitude;
 	}
 
     private Vector3 HeadBob()

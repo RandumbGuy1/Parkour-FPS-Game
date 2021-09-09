@@ -6,7 +6,6 @@ using System;
 public class CameraFollow : MonoBehaviour
 {
 	private Vector3 wallRunRotation = Vector3.zero;
-	private float desiredWallRunRot = 0f;
 	private int tiltDirection = 1;
 	private float tiltTime = 0, targetCameraTilt = 0f;
 
