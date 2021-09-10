@@ -285,7 +285,7 @@ public class PlayerMovement : MonoBehaviour
         {
             ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
-            Vector3 magnitude = s.rb.velocity;
+            Vector3 magnitude = rb.velocity;
 
             velocityOverLifetime.x = magnitude.x;
             velocityOverLifetime.z = magnitude.z;
@@ -333,20 +333,42 @@ public class PlayerMovement : MonoBehaviour
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
-        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
+        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.1f) + (vaultDir);
         float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
-        if (distance > vaultOffset) return;
+        if (distance > vaultOffset + 0.1f) return;
 
-        if (distance < 3.5f)
+        if (distance < 4f)
         {
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = vel;
+            //StartCoroutine(Vault2(vaultPoint - vaultDir, vel, distance));
             return;
         }
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+    }
+
+    private IEnumerator Vault2(Vector3 pos, Vector3 vel, float distance)
+    {
+        rb.detectCollisions = false;
+        vaulting = true;
+
+        distance = (1 / distance) * 0.59f;
+        distance = Mathf.Clamp(distance, 0.18f, 0.25f);
+
+        while (Mathf.Abs(pos.y - transform.position.y) > 0.05f)
+        {
+            rb.MovePosition(transform.position + (pos - transform.position) * distance);
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        rb.detectCollisions = true;
+        vaulting = false;
+
+        rb.velocity = vel;
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)

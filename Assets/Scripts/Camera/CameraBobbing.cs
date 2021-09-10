@@ -48,8 +48,8 @@ public class CameraBobbing : MonoBehaviour
 	private Vector3 CalculateLandOffset()
 	{
 		if (bobOffset > -0.0001f && desiredOffset >= 0f) return Vector3.zero;
-        print(1);
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.deltaTime);
+
+		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.8f * Time.deltaTime);
 		bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
 		if (desiredOffset >= -0.001f) desiredOffset = 0f;
