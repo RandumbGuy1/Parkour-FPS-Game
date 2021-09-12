@@ -165,16 +165,16 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Surface Contact
-    private bool SnapToGround()
+    private bool SnapToGround(float speed)
     {
-        float speed = magnitude;
-
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || vaulting || grounded) return false;
         if (!Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
 
         grounded = true;
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
+
+        if (vaulting) return false;
 
         if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot)).normalized * speed;
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
@@ -186,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (stepsSinceLastJumped < maxJumpSteps) stepsSinceLastJumped++;
 
-        if (grounded || SnapToGround()) stepsSinceLastGrounded = 0;
+        if (grounded || SnapToGround(magnitude)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
     }
     #endregion
@@ -333,7 +333,7 @@ public class PlayerMovement : MonoBehaviour
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
-        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2.1f) + (vaultDir);
+        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
         float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
         if (distance > vaultOffset + 0.1f) return;
@@ -343,7 +343,7 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = vel;
-            //StartCoroutine(Vault2(vaultPoint - vaultDir, vel, distance));
+            //StartCoroutine(Vault2(vaultPoint + vel.normalized * 0.9f, vel, distance));
             return;
         }
 
@@ -352,23 +352,31 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Vault2(Vector3 pos, Vector3 vel, float distance)
     {
+        rb.isKinematic = true;
         rb.detectCollisions = false;
         vaulting = true;
 
         distance = (1 / distance) * 0.59f;
-        distance = Mathf.Clamp(distance, 0.18f, 0.25f);
+        distance = Mathf.Clamp(distance, 0.15f, 0.2f);
 
-        while (Mathf.Abs(pos.y - transform.position.y) > 0.05f)
+        while (Mathf.Abs(pos.y - transform.position.y) > 0.15f)
         {
-            rb.MovePosition(transform.position + (pos - transform.position) * distance);
+            rb.MovePosition(transform.position + (pos - transform.position) * 0.15f);
 
             yield return new WaitForFixedUpdate();
         }
 
+        rb.isKinematic = false;
         rb.detectCollisions = true;
-        vaulting = false;
 
-        rb.velocity = vel;
+        if (moving) rb.velocity = vel;
+
+        yield return new WaitForSeconds(0.01f);
+
+        SnapToGround(vel.magnitude);
+        stepsSinceLastGrounded = 0;
+
+        vaulting = false;
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
