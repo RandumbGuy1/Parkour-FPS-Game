@@ -10133,7 +10133,7 @@ Light:
     serializedVersion: 2
     m_Bits: 16129
   m_RenderingLayerMask: 1
-  m_Lightmapping: 1
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -11383,7 +11383,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.045
+  landBobSmoothTime: 0.043
   landBobMultiplier: 0.087
   maxOffset: 3
   bobSpeed: 10
@@ -13453,7 +13453,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 7.61
+  m_Name: Save 7.7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -135,6 +135,8 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 GroundMovement()
     {
+        if (stepsSinceLastGrounded < 3 && jumping) Jump();
+
         Friction();
         SlopeMovement();
 
@@ -147,6 +149,13 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 AirMovement()
     {
+        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
+
+        if (CanWallJump() && jumping && readyToWallJump) WallJump();
+        if (wallRunning) WallRun();
+
+        if (isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning && readyToWallJump) StopWallRun();
+
         Vector2 inputTemp = input;
 
         if (inputTemp.x > 0 && relativeVel.x > 23f || inputTemp.x < 0 && relativeVel.x < -23f) inputTemp.x = 0f;
@@ -174,8 +183,6 @@ public class PlayerMovement : MonoBehaviour
 
         float dot = Vector3.Dot(rb.velocity, Vector3.up);
 
-        if (vaulting) return false;
-
         if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot)).normalized * speed;
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
 
@@ -189,6 +196,7 @@ public class PlayerMovement : MonoBehaviour
         if (grounded || SnapToGround(magnitude)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
     }
+
     #endregion
 
     #region Collision Calculations
@@ -328,7 +336,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 moveDir = inputDir;
         Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
 
-        if (Vector3.Dot(-vaultDir, moveDir) < 0.5f) return;
+        if (Vector3.Dot(-vaultDir, moveDir) < 0.65f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
@@ -343,42 +351,38 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = vel;
-            //StartCoroutine(Vault2(vaultPoint + vel.normalized * 0.9f, vel, distance));
+            //StartCoroutine(Vault2(vaultPoint - vaultDir * 0.4f, vel, distance));
             return;
         }
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
     }
-
+    /*
     private IEnumerator Vault2(Vector3 pos, Vector3 vel, float distance)
     {
         rb.isKinematic = true;
         rb.detectCollisions = false;
         vaulting = true;
 
-        distance = (1 / distance) * 0.59f;
-        distance = Mathf.Clamp(distance, 0.15f, 0.2f);
+        float elapsed = 0f;
+        float duration = 0.1f;
 
-        while (Mathf.Abs(pos.y - transform.position.y) > 0.15f)
+        while (elapsed < duration - duration * 0.15f) 
         {
-            rb.MovePosition(transform.position + (pos - transform.position) * 0.15f);
+            rb.position = Vector3.Lerp(transform.position, pos, elapsed/ duration);
+            elapsed += Time.fixedDeltaTime;
 
             yield return new WaitForFixedUpdate();
         }
 
         rb.isKinematic = false;
         rb.detectCollisions = true;
-
-        if (moving) rb.velocity = vel;
-
-        yield return new WaitForSeconds(0.01f);
-
-        SnapToGround(vel.magnitude);
-        stepsSinceLastGrounded = 0;
-
         vaulting = false;
-    }
+        grounded = true;
 
+        rb.velocity = vel;
+    }
+    */
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
         rb.isKinematic = true;
@@ -570,8 +574,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void ProcessInput()
     {
-        if (stepsSinceLastGrounded < 3 && jumping) Jump();
-
         RecordMovementSteps();
 
         if (crouching && !wallRunning && !crouched) Crouch(inputDir);
@@ -588,18 +590,11 @@ public class PlayerMovement : MonoBehaviour
 
         UpdateCrouchScale();
 
-        if (nearWall && isWallLeft && CanWallJump() && input.x < 0 || nearWall && isWallRight && CanWallJump() && input.x > 0) wallRunning = true;
-
-        if (CanWallJump() && jumping && readyToWallJump) WallJump();
-
         if (!CanWallJump() || !isWallRight && !isWallLeft)
         {
             wallRunning = false;
             canAddWallRunForce = true;
         }
-
-        if (wallRunning && !grounded) WallRun();
-        if (isWallLeft && input.x > 0 && wallRunning || isWallRight && input.x < 0 && wallRunning && readyToWallJump) StopWallRun();
     }
 
     public Vector2 CalculateMultiplier()
