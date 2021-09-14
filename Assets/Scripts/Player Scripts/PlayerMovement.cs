@@ -491,7 +491,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!wallRunning || Vector3.Dot(s.orientation.forward, wallNormal) > 0.35f || input.y < 0) return 0f;
 
-        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + wallNormal * 0.25f).normalized, Vector3.up), ref camTurnVel, 0.35f);
+        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + wallNormal * 0.3f).normalized, Vector3.up), ref camTurnVel, 0.3f);
     }
     #endregion 
 
@@ -594,6 +594,7 @@ public class PlayerMovement : MonoBehaviour
         {
             wallRunning = false;
             canAddWallRunForce = true;
+            camTurnVel = 0f;
         }
     }
 
