@@ -43,7 +43,7 @@ public class CameraEffects : MonoBehaviour
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 		if (magnitude < 0.5f) magnitude = 0f;
-		if (s.PlayerInput.crouching) magnitude = 0.9f;
+		if (s.PlayerInput.Crouching) magnitude = 0.9f;
 
 		desiredOffset = -magnitude;
 	}

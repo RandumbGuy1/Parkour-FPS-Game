@@ -26,7 +26,7 @@ public class CameraFollow : MonoBehaviour
 	private Vector2 mouse;
 	private Vector2 rotation;
 	private Vector2 smoothRotation;
-	public Vector2 rotationDelta { get; private set; }
+	public Vector2 RotationDelta { get; private set; }
 
 	[Header("Head Sway Settings")]
 	[SerializeField] private float swayAmount;
@@ -68,24 +68,24 @@ public class CameraFollow : MonoBehaviour
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
 
-		if (s.CameraLook.rotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f && s.CameraShaker.offset.sqrMagnitude < 0.01f)
+		if (s.CameraLook.RotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f && s.CameraShaker.Offset.sqrMagnitude < 0.01f)
 		{
 			headSwayScroller += Time.deltaTime * swayFrequency;
 
 			headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
 			headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
 
-			headSwayOffset -= (Vector3)Vector2.one * 0.5f;
+			headSwayOffset -= (Vector3) Vector2.one * 0.5f;
 			finalSwayOffset = headSwayOffset * swayAmount;
 		}
 	}
 
 	void CalcRotation()
 	{
-		rotationDelta = mouse * sensitivity * 0.02f;
+		RotationDelta = mouse * sensitivity * 0.02f;
 
-		rotation.y += rotationDelta.y;
-		rotation.x -= rotationDelta.x;
+		rotation.y += RotationDelta.y;
+		rotation.x -= RotationDelta.x;
 
 		rotation.x = Mathf.Clamp(rotation.x, -upClampAngle, downClampAngle);
 	}
@@ -100,7 +100,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.offset);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.Offset);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
@@ -159,7 +159,7 @@ public class CameraFollow : MonoBehaviour
 	#region Process Camera Effects
 	private void CameraEffects()
 	{
-		if (s.PlayerInput.crouching) SetTilt(8f, 0.15f, 1);
+		if (s.PlayerInput.Crouching) SetTilt(8f, 0.15f, 1);
 
 		if (s.PlayerMovement.wallRunning)
 		{
@@ -168,7 +168,7 @@ public class CameraFollow : MonoBehaviour
 		}
         else
         {
-			if (!s.PlayerInput.crouching) SetTilt(0, 0.2f);
+			if (!s.PlayerInput.Crouching) SetTilt(0, 0.2f);
 			if (s.WeaponControls.aiming) SetFov(-25, 0.2f);
 			else SetFov(0, 0.3f);
 		}

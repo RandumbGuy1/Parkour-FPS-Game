@@ -105,6 +105,11 @@ public class PlayerMovement : MonoBehaviour
         playerScale = transform.localScale;
     }
 
+    void Update()
+    {
+        ProcessInput();
+    }
+
     void FixedUpdate()
     {
         UpdateGroundCollisions();
@@ -125,7 +130,15 @@ public class PlayerMovement : MonoBehaviour
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
 
         ControlSpeed();
-        ProcessInput();
+        RecordMovementSteps();
+        ProcessCrouching();
+
+        if (!CanWallJump() || !isWallRight && !isWallLeft)
+        {
+            wallRunning = false;
+            canAddWallRunForce = true;
+            camTurnVel = 0f;
+        }
 
         rb.AddForce((grounded ? GroundMovement() : AirMovement()) * moveSpeed * 0.1f, ForceMode.Impulse);
 
@@ -135,8 +148,6 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 GroundMovement()
     {
-        if (stepsSinceLastGrounded < 3 && jumping) Jump();
-
         Friction();
         SlopeMovement();
 
@@ -519,6 +530,19 @@ public class PlayerMovement : MonoBehaviour
         if (crouching && transform.localScale.y < crouchScale + 0.01f) transform.localScale = new Vector3(playerScale.x, crouchScale, playerScale.z);
         if (!crouching && transform.localScale.y > playerScale.y - 0.01f) transform.localScale = playerScale;
     }
+
+    private void ProcessCrouching()
+    {
+        if (crouched)
+        {
+            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
+            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
+
+            rb.AddForce(Vector3.down * 25f);
+        }
+
+        UpdateCrouchScale();
+    }
     #endregion
 
     #region Friction
@@ -574,28 +598,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void ProcessInput()
     {
-        RecordMovementSteps();
+        SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
+
+        if (grounded) if (stepsSinceLastGrounded < 3 && jumping) Jump();
 
         if (crouching && !wallRunning && !crouched) Crouch(inputDir);
-
-        if (crouched)
-        {
-            canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
-            canCrouchWalk = magnitude < maxGroundSpeed * 0.65f;
-
-            rb.AddForce(Vector3.down * 25f);
-        }
-
         if (!crouching && crouched && canUnCrouch) UnCrouch();
-
-        UpdateCrouchScale();
-
-        if (!CanWallJump() || !isWallRight && !isWallLeft)
-        {
-            wallRunning = false;
-            canAddWallRunForce = true;
-            camTurnVel = 0f;
-        }
     }
 
     public Vector2 CalculateMultiplier()

@@ -64,7 +64,7 @@ public class CameraBobbing : MonoBehaviour
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
 
 		if (magnitude < 0.5f) magnitude = 0f;
-		if (s.PlayerInput.crouching)
+		if (s.PlayerInput.Crouching)
         {
             magnitude *= 0.83f;
             magnitude = Mathf.Clamp(magnitude, 0f, 1.8f);

@@ -93,7 +93,7 @@ public class PlayerInteraction : MonoBehaviour
             textDisplay.SetActive(true);
             interactionText.text = text;
 
-            if (s.PlayerInput.interacting) Interact(interactable);
+            if (s.PlayerInput.Interacting) Interact(interactable);
 
         }
         else if (interactionText.text != " ")

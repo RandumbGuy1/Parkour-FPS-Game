@@ -6,18 +6,18 @@ using System;
 
 public class PlayerInput : MonoBehaviour
 {
-    public Vector2 input { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
+    public Vector2 InputVector { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
    
-    public bool jumping { get { return Input.GetKeyDown(jumpKey); } }
-    public bool crouching { get { return Input.GetKey(crouchKey); } }
-    public bool interacting { get { return Input.GetKeyDown(interactKey); } }
-    public bool dropping { get { return Input.GetKeyDown(dropKey); } }
-    public bool reloading { get { return Input.GetKeyDown(reloadKey); } }
+    public bool Jumping { get { return Input.GetKeyDown(jumpKey); } }
+    public bool Crouching { get { return Input.GetKey(crouchKey); } }
+    public bool Interacting { get { return Input.GetKeyDown(interactKey); } }
+    public bool Dropping { get { return Input.GetKeyDown(dropKey); } }
+    public bool Reloading { get { return Input.GetKeyDown(reloadKey); } }
 
-    public bool middleClick { get { return Input.GetMouseButtonDown(2); } }
-    public bool rightClick { get { return Input.GetMouseButtonDown(1); } }
-    public bool leftClick { get { return Input.GetMouseButtonDown(0); } }
-    public bool leftHoldClick { get { return Input.GetMouseButton(0); } }
+    public bool MiddleClick { get { return Input.GetMouseButtonDown(2); } }
+    public bool RightClick { get { return Input.GetMouseButtonDown(1); } }
+    public bool LeftClick { get { return Input.GetMouseButtonDown(0); } }
+    public bool LeftHoldClick { get { return Input.GetMouseButton(0); } }
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -30,6 +30,4 @@ public class PlayerInput : MonoBehaviour
     private ScriptManager s;
 
     void Awake() => s = GetComponent<ScriptManager>();
-
-    void Update() => s.PlayerMovement.SetInput(input, jumping, crouching);
 }
