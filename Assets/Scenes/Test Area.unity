@@ -10927,7 +10927,8 @@ MonoBehaviour:
   bobAmountHoriz: 0.1
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
-  stepSmoothTime: 0.05
+  footstepFrequency: 18
+  stepUpSmoothTime: 0.05
   s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
@@ -13549,7 +13550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 7.9
+  m_Name: Save 8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

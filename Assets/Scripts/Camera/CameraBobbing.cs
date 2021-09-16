@@ -24,8 +24,12 @@ public class CameraBobbing : MonoBehaviour
     private float timer;
     private Vector3 smoothOffset = Vector3.zero;
 
-    [Header("Step Settings")]
-    [SerializeField] private float stepSmoothTime;
+    [Header("Footstep Settings")]
+    [SerializeField] private float footstepFrequency;
+    [Space(10)]
+    [SerializeField] private float stepUpSmoothTime;
+    private float footstepDistance = 0f;
+    private int footStepCounter = 0;
 
     private Vector3 vaultDesync;
     private Vector3 vaultVel = Vector3.zero;
@@ -45,7 +49,12 @@ public class CameraBobbing : MonoBehaviour
 		transform.localPosition = newPos;
 	}
 
-	private Vector3 CalculateLandOffset()
+    void FixedUpdate()
+    {
+        CalculateFootsteps();
+    }
+
+    private Vector3 CalculateLandOffset()
 	{
 		if (bobOffset > -0.0001f && desiredOffset >= 0f) return Vector3.zero;
 
@@ -73,6 +82,30 @@ public class CameraBobbing : MonoBehaviour
         desiredOffset -= magnitude;
 	}
 
+    private void CalculateFootsteps()
+    {
+        if (timer <= 0)
+        {
+            footstepDistance = 0f;
+            return;
+        }
+
+        float mag = s.PlayerMovement.magnitude * 0.2f;
+        mag = Mathf.Clamp(mag, 1.2f, 2f);
+
+        footstepDistance += Time.fixedDeltaTime * 2f;
+        
+        if (footstepDistance > 1/footstepFrequency * 10f)
+        {
+            footStepCounter++;
+
+            s.CameraShaker.ShakeOnce(0.6f * mag, 4f, 0.3f, 0.11f, CameraShaker.ShakeEvent.ShakeType.KickBack, Vector3.forward * (footStepCounter % 2 == 0 ? 1 : -1));
+            footstepDistance = 0f;
+
+            if (footStepCounter >= 100) footStepCounter = 0;    
+        }
+    }
+
     private Vector3 HeadBob()
     {
         float speedAmp = s.PlayerMovement.magnitude * 0.065f;
@@ -88,7 +121,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (vaultDesync == Vector3.zero) return;
 
-        vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, stepSmoothTime);
+        vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, stepUpSmoothTime);
 
         if (vaultDesync.sqrMagnitude < 0.001f) vaultDesync = Vector3.zero;
     }
