@@ -91,18 +91,14 @@ public class CameraBobbing : MonoBehaviour
         }
 
         float mag = s.PlayerMovement.magnitude * 0.2f;
-        mag = Mathf.Clamp(mag, 1.2f, 2f);
+        mag = Mathf.Clamp(mag, 0f, 2f);
 
-        footstepDistance += Time.fixedDeltaTime * 2f;
+        footstepDistance += Time.fixedDeltaTime * 2.5f;
         
         if (footstepDistance > 1/footstepFrequency * 10f)
         {
-            footStepCounter++;
-
-            s.CameraShaker.ShakeOnce(0.6f * mag, 4f, 0.3f, 0.11f, CameraShaker.ShakeEvent.ShakeType.KickBack, Vector3.forward * (footStepCounter % 2 == 0 ? 1 : -1));
+            s.CameraShaker.ShakeOnce(0.25f * mag, 4.5f, 0.25f, 0.09f, CameraShaker.ShakeEvent.ShakeType.KickBack);
             footstepDistance = 0f;
-
-            if (footStepCounter >= 100) footStepCounter = 0;    
         }
     }
 
