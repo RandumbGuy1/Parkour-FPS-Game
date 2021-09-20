@@ -26,10 +26,10 @@ public class CameraBobbing : MonoBehaviour
 
     [Header("Footstep Settings")]
     [SerializeField] private float footstepFrequency;
+    [SerializeField] private ShakeData shakeData; 
     [Space(10)]
     [SerializeField] private float stepUpSmoothTime;
     private float footstepDistance = 0f;
-    private int footStepCounter = 0;
 
     private Vector3 vaultDesync;
     private Vector3 vaultVel = Vector3.zero;
@@ -58,7 +58,7 @@ public class CameraBobbing : MonoBehaviour
 	{
 		if (bobOffset > -0.0001f && desiredOffset >= 0f) return Vector3.zero;
 
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 8.2f * Time.smoothDeltaTime);
+		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.smoothDeltaTime);
 		bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
 		if (desiredOffset >= -0.001f) desiredOffset = 0f;
@@ -90,14 +90,14 @@ public class CameraBobbing : MonoBehaviour
             return;
         }
 
-        float mag = s.PlayerMovement.magnitude * 0.2f;
+        float mag = s.PlayerMovement.magnitude * 0.18f;
         mag = Mathf.Clamp(mag, 0f, 2f);
 
-        footstepDistance += Time.fixedDeltaTime * 2.5f;
+        footstepDistance += Time.fixedDeltaTime * 2.8f;
         
         if (footstepDistance > 1/footstepFrequency * 10f)
         {
-            s.CameraShaker.ShakeOnce(0.25f * mag, 4.5f, 0.25f, 0.09f, CameraShaker.ShakeEvent.ShakeType.KickBack);
+            s.CameraShaker.ShakeOnce(shakeData);
             footstepDistance = 0f;
         }
     }

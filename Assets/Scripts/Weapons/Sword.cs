@@ -22,6 +22,8 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     public Vector3 recoilPosOffset { get { return swingPosOffset; } }
     public Vector3 recoilRotOffset { get { return swingRotOffset; } }
 
+    public ShakeData recoilShakeData { get { return recoilShake; } }
+
     public float recoilForce { get; }
     public float reloadSmoothTime { get; }
     public Vector3 reloadRotOffset { get; }
@@ -51,6 +53,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private float swingSmoothing;
     [SerializeField] private Vector3 swingPosOffset;
     [SerializeField] private Vector3 swingRotOffset;
+    [SerializeField] private ShakeData recoilShake;
 
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;

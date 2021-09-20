@@ -204,6 +204,7 @@ MonoBehaviour:
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
   reloadTime: 0.8
@@ -782,7 +783,7 @@ Transform:
   m_Children:
   - {fileID: 1281887911}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &150886295
 PrefabInstance:
@@ -1509,6 +1510,7 @@ MonoBehaviour:
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.06}
   weaponRecoilRotOffset: {x: -1.1, y: 0, z: 0}
+  recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 80
   bulletsPerTap: 1
   reloadTime: 0.8
@@ -6994,6 +6996,7 @@ MonoBehaviour:
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
   reloadTime: 0.8
@@ -7716,7 +7719,7 @@ Transform:
   - {fileID: 514731679}
   - {fileID: 1027908242}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &493642730
 GameObject:
@@ -7929,6 +7932,7 @@ MonoBehaviour:
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
   reloadTime: 0.8
@@ -8899,6 +8903,7 @@ MonoBehaviour:
   swingSmoothing: 0.08
   swingPosOffset: {x: -4, y: 0, z: 0.3}
   swingRotOffset: {x: 80, y: 0, z: 110}
+  recoilShake: {fileID: 11400000, guid: 8b093639b7036144f8cb2ce612b87f22, type: 2}
   attackPoint: {fileID: 2050023512}
   rb: {fileID: 0}
   bc: {fileID: 0}
@@ -9172,7 +9177,7 @@ Transform:
   - {fileID: 1971585146}
   - {fileID: 642207235}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &653607703
 GameObject:
@@ -10086,7 +10091,7 @@ Transform:
   - {fileID: 362155188}
   - {fileID: 618472375}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &793697116
 GameObject:
@@ -10212,7 +10217,7 @@ Transform:
   m_Children:
   - {fileID: 963194228}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &838078165
 MonoBehaviour:
@@ -10247,39 +10252,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39d572476ad42843b5ab94208d1dd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendOverLifetime:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 12.566371
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.2
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0.040721603
-      outSlope: 0.040721603
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.21719038
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1001 &867266070
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10920,14 +10892,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.0435
-  landBobMultiplier: 0.0875
+  landBobSmoothTime: 0.045
+  landBobMultiplier: 0.09
   maxOffset: 3
   bobSpeed: 10
   bobAmountHoriz: 0.1
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
   footstepFrequency: 15
+  shakeData: {fileID: 11400000, guid: 7deb4541c67cab348a211eaea3f3b3db, type: 2}
   stepUpSmoothTime: 0.05
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -12857,6 +12830,50 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1340002415}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1341061848
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1341061850}
+  - component: {fileID: 1341061849}
+  m_Layer: 0
+  m_Name: Shake Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1341061849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1341061848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67d336c564958164185ceef2eb24dda9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shakeRecievers: []
+--- !u!4 &1341061850
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1341061848}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1382213912
 GameObject:
   m_ObjectHideFlags: 0
@@ -13550,7 +13567,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 8.1
+  m_Name: Save 8.21
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13568,7 +13585,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1543836352
 GameObject:
@@ -13951,7 +13968,7 @@ Transform:
   - {fileID: 1698904618}
   - {fileID: 461129906}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1631858303
 GameObject:
@@ -14256,7 +14273,7 @@ Transform:
   - {fileID: 32658971}
   - {fileID: 1277575616}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1650519435
 MonoBehaviour:
@@ -15266,7 +15283,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1783921601
 PrefabInstance:
@@ -16164,6 +16181,7 @@ MonoBehaviour:
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
   reloadTime: 0.8
@@ -16703,7 +16721,7 @@ RectTransform:
   - {fileID: 656293781}
   - {fileID: 1486455896}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

@@ -14,6 +14,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public Vector3 recoilPosOffset { get { return weaponRecoilPosOffset; } }
     public Vector3 recoilRotOffset { get { return weaponRecoilRotOffset; } }
 
+    public ShakeData recoilShakeData { get { return recoilShake; } }
+
     public Vector3 defaultPos { get { return weaponDefaultPos; } }
     public Vector3 defaultRot { get { return weaponDefaultRot; } }
 
@@ -52,6 +54,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float weaponRecoilSmoothTime;
     [SerializeField] private Vector3 weaponRecoilPosOffset;
     [SerializeField] private Vector3 weaponRecoilRotOffset;
+    [SerializeField] private ShakeData recoilShake;
 
     [Header("Reload Settings")]
     [SerializeField] private int magazineSize;

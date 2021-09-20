@@ -140,7 +140,7 @@ public class WeaponController : MonoBehaviour
             case WeaponClass.Ranged:
                 if (CurrentWeapon.OnAttack(s.cam))
                 {
-                    s.CameraShaker.ShakeOnce((aiming ? 4.5f : 6f), 4f, 0.5f, 0.1f, CameraShaker.ShakeEvent.ShakeType.KickBack, Vector3.left);
+                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
 
                     desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
@@ -155,7 +155,7 @@ public class WeaponController : MonoBehaviour
                     desiredRecoilPos = CurrentWeapon.recoilPosOffset;
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset;
 
-                    s.CameraShaker.ShakeOnce(6f, 7f, 1f, 0.14f, CameraShaker.ShakeEvent.ShakeType.KickBack, Vector3.left);
+                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
 
                     slider.SetSliderCooldown(1, 0.1f);
                 }

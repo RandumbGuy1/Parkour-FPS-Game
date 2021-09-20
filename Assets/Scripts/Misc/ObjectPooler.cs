@@ -13,10 +13,20 @@ public class ObjectPooler : MonoBehaviour
     }
 
     public static ObjectPooler Instance;
-    public List<Pool> pools;
+    [SerializeField] private List<Pool> pools;
     public Dictionary<string, Queue<GameObject>> poolDictionary;
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        if (Instance == this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start()
     {

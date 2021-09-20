@@ -13,6 +13,8 @@ public interface IWeapon
     Vector3 recoilPosOffset { get; }
     Vector3 recoilRotOffset { get; }
 
+    ShakeData recoilShakeData { get; }
+
     Vector3 reloadRotOffset { get; }
     float reloadSmoothTime { get; }
 
