@@ -24,15 +24,19 @@ public class ShakeManager : MonoBehaviour
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
         {
-            float amp = 1f;
-
             if (shakeSource != default(Vector3))
             {
                 float distance = Vector3.Distance(shakeRecievers[i].transform.position, shakeSource);
-                amp = 1 / distance;
+
+                distance = Mathf.Clamp(distance, 1.8f, 20f);
+                distance -= 1f;
+                distance = 1f - (distance / 20f);
+                distance = 1f - Mathf.Pow(1f - distance, 2.7f);
+
+                magnitude *= distance;
             }
 
-            shakeRecievers[i].ShakeOnce(magnitude * amp, frequency, duration, smoothness, type);
+            shakeRecievers[i].ShakeOnce(magnitude, frequency, duration, smoothness, type);
         }
     }
 
@@ -40,15 +44,19 @@ public class ShakeManager : MonoBehaviour
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
         {
-            float amp = 1f;
-
             if (shakeSource != default(Vector3))
             {
                 float distance = Vector3.Distance(shakeRecievers[i].transform.position, shakeSource);
-                amp = 1 / distance;
+
+                distance = Mathf.Clamp(distance, 1.8f, 20f);
+                distance -= 1f;
+                distance = 1f - (distance / 20f);
+                distance = 1f - Mathf.Pow(1f - distance, 2.7f);
+
+                sd.magnitude *= distance;
             }
 
-            shakeRecievers[i].ShakeOnce(sd.magnitude * amp, sd.frequency, sd.duration, sd.smoothness, sd.type);
+            shakeRecievers[i].ShakeOnce(sd);
         }
     }
 }

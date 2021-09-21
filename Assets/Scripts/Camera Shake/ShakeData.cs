@@ -5,6 +5,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Shake Data", menuName = "Custom Shake Event Data", order = 1)]
 public class ShakeData : ScriptableObject
 {
+    public enum ShakeType
+    {
+        KickBack,
+        Perlin,
+    }
+
     [Header("Shake Settings")]
     public ShakeType type;
     public float magnitude = 1f;
@@ -17,9 +23,12 @@ public class ShakeData : ScriptableObject
       new Keyframe(0.2f, 1.0f),
       new Keyframe(1.0f, 0.0f));
 
-    public enum ShakeType
+    public void Intialize(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type)
     {
-        KickBack,
-        Perlin,
+        this.type = type;
+        this.magnitude = magnitude;
+        this.frequency = frequency;
+        this.duration = duration;
+        this.smoothness = smoothness;
     }
 }
