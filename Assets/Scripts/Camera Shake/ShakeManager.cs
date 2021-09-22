@@ -25,16 +25,7 @@ public class ShakeManager : MonoBehaviour
         for (int i = 0; i < shakeRecievers.Count; i++)
         {
             if (shakeSource != default(Vector3))
-            {
-                float distance = Vector3.Distance(shakeRecievers[i].transform.position, shakeSource);
-
-                distance = Mathf.Clamp(distance, 1.8f, 20f);
-                distance -= 1f;
-                distance = 1f - (distance / 20f);
-                distance = 1f - Mathf.Pow(1f - distance, 2.7f);
-
-                magnitude *= distance;
-            }
+                magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
 
             shakeRecievers[i].ShakeOnce(magnitude, frequency, duration, smoothness, type);
         }
@@ -43,20 +34,23 @@ public class ShakeManager : MonoBehaviour
     public void ShakeAll(ShakeData sd, Vector3 shakeSource = default(Vector3))
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
-        {
-            if (shakeSource != default(Vector3))
-            {
-                float distance = Vector3.Distance(shakeRecievers[i].transform.position, shakeSource);
-
-                distance = Mathf.Clamp(distance, 1.8f, 20f);
-                distance -= 1f;
-                distance = 1f - (distance / 20f);
-                distance = 1f - Mathf.Pow(1f - distance, 2.7f);
-
-                sd.magnitude *= distance;
-            }
+        { 
+            if (shakeSource != default(Vector3)) 
+                sd.magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
 
             shakeRecievers[i].ShakeOnce(sd);
         }
+    }
+
+    private float CalculateDistanceBasedMagnitude(Vector3 a, Vector3 b)
+    {
+        float distance = Vector3.Distance(a, b) * 0.4f;
+
+        distance = Mathf.Clamp(distance, 0f, 20f);
+        distance = 1f - (distance / 20f);
+        distance = Mathf.Clamp(distance, 0.2f, 1f);
+
+        print(distance);
+        return distance;
     }
 }

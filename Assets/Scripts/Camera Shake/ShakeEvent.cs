@@ -39,7 +39,7 @@ public class ShakeEvent
         {
             case ShakeData.ShakeType.KickBack:
                 {
-                    if ((targetDir - smoothDir).sqrMagnitude < (shakeData.frequency * 0.1f)) targetDir = (-targetDir + Random.insideUnitSphere * 0.6f).normalized;
+                    if ((targetDir - smoothDir).sqrMagnitude < (shakeData.frequency * 0.1f)) targetDir = (-targetDir + Random.insideUnitSphere * 0.3f).normalized;
                     smoothDir = Vector3.SmoothDamp(smoothDir, targetDir, ref vel, shakeData.smoothness);
 
                     Displacement = (smoothDir * shakeData.magnitude) * trama;

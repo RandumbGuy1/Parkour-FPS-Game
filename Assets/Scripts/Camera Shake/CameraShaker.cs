@@ -10,7 +10,7 @@ public class CameraShaker : MonoBehaviour
 
     public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 initialKickback = default(Vector3))
     {
-        ShakeData shakeData = ShakeData.CreateInstance<ShakeData>();
+        ShakeData shakeData = ScriptableObject.CreateInstance<ShakeData>();
         shakeData.Intialize(magnitude, frequency, duration, smoothness, type);
 
         shakeEvents.Add(new ShakeEvent(shakeData, initialKickback));
