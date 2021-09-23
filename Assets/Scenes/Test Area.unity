@@ -9351,9 +9351,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 25
-  frequency: 3
-  duration: 2
+  magnitude: 20
+  frequency: 8
+  duration: 3
   smoothness: 0.1
   blendOverLifetime:
     serializedVersion: 2
@@ -9362,7 +9362,7 @@ MonoBehaviour:
       time: 0
       value: 0
       inSlope: 0
-      outSlope: 12.566371
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -9377,13 +9377,31 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
+      time: 0.78704464
+      value: 0.09561226
+      inSlope: -0.9457458
+      outSlope: -0.9457458
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.9269577
+      value: 0.027207296
+      inSlope: -0.1669319
+      outSlope: -0.1669319
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -0.25752994
+      outSlope: -0.25752994
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1259242
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -11213,7 +11231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.043
+  landBobSmoothTime: 0.0435
   landBobMultiplier: 0.09
   maxOffset: 3
   bobSpeed: 10
@@ -13182,7 +13200,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeRecievers:
   - {fileID: 838078167}
-  - {fileID: 2088357452}
 --- !u!4 &1341061850
 Transform:
   m_ObjectHideFlags: 0
@@ -13890,7 +13907,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 8.4
+  m_Name: Save 8.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

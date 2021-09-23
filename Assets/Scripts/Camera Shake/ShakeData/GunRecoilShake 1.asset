@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: GunRecoilShake 1
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 6
-  frequency: 4
-  duration: 0.5
-  smoothness: 0.1
+  magnitude: 3.5
+  frequency: 9.5
+  duration: 0.7
+  smoothness: 0.025
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:

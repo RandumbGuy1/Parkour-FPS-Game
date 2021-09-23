@@ -56,12 +56,10 @@ public class CameraBobbing : MonoBehaviour
 
     private Vector3 CalculateLandOffset()
 	{
-		if (bobOffset > -0.0001f && desiredOffset >= 0f) return Vector3.zero;
+		if (desiredOffset <= 0f) desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.smoothDeltaTime);
+        if (bobOffset <= 0f) bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
-		desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.smoothDeltaTime);
-		bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
-
-		if (desiredOffset >= -0.001f) desiredOffset = 0f;
+        if (desiredOffset >= -0.001f) desiredOffset = 0f;
 
 		return Vector3.up * bobOffset;
 	}
@@ -71,7 +69,7 @@ public class CameraBobbing : MonoBehaviour
 		float magnitude = (mag * landBobMultiplier);
 		magnitude = Mathf.Round(magnitude * 100f) * 0.01f;
 		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
-
+        
 		if (magnitude < 0.5f) magnitude = 0f;
 		if (s.PlayerInput.Crouching)
         {
