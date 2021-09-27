@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: SwordSwingShake
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 3
-  frequency: 10
+  magnitude: 2.5
+  frequency: 9
   duration: 1
-  smoothness: 0.05
+  smoothness: 0.1
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:

@@ -48,9 +48,8 @@ public class ShakeManager : MonoBehaviour
 
         distance = Mathf.Clamp(distance, 0f, 20f);
         distance = 1f - (distance / 20f);
-        distance = Mathf.Clamp(distance, 0.2f, 1f);
+        distance = Mathf.Clamp(distance, 0.35f, 1f);
 
-        print(distance);
         return distance;
     }
 }

@@ -9351,22 +9351,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 20
-  frequency: 8
+  magnitude: 10
+  frequency: 9
   duration: 3
-  smoothness: 0.1
+  smoothness: 0.2
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 12.759434
+      outSlope: 12.759434
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.055452865
     - serializedVersion: 3
       time: 0.2
       value: 1
@@ -9376,24 +9376,6 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0
       outWeight: 0
-    - serializedVersion: 3
-      time: 0.78704464
-      value: 0.09561226
-      inSlope: -0.9457458
-      outSlope: -0.9457458
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.9269577
-      value: 0.027207296
-      inSlope: -0.1669319
-      outSlope: -0.1669319
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 0
@@ -11231,14 +11213,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.0435
-  landBobMultiplier: 0.09
+  landBobSmoothTime: 0.0425
+  landBobMultiplier: 0.085
   maxOffset: 3
   bobSpeed: 10
   bobAmountHoriz: 0.1
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
-  footstepFrequency: 15
+  footstepFrequency: 22
   shakeData: {fileID: 11400000, guid: 7deb4541c67cab348a211eaea3f3b3db, type: 2}
   stepUpSmoothTime: 0.05
   s: {fileID: 1650519438}
@@ -13907,7 +13889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 8.5
+  m_Name: Save 8.7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14663,7 +14645,7 @@ MonoBehaviour:
   vaultForce: 10
   vaultOffset: 6
   friction: 6.5
-  slideFriction: 11
+  slideFriction: 10
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768

@@ -46,25 +46,23 @@ public class ShakeEvent
         {
             case ShakeData.ShakeType.KickBack:
                 {
-                    float duration = 1 / shakeData.frequency;
+                    elapsed += Time.deltaTime * shakeData.frequency;
 
-                    if (elapsed >= duration)
+                    movingDir = Vector3.Lerp(movingDir, targetDir, elapsed);
+                    smoothDir = Vector3.SmoothDamp(smoothDir, movingDir, ref vel, shakeData.smoothness);
+
+                    Displacement = movingDir * trama;
+
+                    if (elapsed >= 1f)
                     {
                         Vector3 randomDir = Random.insideUnitSphere;
 
-                        while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;
+                        while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.4f, -0.4f)) randomDir = Random.insideUnitSphere;
 
-                        targetDir = (randomDir - targetDir * 2f).normalized * shakeData.magnitude;
+                        targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.magnitude;
                         elapsed = 0f;
                     }
 
-                    elapsed += Time.deltaTime;
-
-                    movingDir = Vector3.Lerp(movingDir, targetDir, elapsed * 2f / duration);
-                    smoothDir = Vector3.SmoothDamp(smoothDir, movingDir, ref vel, shakeData.smoothness);
-
-                    Displacement = (smoothDir) * trama;
-                    
                     break;
                 }
 
