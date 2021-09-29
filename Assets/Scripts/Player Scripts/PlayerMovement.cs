@@ -121,6 +121,13 @@ public class PlayerMovement : MonoBehaviour
     #region Movement
     private void Movement()
     {
+        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+
+        float maxSpeed = CalculateMaxSpeed();
+        float coefficientOfFriction = moveSpeed * 0.040f / maxSpeed;
+
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
+
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
@@ -129,7 +136,6 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = !(vaulting || wallRunning);
         relativeVel = s.orientation.InverseTransformDirection(rb.velocity);
 
-        ControlSpeed();
         RecordMovementSteps();
         ProcessCrouching();
 
@@ -140,7 +146,9 @@ public class PlayerMovement : MonoBehaviour
             camTurnVel = 0f;
         }
 
-        rb.AddForce((grounded ? GroundMovement() : AirMovement()) * moveSpeed * 0.1f, ForceMode.Impulse);
+        Vector3 moveDir = (grounded ? GroundMovement() : AirMovement());
+
+        rb.AddForce(moveDir * moveSpeed * 0.1f, ForceMode.Impulse);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
@@ -326,7 +334,7 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = true;
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        rb.AddForce(Vector3.up * jumpForce * 0.7f, ForceMode.Impulse);
+        rb.AddForce(Vector3.up * jumpForce * 0.8f, ForceMode.Impulse);
     }
     #endregion
 
@@ -564,15 +572,6 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Limiting Speed
-    void ControlSpeed()
-    {
-        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        float maxSpeed = CalculateMaxSpeed();
-        float coefficientOfFriction = moveSpeed * 0.045f / maxSpeed;
-
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
-    }
-
     private float CalculateMaxSpeed()
     {
         if (crouched && canCrouchWalk) return maxGroundSpeed * 0.6f;

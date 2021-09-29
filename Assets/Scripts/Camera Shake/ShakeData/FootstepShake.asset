@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: FootstepShake
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 0.35
-  frequency: 8.8
+  magnitude: 0.25
+  frequency: 9
   duration: 0.3
   smoothness: 0.1
   blendOverLifetime:

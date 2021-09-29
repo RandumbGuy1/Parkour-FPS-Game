@@ -6,18 +6,12 @@ using UnityEngine.AI;
 public class FollowPlayer : MonoBehaviour
 {
     [Header("Follow Settings")]
-    [SerializeField] private float speed;
     [SerializeField] private float kickForce;
-    [SerializeField] private LayerMask Kicks;
     [SerializeField] private float standingDistance;
+    [SerializeField] private LayerMask Kicks;
     [Space(10)]
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
-
-    private void Start()
-    {
-        agent.speed = speed;
-    }
 
     void Update()
     {
@@ -49,6 +43,7 @@ public class FollowPlayer : MonoBehaviour
 
         if (rb == null) return;
 
-        rb.AddForce((transform.forward + dirTo).normalized * kickForce, ForceMode.Impulse);
+        rb.AddForce((transform.forward + dirTo).normalized * kickForce * 1.3f, ForceMode.VelocityChange);
+        rb.AddForce(Vector3.up * kickForce * 0.3f, ForceMode.VelocityChange);
     }
 }
