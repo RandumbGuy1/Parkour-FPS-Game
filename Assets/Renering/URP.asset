@@ -42,7 +42,7 @@ MonoBehaviour:
   m_SoftShadowsSupported: 0
   m_UseSRPBatcher: 0
   m_SupportsDynamicBatching: 0
-  m_MixedLightingSupported: 1
+  m_MixedLightingSupported: 0
   m_DebugLevel: 0
   m_UseAdaptivePerformance: 0
   m_PostProcessingFeatureSet: 0

@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float maxGroundSpeed;
     [Space(10)]
+    [SerializeField] private float airMultiplier;
     [SerializeField] private float maxAirSpeed;
     [SerializeField] private float maxSlideSpeed;
 
@@ -124,9 +125,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
 
         float maxSpeed = CalculateMaxSpeed();
-        float coefficientOfFriction = moveSpeed * 0.040f / maxSpeed;
+        float coefficientOfFriction = moveSpeed * (grounded ? 1 : airMultiplier) / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction, ForceMode.VelocityChange);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 0.043f, ForceMode.VelocityChange);
 
         reachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (reachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
@@ -148,7 +149,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 moveDir = (grounded ? GroundMovement() : AirMovement());
 
-        rb.AddForce(moveDir * moveSpeed * 0.1f, ForceMode.Impulse);
+        rb.AddForce(moveDir * moveSpeed * 0.043f, ForceMode.VelocityChange);
 
         magnitude = rb.velocity.magnitude;
         velocity = rb.velocity;
@@ -352,10 +353,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = velocity;
         vel.y = 0f;
 
-        Vector3 moveDir = inputDir;
         Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
 
-        if (Vector3.Dot(-vaultDir, moveDir) < 0.65f) return;
+        if (Vector3.Dot(-vaultDir, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir, inputDir) < 0.6f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
@@ -564,10 +564,10 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Vector3 frictionForce = (-s.orientation.right * relativeVel.x * Convert.ToInt32(input.x == 0f || CounterMomentum(input.x, relativeVel.x)) + -s.orientation.forward * relativeVel.z * Convert.ToInt32(input.y == 0f || CounterMomentum(input.y, relativeVel.z))) * friction * 2f;
+        Vector3 frictionForce = (-s.orientation.right * relativeVel.x * Convert.ToInt32(input.x == 0f || CounterMomentum(input.x, relativeVel.x)) + -s.orientation.forward * relativeVel.z * Convert.ToInt32(input.y == 0f || CounterMomentum(input.y, relativeVel.z)));
         frictionForce = Vector3.ProjectOnPlane(frictionForce, groundNormal);
 
-        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce, ForceMode.Acceleration);
+        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * 2f, ForceMode.Acceleration);
     }
     #endregion
 
@@ -609,18 +609,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (vaulting || wallRunning) return new Vector2(0f, 0f);
 
-        if (grounded) return (crouched ? new Vector2(0.08f, 0.08f) : new Vector2(1f, 1.05f));
+        if (grounded) return (crouched ? new Vector2(0.1f, 0.1f) : new Vector2(1f, 1.1f));
 
-        if (crouched) return new Vector2(0.4f, 0.3f);
-
-        return new Vector2(0.4f, 0.6f);
-    }
-
-    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier)
-    {
-        return s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
+        return new Vector2(airMultiplier, airMultiplier + 0.1f);
     }
     #endregion
+
+    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier) => 
+        s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
 
     void ResetWallJump() => readyToWallJump = true;
 
