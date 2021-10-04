@@ -126,7 +126,7 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
+        bool canAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
 
         if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && canAttack : s.PlayerInput.LeftClick && canAttack) Attack();
         if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = CurrentWeapon.reloadRotOffset;
@@ -267,10 +267,10 @@ public class WeaponController : MonoBehaviour
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
 
-        float fallSpeed = s.PlayerMovement.velocity.y * 0.02f;
+        float fallSpeed = s.PlayerMovement.Velocity.y * 0.02f;
         fallSpeed = Mathf.Clamp(fallSpeed, -0.5f, 0.5f);
 
-        float strafeOffset = s.PlayerMovement.relativeVel.x * 0.03f;
+        float strafeOffset = s.PlayerMovement.RelativeVel.x * 0.03f;
         strafeOffset = Mathf.Clamp(strafeOffset, -0.2f, 0.2f);
 
         return -new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f) * amp;
@@ -348,7 +348,7 @@ public class WeaponController : MonoBehaviour
 
     private void ProcessMovement()
     {
-        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.magnitude > 5f ? timer += Time.deltaTime : 0f;
+        timer = s.PlayerMovement.Moving && s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 5f ? timer += Time.deltaTime : 0f;
 
         smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
         smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero), ref swayVel, swaySmoothTime);

@@ -27,7 +27,7 @@ public class DynaimcReticle : MonoBehaviour
     {
         bool aiming = s.WeaponControls.aiming;
 
-        newSize = Mathf.Pow((s.PlayerMovement.magnitude + (s.CameraLook.RotationDelta.sqrMagnitude * 6f)) * 5f, 1.3f);
+        newSize = Mathf.Pow((s.PlayerMovement.Magnitude + (s.CameraLook.RotationDelta.sqrMagnitude * 6f)) * 5f, 1.3f);
         newSize = Mathf.Clamp(newSize, (aiming ? minAimSize : minSize), (aiming ? minAimSize : maxSize));
 
         size = Mathf.SmoothDamp(size, newSize, ref vel, smoothTime);

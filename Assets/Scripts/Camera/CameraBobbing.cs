@@ -25,7 +25,6 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 smoothOffset = Vector3.zero;
 
     [Header("Footstep Settings")]
-    [SerializeField] private float footstepFrequency;
     [SerializeField] private ShakeData shakeData; 
     [Space(10)]
     [SerializeField] private float stepUpSmoothTime;
@@ -39,7 +38,7 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        timer = (s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.moving || s.PlayerMovement.wallRunning) && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
+        timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
 
@@ -88,24 +87,24 @@ public class CameraBobbing : MonoBehaviour
             return;
         }
 
-        float mag = s.PlayerMovement.magnitude * 0.18f;
-        mag = Mathf.Clamp(mag, 0f, 2f);
+        float walkMagnitude = s.PlayerMovement.Magnitude;
+        walkMagnitude = Mathf.Clamp(walkMagnitude, 0f, 20f);
 
-        footstepDistance += Time.fixedDeltaTime * 2.8f;
-        
-        if (footstepDistance > 1/footstepFrequency * 10f)
+        footstepDistance += walkMagnitude * 0.02f * 50f;
+
+        if (footstepDistance > 300f)
         {
             s.CameraShaker.ShakeOnce(shakeData);
             footstepDistance = 0f;
-        }
+        }    
     }
 
     private Vector3 HeadBob()
     {
-        float speedAmp = s.PlayerMovement.magnitude * 0.065f;
+        float speedAmp = s.PlayerMovement.Magnitude * 0.065f;
         speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
        
-        float amp = s.PlayerMovement.magnitude * 0.068f * (s.PlayerMovement.wallRunning ? 1.3f : 1f);
+        float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f);
         amp = Mathf.Clamp(amp, 1f, 2.15f);
 
         return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed * speedAmp) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * bobAmountVert * amp);

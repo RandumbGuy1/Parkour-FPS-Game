@@ -7,7 +7,8 @@ using System;
 public class PlayerInput : MonoBehaviour
 {
     public Vector2 InputVector { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
-   
+    public Vector2 MouseInputVector { get { return new Vector2(Input.GetAxisRaw("Mouse Y"), Input.GetAxisRaw("Mouse X")); } }
+
     public bool Jumping { get { return Input.GetKeyDown(jumpKey); } }
     public bool Crouching { get { return Input.GetKey(crouchKey); } }
     public bool Interacting { get { return Input.GetKeyDown(interactKey); } }

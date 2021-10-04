@@ -186,7 +186,7 @@ public class PlayerInteraction : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
-        objRb.velocity *= throwForce * ((s.PlayerMovement.magnitude * 0.01f) + 1f) * 2f;
+        objRb.velocity *= throwForce * ((s.PlayerMovement.Magnitude * 0.01f) + 1f) * 2f;
         objRb.AddTorque(rand.normalized * throwForce, ForceMode.VelocityChange);
 
         heldObj = null;

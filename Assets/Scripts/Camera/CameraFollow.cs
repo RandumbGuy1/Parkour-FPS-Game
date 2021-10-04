@@ -40,7 +40,6 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private ScriptManager s;
 	[SerializeField] private ParticleSystem sprintEffect;
 	private Camera cam;
-	private bool fast = false;
 
 	void Awake()
 	{
@@ -50,9 +49,6 @@ public class CameraFollow : MonoBehaviour
 
 	void Update()
 	{
-		mouse.y = Input.GetAxisRaw("Mouse X");
-		mouse.x = Input.GetAxisRaw("Mouse Y");
-
 		CameraEffects();
 		SpeedLines();
 		ChangeTilt();
@@ -68,7 +64,7 @@ public class CameraFollow : MonoBehaviour
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
 
-		if (s.CameraLook.RotationDelta.sqrMagnitude < 5f && s.PlayerMovement.magnitude < 1f && s.CameraShaker.Offset.sqrMagnitude < 0.01f)
+		if (s.CameraLook.RotationDelta.sqrMagnitude < 5f && s.PlayerMovement.Magnitude < 1f && s.CameraShaker.Offset.sqrMagnitude < 0.01f)
 		{
 			headSwayScroller += Time.deltaTime * swayFrequency;
 
@@ -82,7 +78,7 @@ public class CameraFollow : MonoBehaviour
 
 	void CalcRotation()
 	{
-		RotationDelta = mouse * sensitivity * 0.02f;
+		RotationDelta = s.PlayerInput.MouseInputVector * sensitivity * 0.02f;
 
 		rotation.y += RotationDelta.y;
 		rotation.x -= RotationDelta.x;
@@ -161,9 +157,9 @@ public class CameraFollow : MonoBehaviour
 	{
 		if (s.PlayerInput.Crouching) SetTilt(8f, 0.15f, 1);
 
-		if (s.PlayerMovement.wallRunning)
+		if (s.PlayerMovement.WallRunning)
 		{
-			SetTilt(15f, 0.15f, (s.PlayerMovement.isWallRight ? 1 : -1));
+			SetTilt(15f, 0.15f, (s.PlayerMovement.IsWallRight ? 1 : -1));
 			SetFov(15f, 0.2f);
 		}
         else
@@ -176,22 +172,18 @@ public class CameraFollow : MonoBehaviour
 
 	private void SpeedLines()
 	{
-		if (s.PlayerMovement.magnitude >= 25f)
+		if (s.PlayerMovement.Magnitude >= 10f)
 		{
-			if (!fast)
-            {
-				sprintEffect.Play();
-				fast = true;
-			}
-			
-			var em = sprintEffect.emission;
-			em.rateOverTime = s.PlayerMovement.magnitude;
+			if (!sprintEffect.isPlaying) sprintEffect.Play();
+
+			float rateOverLifeTime = Vector3.Angle(s.PlayerMovement.Velocity, cam.transform.forward) * 0.15f;
+			rateOverLifeTime = Mathf.Clamp(rateOverLifeTime, 1f, 1000f);
+			rateOverLifeTime = s.PlayerMovement.Magnitude * 3.5f / rateOverLifeTime;
+
+			ParticleSystem.EmissionModule em = sprintEffect.emission;
+			em.rateOverTime = (s.PlayerMovement.Grounded ? 0f : rateOverLifeTime);
 		}
-		else if (fast)
-		{
-			sprintEffect.Stop();
-			fast = false;
-		}
+		else if (sprintEffect.isPlaying) sprintEffect.Stop();
 	}
 	#endregion
 }

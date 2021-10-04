@@ -27,7 +27,7 @@ public class HeadBobbing : MonoBehaviour
 
     void LateUpdate()
     {
-        timer = s.PlayerMovement.moving && s.PlayerMovement.grounded && s.PlayerMovement.canCrouchWalk && s.PlayerMovement.magnitude > 0.5f ? timer + Time.deltaTime : 0f;
+        timer = s.PlayerMovement.Moving && s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref vel, bobSmoothTime);
         Vector3 newPos = s.playerHead.position + smoothOffset + vaultDesync;
