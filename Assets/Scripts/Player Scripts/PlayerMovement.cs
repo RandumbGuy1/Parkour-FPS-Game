@@ -49,12 +49,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float vaultDuration;
     [SerializeField] private float vaultForce;
     [SerializeField] private float vaultOffset;
+    [SerializeField] private float vaultJumpForce;
 
     public bool Vaulting { get; private set; } = false;
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
     [SerializeField] private float slideFriction;
+    private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
     [SerializeField] private LayerMask GroundSnapLayer;
@@ -363,43 +365,17 @@ public class PlayerMovement : MonoBehaviour
 
         if (distance > vaultOffset + 0.1f) return;
 
-        if (distance < 4f)
+        if (distance < 3.7f)
         {
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = vel;
-            //StartCoroutine(Vault2(vaultPoint - vaultDir * 0.4f, vel, distance));
             return;
         }
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
     }
-    /*
-    private IEnumerator Vault2(Vector3 pos, Vector3 vel, float distance)
-    {
-        rb.isKinematic = true;
-        rb.detectCollisions = false;
-        vaulting = true;
 
-        float elapsed = 0f;
-        float duration = 0.1f;
-
-        while (elapsed < duration - duration * 0.15f) 
-        {
-            rb.position = Vector3.Lerp(transform.position, pos, elapsed/ duration);
-            elapsed += Time.fixedDeltaTime;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        rb.isKinematic = false;
-        rb.detectCollisions = true;
-        vaulting = false;
-        grounded = true;
-
-        rb.velocity = vel;
-    }
-    */
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
         rb.isKinematic = true;
@@ -413,10 +389,23 @@ public class PlayerMovement : MonoBehaviour
         float elapsed = 0f;
         float vaultDuration = this.vaultDuration + distance;
 
+        bool jumpedOff = false;
+
         Grounded = false;
 
         while (elapsed < vaultDuration)
         {
+            /*
+            if (jumping)
+            {
+                jumpedOff = true;
+                rb.isKinematic = false;
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
+                rb.velocity = (Vector3.up - normal) * vaultJumpForce * 0.5f;
+                break;
+            }
+            */
+
             float t = elapsed / vaultDuration;
             t = t * t * t * (t * (6f * t - 15f) + 10f);
 
@@ -427,11 +416,15 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vaulting = false;
-        rb.isKinematic = false;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        rb.velocity = normal * vaultForce * 0.5f;
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        if (!jumpedOff)
+        {
+            rb.isKinematic = false;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+            rb.velocity = normal * vaultForce * 0.5f;
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        }
     }
     #endregion
 
@@ -558,14 +551,27 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouched && canUnCrouch && !CanCrouchWalk)
         {
-            rb.AddForce(-rb.velocity.normalized * slideFriction * 3f * (Magnitude * 0.1f)); 
+            rb.AddForce(-rb.velocity.normalized * slideFriction * 2.5f * (Magnitude * 0.1f)); 
             return;
         }
 
-        Vector3 frictionForce = (-s.orientation.right * RelativeVel.x * Convert.ToInt32(input.x == 0f || CounterMomentum(input.x, RelativeVel.x)) + -s.orientation.forward * RelativeVel.z * Convert.ToInt32(input.y == 0f || CounterMomentum(input.y, RelativeVel.z)));
+        Vector3 frictionForce = Vector3.zero;
+
+        if (Math.Abs(RelativeVel.x) > 0.05f && input.x == 0f && readyToCounter.x > 1) frictionForce -= s.orientation.right * RelativeVel.x;
+        if (Math.Abs(RelativeVel.z) > 0.05f && input.y == 0f && readyToCounter.y > 1) frictionForce -= s.orientation.forward * RelativeVel.z;
+
+        if (CounterMomentum(input.x, RelativeVel.x)) frictionForce -= s.orientation.right * RelativeVel.x;
+        if (CounterMomentum(input.y, RelativeVel.z)) frictionForce -= s.orientation.forward * RelativeVel.z;
+
         frictionForce = Vector3.ProjectOnPlane(frictionForce, GroundNormal);
 
-        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * 2f, ForceMode.Acceleration);
+        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f, ForceMode.Acceleration);
+
+        if (input.x == 0f) readyToCounter.x++;
+        else readyToCounter.x = 0;
+
+        if (input.y == 0f) readyToCounter.y++;
+        else readyToCounter.y = 0;
     }
     #endregion
 
@@ -606,6 +612,7 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 CalculateMultiplier()
     {
         if (Vaulting || WallRunning) return new Vector2(0f, 0f);
+        if (crouched && !CanCrouchWalk && Grounded) return new Vector2(0.05f, 0.05f);
 
         if (Grounded) return (crouched ? new Vector2(0.1f, 0.1f) : new Vector2(1f, 1.1f));
 

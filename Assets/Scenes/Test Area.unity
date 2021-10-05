@@ -11215,13 +11215,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   landBobSmoothTime: 0.045
-  landBobMultiplier: 0.1
+  landBobMultiplier: 0.096
   maxOffset: 3.5
   bobSpeed: 10
   bobAmountHoriz: 0.1
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
-  footstepFrequency: 21
   shakeData: {fileID: 11400000, guid: 7deb4541c67cab348a211eaea3f3b3db, type: 2}
   stepUpSmoothTime: 0.055
   s: {fileID: 1650519438}
@@ -13984,7 +13983,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 9.1
+  m_Name: Save 9.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14832,9 +14831,10 @@ MonoBehaviour:
   minimumJumpHeight: 1.3
   vaultDuration: 0.08
   vaultForce: 10
-  vaultOffset: 6
+  vaultOffset: 8.5
+  vaultJumpForce: 40
   friction: 4.5
-  slideFriction: 10
+  slideFriction: 11
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768
