@@ -16,6 +16,25 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private Rigidbody enemyRb;
 
+    [Header("Ground Check Settings")]
+    [SerializeField] private LayerMask Ground;
+    [SerializeField] private Vector3 groundCheckHalfExtents;
+    [SerializeField] private Vector3 groundCheckOffset;
+    [SerializeField] private float groundCheckInterval;
+    private bool grounded;
+
+    private void Start()
+    {
+        CancelInvoke("SetGroundCheckInterval");
+        SetGroundCheckInterval();
+    }
+
+    private void OnEnable()
+    {
+        CancelInvoke("SetGroundCheckInterval");
+        SetGroundCheckInterval();
+    }
+
     void FixedUpdate()
     {
         FollowThePlayer();
@@ -23,13 +42,15 @@ public class FollowPlayer : MonoBehaviour
 
     void FollowThePlayer()
     {
+        if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
+
         if ((player.position - enemyRb.transform.position).sqrMagnitude < standingDistance)
         {
             agent.SetDestination(agent.transform.position);
             return;
         }
 
-        if ((player.position - enemyRb.transform.position).sqrMagnitude < (player.position - agent.transform.position).sqrMagnitude)
+        if ((player.position - enemyRb.transform.position).sqrMagnitude * 1.2f < (player.position - agent.transform.position).sqrMagnitude)
         {
             Vector3 vel = enemyRb.velocity * 0.1f;
             vel.y = 0f;
@@ -39,18 +60,15 @@ public class FollowPlayer : MonoBehaviour
             return;
         }
 
+        if (!grounded) return;
+
         agent.SetDestination(player.position);
 
         Vector3 pathDir = (agent.transform.position - enemyRb.transform.position).normalized;
-        pathDir.y = 0f;
+        pathDir.y *= 0.1f;
 
         enemyRb.AddForce(pathDir * speed * 10f, ForceMode.Acceleration);
-        enemyRb.AddForce(Vector3.down * 65f);
-        //enemyRb.AddTorque(pathDir * angularSpeed * 10f, ForceMode.Acceleration);
-
-        //Quaternion targetRot = Quaternion.LookRotation(pathDir);
-
-        //enemyRb.rotation = Quaternion.RotateTowards(enemyRb.rotation, targetRot, angularSpeed * Time.fixedDeltaTime * 20f);
+        enemyRb.AddForce(Vector3.down * 55f);
     }
 
     private void OnCollisionEnter(Collision col)
@@ -69,5 +87,20 @@ public class FollowPlayer : MonoBehaviour
 
         rb.AddForce((enemyRb.transform.forward + dirTo).normalized * kickForce * 1.3f, ForceMode.VelocityChange);
         rb.AddForce(Vector3.up * kickForce * 0.3f, ForceMode.VelocityChange);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireCube(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents * 2f);
+    }
+
+    private void SetGroundCheckInterval()
+    {
+        Quaternion orientation = Quaternion.LookRotation(enemyRb.transform.up);
+
+        grounded = Physics.CheckBox(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents, orientation, Ground);
+        print(grounded);
+
+        Invoke("SetGroundCheckInterval", groundCheckInterval);
     }
 }
