@@ -16,7 +16,7 @@ public class ShakeData : ScriptableObject
     public float magnitude = 1f;
     public float frequency = 1f;
     public float duration = 1f;
-    public float smoothness = 1f;
+    public float smoothSpeed = 1f;
     [Space(10)]
     public AnimationCurve blendOverLifetime = new AnimationCurve(
       new Keyframe(0.0f, 0.0f, Mathf.Deg2Rad * 0.0f, Mathf.Deg2Rad * 720.0f),
@@ -29,6 +29,6 @@ public class ShakeData : ScriptableObject
         this.magnitude = magnitude;
         this.frequency = frequency;
         this.duration = duration;
-        this.smoothness = smoothness;
+        this.smoothSpeed = smoothness;
     }
 }

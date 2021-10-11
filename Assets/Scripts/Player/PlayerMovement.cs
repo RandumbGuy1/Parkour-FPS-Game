@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
@@ -56,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Control")]
     [SerializeField] private float friction;
     [SerializeField] private float slideFriction;
+    [SerializeField] private int counterThresold;
     private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
@@ -557,8 +559,8 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 frictionForce = Vector3.zero;
 
-        if (Math.Abs(RelativeVel.x) > 0.05f && input.x == 0f && readyToCounter.x > 1) frictionForce -= s.orientation.right * RelativeVel.x;
-        if (Math.Abs(RelativeVel.z) > 0.05f && input.y == 0f && readyToCounter.y > 1) frictionForce -= s.orientation.forward * RelativeVel.z;
+        if (Math.Abs(RelativeVel.x) > 0.05f && input.x == 0f && readyToCounter.x > counterThresold) frictionForce -= s.orientation.right * RelativeVel.x;
+        if (Math.Abs(RelativeVel.z) > 0.05f && input.y == 0f && readyToCounter.y > counterThresold) frictionForce -= s.orientation.forward * RelativeVel.z;
 
         if (CounterMomentum(input.x, RelativeVel.x)) frictionForce -= s.orientation.right * RelativeVel.x;
         if (CounterMomentum(input.y, RelativeVel.z)) frictionForce -= s.orientation.forward * RelativeVel.z;

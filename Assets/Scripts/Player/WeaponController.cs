@@ -140,7 +140,7 @@ public class WeaponController : MonoBehaviour
             case WeaponClass.Ranged:
                 if (CurrentWeapon.OnAttack(s.cam))
                 {
-                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
+                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)));
 
                     desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;

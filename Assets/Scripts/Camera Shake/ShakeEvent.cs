@@ -12,11 +12,8 @@ public class ShakeEvent
     private Vector3 noise = Vector3.zero;
     private Vector3 noiseOffset = Vector3.zero;
 
-    private Vector3 targetDir = Vector3.zero;
-    private Vector3 movingDir = Vector3.zero;
+    private Vector3 targetDir;
     private Vector3 smoothDir = Vector3.zero;
-    private Vector3 vel = Vector3.zero;
-    private float elapsed = 0f;
 
     public Vector3 Displacement { get; private set; } = Vector3.zero;
     public bool Finished { get { return timeRemaining <= 0f; } }
@@ -46,6 +43,7 @@ public class ShakeEvent
         {
             case ShakeData.ShakeType.KickBack:
                 {
+                    /*
                     elapsed += Time.deltaTime * shakeData.frequency;
 
                     movingDir = Vector3.Lerp(movingDir, targetDir, elapsed);
@@ -61,6 +59,20 @@ public class ShakeEvent
 
                         targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.magnitude;
                         elapsed = 0f;
+                    }
+                    */
+
+                    targetDir = Vector3.Lerp(targetDir, Vector3.zero, shakeData.smoothSpeed * 0.4f * Time.smoothDeltaTime);
+                    smoothDir = Vector3.Slerp(smoothDir, targetDir, shakeData.smoothSpeed * Time.smoothDeltaTime);
+
+                    Displacement = smoothDir * trama;
+
+                    if (targetDir.sqrMagnitude < (shakeData.magnitude * shakeData.frequency * 0.05f) * (shakeData.magnitude * shakeData.frequency * 0.05f))
+                    {
+                        Vector3 randomDir = Random.insideUnitSphere;
+                        while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;
+
+                        targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.magnitude;
                     }
 
                     break;
@@ -80,7 +92,7 @@ public class ShakeEvent
                     noise *= shakeData.magnitude;
                     noise *= trama;
 
-                    Displacement = Vector3.SmoothDamp(Displacement, noise, ref vel, shakeData.smoothness);
+                    Displacement = Vector3.Lerp(Displacement, noise, shakeData.smoothSpeed);
                     break;
                 }
         }

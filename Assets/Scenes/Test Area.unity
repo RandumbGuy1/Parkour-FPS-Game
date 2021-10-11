@@ -1500,8 +1500,8 @@ MonoBehaviour:
   weaponSprite: {fileID: 0}
   weaponDefaultPos: {x: 2, y: -0.6, z: 3.4}
   weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -2, y: -0.1, z: -0.5}
-  weaponAimRot: {x: 0, y: -18, z: 0}
+  weaponAimPos: {x: -1.72, y: -0.035, z: -1.6}
+  weaponAimRot: {x: 0, y: -18, z: 25}
   weaponWeight: 1.5
   shootForce: 80
   attackRange: 120
@@ -8298,7 +8298,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &562165511
 Transform:
   m_ObjectHideFlags: 0
@@ -9399,7 +9399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &649301887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9412,11 +9412,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac831f6c892e0f47bb53cd6c850e255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
-  magnitude: 12
-  frequency: 9
+  type: 1
+  magnitude: 40
+  frequency: 6
   duration: 3
-  smoothness: 0.2
+  smoothness: 6.5
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:
@@ -11335,7 +11335,7 @@ MonoBehaviour:
   bobAmountHoriz: 0.1
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
-  shakeData: {fileID: 11400000, guid: 7deb4541c67cab348a211eaea3f3b3db, type: 2}
+  shakeData: {fileID: 11400000, guid: 915b73c15e711e94f8d19869af90b586, type: 2}
   stepUpSmoothTime: 0.055
   s: {fileID: 1650519438}
 --- !u!114 &963194230
@@ -13389,7 +13389,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeRecievers:
   - {fileID: 838078167}
-  - {fileID: 2088357452}
 --- !u!4 &1341061850
 Transform:
   m_ObjectHideFlags: 0
@@ -14097,7 +14096,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 9.4
+  m_Name: Save 9.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14927,8 +14926,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30
-  maxGroundSpeed: 20
+  moveSpeed: 30.5
+  maxGroundSpeed: 22
   airMultiplier: 0.45
   maxAirSpeed: 50
   maxSlideSpeed: 60
@@ -14947,8 +14946,9 @@ MonoBehaviour:
   vaultForce: 10
   vaultOffset: 8.5
   vaultJumpForce: 40
-  friction: 5.5
-  slideFriction: 11
+  friction: 6
+  slideFriction: 10.5
+  counterThresold: 3
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768
