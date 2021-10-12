@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: FootStepShake 1
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 0.8
+  magnitude: 0.75
   frequency: 1
-  duration: 0.2
-  smoothSpeed: 13
+  duration: 0.3
+  smoothSpeed: 15
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:

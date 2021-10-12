@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GunRecoilShake 1
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 7
+  magnitude: 5
   frequency: 0
   duration: 0.6
   smoothSpeed: 13
@@ -23,15 +23,15 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 12.566371
+      inSlope: 18.501183
+      outSlope: 18.501183
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.07481388
     - serializedVersion: 3
-      time: 0.2
-      value: 1
+      time: 0.14824219
+      value: 1.0023575
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -41,11 +41,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: -1.2268685
+      outSlope: -1.2268685
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.060073957
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

@@ -1508,9 +1508,9 @@ MonoBehaviour:
   spread: 2
   fireRate: 9
   weaponRecoilForce: 15
-  weaponRecoilSmoothTime: 0.05
-  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.06}
-  weaponRecoilRotOffset: {x: -1.1, y: 0, z: 0}
+  weaponRecoilSmoothTime: 0.04
+  weaponRecoilPosOffset: {x: 0, y: -0.02, z: -0.08}
+  weaponRecoilRotOffset: {x: -0.7, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 80
   bulletsPerTap: 1
@@ -8298,7 +8298,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &562165511
 Transform:
   m_ObjectHideFlags: 0
@@ -8327,7 +8327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be6576bcaf49d224d802315d82ad338a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 15
+  speed: 45
   angularSpeed: 9
   kickForce: 15
   standingDistance: 6
@@ -9399,7 +9399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &649301887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10610,7 +10610,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.7
-  m_Speed: 25
+  m_Speed: 20
   m_Acceleration: 50
   avoidancePriority: 50
   m_AngularSpeed: 90
@@ -14096,7 +14096,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 9.5
+  m_Name: Save 9.6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16530,7 +16530,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1908489827}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 3.5
   m_AngularDrag: 1
   m_UseGravity: 1

@@ -23,7 +23,6 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private float upClampAngle;
 	[SerializeField] private float downClampAngle;
 
-	private Vector2 mouse;
 	private Vector2 rotation;
 	private Vector2 smoothRotation;
 	public Vector2 RotationDelta { get; private set; }
@@ -35,6 +34,9 @@ public class CameraFollow : MonoBehaviour
 	private Vector3 finalSwayOffset = Vector3.zero;
 	private Vector3 headSwayOffset = Vector3.zero;
 	private float headSwayScroller = 0;
+
+	private float smoothHeadTiltSway = 0f;
+	private float smoothHeadTiltSwayVel = 0f;
 
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
@@ -72,8 +74,13 @@ public class CameraFollow : MonoBehaviour
 			headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
 
 			headSwayOffset -= (Vector3) Vector2.one * 0.5f;
-			finalSwayOffset = headSwayOffset * swayAmount;
 		}
+
+		float horizInput = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x : 0f);
+
+		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 2f, ref smoothHeadTiltSwayVel, 0.3f);
+
+		finalSwayOffset = (headSwayOffset * swayAmount) + Vector3.forward * smoothHeadTiltSway;
 	}
 
 	void CalcRotation()
