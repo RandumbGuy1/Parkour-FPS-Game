@@ -63,7 +63,7 @@ public class CameraBobbing : MonoBehaviour
 		return Vector3.up * bobOffset;
 	}
 
-	public void CameraLand(float mag)
+	public void BobOnce(float mag)
 	{
 		float magnitude = (mag * landBobMultiplier);
 		magnitude = Mathf.Round(magnitude * 100f) * 0.01f;
@@ -92,7 +92,7 @@ public class CameraBobbing : MonoBehaviour
 
         footstepDistance += walkMagnitude * 0.02f * 50f;
 
-        if (footstepDistance > 300f)
+        if (footstepDistance > 350f)
         {
             s.CameraShaker.ShakeOnce(shakeData);
             footstepDistance = 0f;

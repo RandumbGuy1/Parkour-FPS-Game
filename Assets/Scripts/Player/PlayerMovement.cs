@@ -321,7 +321,7 @@ public class PlayerMovement : MonoBehaviour
             velocityOverLifetime.z = magnitude.z;
         }
 
-        s.CameraHeadBob.CameraLand(impactForce);
+        s.CameraHeadBob.BobOnce(impactForce);
     }
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;

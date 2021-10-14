@@ -44,13 +44,13 @@ public class FollowPlayer : MonoBehaviour
     {
         if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
 
-        if ((player.position - enemyRb.transform.position).sqrMagnitude < standingDistance)
+        if ((player.position - enemyRb.transform.position).sqrMagnitude < standingDistance * standingDistance)
         {
-            agent.SetDestination(agent.transform.position);
+            agent.SetDestination(enemyRb.transform.position);
             return;
         }
 
-        if ((player.position - enemyRb.transform.position).sqrMagnitude * 1.2f < (player.position - agent.transform.position).sqrMagnitude)
+        if ((player.position - enemyRb.transform.position).sqrMagnitude * 1.05f < (player.position - agent.transform.position).sqrMagnitude)
         {
             Vector3 vel = enemyRb.velocity * 0.1f;
             vel.y = 0f;
@@ -60,15 +60,23 @@ public class FollowPlayer : MonoBehaviour
             return;
         }
 
-        if (!grounded) return;
+        float angle = Vector3.Angle(enemyRb.transform.up, Vector3.up);
+
+        if (angle > 10f)
+        {
+            Quaternion fromTo = Quaternion.FromToRotation(enemyRb.transform.up, Vector3.up);
+            enemyRb.AddTorque(new Vector3(fromTo.x, fromTo.y, fromTo.z) * 85f, ForceMode.Acceleration);
+        }
+
+        if (!grounded && angle >= 90f) return;
 
         agent.SetDestination(player.position);
 
         Vector3 pathDir = (agent.transform.position - enemyRb.transform.position).normalized;
         pathDir.y *= 0.1f;
 
-        enemyRb.AddForce(pathDir * speed * 10f, ForceMode.Acceleration);
-        enemyRb.AddForce(Vector3.down * 55f);
+        enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
+        enemyRb.AddForce(Vector3.down * 30f, ForceMode.Acceleration);
     }
 
     private void OnCollisionEnter(Collision col)
