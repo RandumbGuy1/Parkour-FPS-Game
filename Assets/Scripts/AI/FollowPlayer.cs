@@ -52,20 +52,24 @@ public class FollowPlayer : MonoBehaviour
 
         if ((player.position - enemyRb.transform.position).sqrMagnitude * 1.05f < (player.position - agent.transform.position).sqrMagnitude)
         {
-            Vector3 vel = enemyRb.velocity * 0.1f;
-            vel.y = 0f;
-
-            agent.transform.position = enemyRb.transform.position + vel;
+            agent.transform.position = enemyRb.transform.position;
             agent.SetDestination(player.position);
             return;
         }
 
+        if ((player.position - agent.transform.position).sqrMagnitude < agent.stoppingDistance * agent.stoppingDistance && (player.position - enemyRb.transform.position).sqrMagnitude > 125f)
+        {
+             agent.transform.position = enemyRb.transform.position;
+             agent.SetDestination(player.position);
+             return;
+        }
+
         float angle = Vector3.Angle(enemyRb.transform.up, Vector3.up);
 
-        if (angle > 10f)
+        if (angle > 15f)
         {
             Quaternion fromTo = Quaternion.FromToRotation(enemyRb.transform.up, Vector3.up);
-            enemyRb.AddTorque(new Vector3(fromTo.x, fromTo.y, fromTo.z) * 85f, ForceMode.Acceleration);
+            enemyRb.AddTorque(new Vector3(fromTo.x, fromTo.y, fromTo.z) * 95f, ForceMode.Acceleration);
         }
 
         if (!grounded && angle >= 90f) return;
@@ -76,7 +80,7 @@ public class FollowPlayer : MonoBehaviour
         pathDir.y *= 0.1f;
 
         enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
-        enemyRb.AddForce(Vector3.down * 30f, ForceMode.Acceleration);
+        enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
     }
 
     private void OnCollisionEnter(Collision col)
@@ -88,7 +92,7 @@ public class FollowPlayer : MonoBehaviour
         dirTo.y = 0f;
 
         if (Vector3.Dot(dirTo, enemyRb.transform.forward) < 0.6f) return;
-
+ 
         Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
 
         if (rb == null) return;
@@ -107,7 +111,6 @@ public class FollowPlayer : MonoBehaviour
         Quaternion orientation = Quaternion.LookRotation(enemyRb.transform.up);
 
         grounded = Physics.CheckBox(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents, orientation, Ground);
-        print(grounded);
 
         Invoke("SetGroundCheckInterval", groundCheckInterval);
     }

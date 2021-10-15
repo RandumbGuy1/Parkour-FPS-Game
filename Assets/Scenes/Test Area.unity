@@ -109,16 +109,16 @@ NavMeshSettings:
     agentTypeID: 0
     agentRadius: 2.5
     agentHeight: 6
-    agentSlope: 50
-    agentClimb: 1.67
-    ledgeDropHeight: 20
-    maxJumpAcrossDistance: 20
+    agentSlope: 14
+    agentClimb: 0.3
+    ledgeDropHeight: 30
+    maxJumpAcrossDistance: 10
     minRegionArea: 2
     manualCellSize: 0
     cellSize: 0.8333333
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    accuratePlacement: 1
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 23800000, guid: 41fe99504259a2e438708e0af04dcbf1, type: 2}
@@ -8329,11 +8329,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 20
   angularSpeed: 9
-  kickForce: 15
+  kickForce: 50
   standingDistance: 8
   Kicks:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1793
   agent: {fileID: 832000373}
   player: {fileID: 1650519434}
   enemyRb: {fileID: 1908489834}
@@ -14096,7 +14096,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 9.7
+  m_Name: Save 9.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16531,8 +16531,8 @@ Rigidbody:
   m_GameObject: {fileID: 1908489827}
   serializedVersion: 2
   m_Mass: 10
-  m_Drag: 4
-  m_AngularDrag: 0.1
+  m_Drag: 3.6
+  m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
