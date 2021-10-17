@@ -81,6 +81,12 @@ public class FollowPlayer : MonoBehaviour
 
         enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
         enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
+
+        Vector3 vel = enemyRb.velocity;
+        vel.y = 0f;
+
+        Quaternion lookAtPlayer = Quaternion.FromToRotation(enemyRb.transform.forward, vel.normalized);
+        enemyRb.AddTorque(Vector3.up * lookAtPlayer.y * 95f, ForceMode.Acceleration);
     }
 
     private void OnCollisionEnter(Collision col)

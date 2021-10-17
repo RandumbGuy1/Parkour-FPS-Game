@@ -114,7 +114,7 @@ public class WeaponController : MonoBehaviour
         }
 
         Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot);
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.75f);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -267,7 +267,7 @@ public class WeaponController : MonoBehaviour
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
 
-        float fallSpeed = s.PlayerMovement.Velocity.y * 0.02f;
+        float fallSpeed = s.PlayerMovement.Velocity.y * 0.023f;
         fallSpeed = Mathf.Clamp(fallSpeed, -0.5f, 0.5f);
 
         float strafeOffset = s.PlayerMovement.RelativeVel.x * 0.03f;

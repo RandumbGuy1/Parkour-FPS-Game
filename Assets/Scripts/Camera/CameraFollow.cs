@@ -78,7 +78,7 @@ public class CameraFollow : MonoBehaviour
 
 		float horizInput = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x : 0f);
 
-		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 2f, ref smoothHeadTiltSwayVel, 0.3f);
+		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 2f, ref smoothHeadTiltSwayVel, 0.2f);
 
 		finalSwayOffset = (headSwayOffset * swayAmount) + Vector3.forward * smoothHeadTiltSway;
 	}
