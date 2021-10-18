@@ -8327,10 +8327,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be6576bcaf49d224d802315d82ad338a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
+  speed: 15
   angularSpeed: 9
   kickForce: 50
-  standingDistance: 8
+  standingDistance: 0
   Kicks:
     serializedVersion: 2
     m_Bits: 1793
@@ -10610,7 +10610,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.7
-  m_Speed: 35
+  m_Speed: 20
   m_Acceleration: 50
   avoidancePriority: 50
   m_AngularSpeed: 90
@@ -14096,7 +14096,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 9.9
+  m_Name: Save 10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16530,9 +16530,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1908489827}
   serializedVersion: 2
-  m_Mass: 10
+  m_Mass: 6
   m_Drag: 3.6
-  m_AngularDrag: 0.1
+  m_AngularDrag: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
