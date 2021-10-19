@@ -28,7 +28,7 @@ public class FollowPlayer : MonoBehaviour
     private void Start()
     {
         startAngularDrag = enemyRb.angularDrag;
-        agent.speed = speed + 2.5f;
+        agent.speed = speed + speed * 0.3f;
 
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
@@ -53,25 +53,41 @@ public class FollowPlayer : MonoBehaviour
         float sqrAgentToPlayer = (player.position - agent.transform.position).sqrMagnitude;
         float sqrAgentToEnemy = (enemyRb.transform.position - agent.transform.position).sqrMagnitude;
 
+        HandleRotation();
+
+        enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
+
         if (sqrEnemyToPlayer < standingDistance * standingDistance)
         {
             agent.SetDestination(enemyRb.transform.position);
             return;
         }
 
-        if (sqrAgentToEnemy * 1.5f > sqrAgentToPlayer || enemyRb.velocity.sqrMagnitude < 3f * 3f && sqrAgentToEnemy > 15f * 15f)
+        if (sqrAgentToEnemy * 1.5f > sqrEnemyToPlayer || enemyRb.velocity.sqrMagnitude < 3f * 3f && sqrAgentToEnemy > 15f * 15f)
         {
              agent.transform.position = enemyRb.transform.position - (player.position - enemyRb.transform.position).normalized * 5f;
              agent.SetDestination(player.position);
              return;
         }
-        else if (sqrEnemyToPlayer * 1.1f < sqrAgentToPlayer)
+        else if (sqrEnemyToPlayer < sqrAgentToPlayer && (sqrEnemyToPlayer < 25f * 25f || sqrAgentToPlayer < 25f * 25f))
         {
-            agent.transform.position = enemyRb.transform.position;
+            enemyRb.AddForce((player.position - enemyRb.transform.position).normalized * speed * 5f, ForceMode.Acceleration);
             agent.SetDestination(player.position);
             return;
         }
 
+        if (!grounded) return;
+
+        agent.SetDestination(player.position);
+
+        Vector3 pathDir = (agent.transform.position - enemyRb.transform.position).normalized;
+        pathDir.y *= 0.1f;
+
+        enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
+    }
+
+    private void HandleRotation()
+    {
         float angle = Vector3.Angle(enemyRb.transform.up, Vector3.up);
 
         if (angle > 15f)
@@ -80,27 +96,25 @@ public class FollowPlayer : MonoBehaviour
             enemyRb.AddTorque(new Vector3(fromTo.x, fromTo.y, fromTo.z) * 100f, ForceMode.Acceleration);
         }
 
-        if (!grounded && angle >= 90f) return;
-
-        agent.SetDestination(player.position);
-
-        Vector3 pathDir = (agent.transform.position - enemyRb.transform.position).normalized;
-        pathDir.y *= 0.1f;
-
-        enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
-        enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
-
-        Vector3 vel = enemyRb.velocity;
+        Vector3 vel = (player.position - enemyRb.transform.position);
         vel.y = 0f;
 
-        Quaternion lookAtPlayer = Quaternion.FromToRotation(enemyRb.transform.forward, vel.normalized);
-        enemyRb.AddTorque(Vector3.up * lookAtPlayer.y * 65f, ForceMode.Acceleration);
+        /*
+        float angle2 = Vector3.Angle(enemyRb.transform.forward, vel.normalized);
+        float lookAtPlayer = Vector3.SignedAngle(enemyRb.transform.forward, vel.normalized, Vector3.up);
 
-        if (angle < 15f && Vector3.Angle(enemyRb.transform.forward, vel.normalized) < 5f) enemyRb.angularDrag = 3f;
-        else enemyRb.angularDrag = startAngularDrag;
+        if (angle2 < 5f)
+        {
+            if (angle < 15f) enemyRb.angularDrag = 5f;
+            return;
+        }
+
+        enemyRb.angularDrag = startAngularDrag;
+        enemyRb.AddTorque(Vector3.up * lookAtPlayer * 60f, ForceMode.Acceleration);
+        */
     }
 
-    private void OnCollisionEnter(Collision col)
+    void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
         if (Kicks != (Kicks | 1 << layer)) return;
