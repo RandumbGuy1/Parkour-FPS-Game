@@ -352,6 +352,9 @@ public class PlayerMovement : MonoBehaviour
         vaultDir.y = 0f;
         vaultDir.Normalize();
 
+        Vector3 lastVel = Velocity;
+        lastVel.y = (lastVel.y <= 0f ? 0f : lastVel.y * 0.65f);
+
         Vector3 vel = Velocity;
         vel.y = 0f;
 
@@ -371,7 +374,8 @@ public class PlayerMovement : MonoBehaviour
         {
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
-            rb.velocity = vel;
+            rb.velocity = lastVel;
+            if (lastVel.y >= 5f) rb.AddForce(Vector3.down * 20f, ForceMode.Impulse);
             return;
         }
 

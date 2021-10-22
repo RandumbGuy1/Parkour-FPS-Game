@@ -8,9 +8,8 @@ public class FollowPlayer : MonoBehaviour
     [Header("Follow Settings")]
     [SerializeField] private float speed;
     [SerializeField] private float angularSpeed;
-    [SerializeField] private float kickForce;
     [SerializeField] private float standingDistance;
-    [SerializeField] private LayerMask Kicks;
+    [SerializeField] private LayerMask Environment;
     [Space(10)]
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
@@ -28,7 +27,7 @@ public class FollowPlayer : MonoBehaviour
     private void Start()
     {
         startAngularDrag = enemyRb.angularDrag;
-        agent.speed = speed + speed * 0.3f;
+        agent.speed = speed + speed * 0.1f;
 
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
@@ -63,24 +62,37 @@ public class FollowPlayer : MonoBehaviour
             return;
         }
 
-        if (sqrAgentToEnemy * 1.5f > sqrEnemyToPlayer || enemyRb.velocity.sqrMagnitude < 3f * 3f && sqrAgentToEnemy > 15f * 15f)
+        /*
+        if (sqrAgentToEnemy > sqrAgentToPlayer || sqrAgentToEnemy > sqrEnemyToPlayer)
         {
-             agent.transform.position = enemyRb.transform.position - (player.position - enemyRb.transform.position).normalized * 5f;
+            agent.transform.position = enemyRb.transform.position;
+            agent.SetDestination(player.position);
+            return;
+        }
+        */
+
+        /*
+        if (sqrAgentToEnemy * 1.5f > sqrEnemyToPlayer || enemyRb.velocity.sqrMagnitude < 5f * 5f && sqrAgentToEnemy > 10f * 10f)
+        {
+             agent.transform.position = enemyRb.transform.position - (player.position - enemyRb.transform.position).normalized * 8f;
              agent.SetDestination(player.position);
              return;
         }
-        else if (sqrEnemyToPlayer < sqrAgentToPlayer && (sqrEnemyToPlayer < 25f * 25f || sqrAgentToPlayer < 25f * 25f))
+        else if (sqrEnemyToPlayer < sqrAgentToPlayer * 1.05f && (sqrEnemyToPlayer < 25f * 25f || sqrAgentToPlayer < 25f * 25f))
         {
             enemyRb.AddForce((player.position - enemyRb.transform.position).normalized * speed * 5f, ForceMode.Acceleration);
             agent.SetDestination(player.position);
             return;
         }
+        */
 
         if (!grounded) return;
 
         agent.SetDestination(player.position);
 
-        Vector3 pathDir = (agent.transform.position - enemyRb.transform.position).normalized;
+        Vector3 pathDir = ((sqrEnemyToPlayer < sqrAgentToPlayer && !Physics.Linecast(player.position, enemyRb.transform.position, Environment) 
+            ? player.position : agent.transform.position) - enemyRb.transform.position).normalized;
+
         pathDir.y *= 0.1f;
 
         enemyRb.AddForce(pathDir * speed * 5f, ForceMode.Acceleration);
@@ -112,24 +124,6 @@ public class FollowPlayer : MonoBehaviour
         enemyRb.angularDrag = startAngularDrag;
         enemyRb.AddTorque(Vector3.up * lookAtPlayer * 60f, ForceMode.Acceleration);
         */
-    }
-
-    void OnCollisionEnter(Collision col)
-    {
-        int layer = col.gameObject.layer;
-        if (Kicks != (Kicks | 1 << layer)) return;
-
-        Vector3 dirTo = (col.transform.position - enemyRb.transform.position).normalized;
-        dirTo.y = 0f;
-
-        if (Vector3.Dot(dirTo, enemyRb.transform.forward) < 0.6f) return;
- 
-        Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
-
-        if (rb == null) return;
-
-        rb.AddForce((enemyRb.transform.forward + dirTo).normalized * kickForce * 1.3f, ForceMode.VelocityChange);
-        rb.AddForce(Vector3.up * kickForce * 0.3f, ForceMode.VelocityChange);
     }
 
     void OnDrawGizmosSelected()
