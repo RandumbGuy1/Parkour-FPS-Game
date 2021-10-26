@@ -67,9 +67,9 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         bc = GetComponent<BoxCollider>();
     }
 
-    public bool OnAttack(Transform cam)
+    public bool OnAttack(ScriptManager s)
     {
-        this.cam = cam;
+        cam = s.cam;
 
         CancelInvoke("RevertAttackHitBox");
         Invoke("AttackHitBox", 0.05f);

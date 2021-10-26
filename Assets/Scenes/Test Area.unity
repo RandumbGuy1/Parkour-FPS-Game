@@ -9451,7 +9451,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &649301887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11388,7 +11388,7 @@ MonoBehaviour:
   bobAmountVert: 0.3
   bobSmoothTime: 0.1
   shakeData: {fileID: 11400000, guid: 915b73c15e711e94f8d19869af90b586, type: 2}
-  stepUpSmoothTime: 0.055
+  stepUpSmoothTime: 0.05
   s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
@@ -14208,7 +14208,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 10.2
+  m_Name: Save 10.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

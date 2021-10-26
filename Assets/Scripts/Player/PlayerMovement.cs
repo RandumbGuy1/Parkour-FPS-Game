@@ -375,7 +375,7 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = lastVel;
-            if (lastVel.y >= 5f) rb.AddForce(Vector3.down * 20f, ForceMode.Impulse);
+            if (lastVel.y >= 5f) rb.AddForce(Vector3.down * 10f, ForceMode.Impulse);
             return;
         }
 

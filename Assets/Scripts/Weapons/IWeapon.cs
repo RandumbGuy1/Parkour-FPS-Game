@@ -18,7 +18,7 @@ public interface IWeapon
     Vector3 reloadRotOffset { get; }
     float reloadSmoothTime { get; }
 
-    bool OnAttack(Transform cam);
+    bool OnAttack(ScriptManager s);
     bool SecondaryAction();
 }
 

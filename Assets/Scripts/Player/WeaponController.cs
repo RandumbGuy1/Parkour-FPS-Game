@@ -138,7 +138,7 @@ public class WeaponController : MonoBehaviour
         switch (CurrentWeapon.weaponType)
         {
             case WeaponClass.Ranged:
-                if (CurrentWeapon.OnAttack(s.cam))
+                if (CurrentWeapon.OnAttack(s))
                 {
                     s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)));
 
@@ -150,7 +150,7 @@ public class WeaponController : MonoBehaviour
                 break;
 
             case WeaponClass.Melee:
-                if (CurrentWeapon.OnAttack(s.cam))
+                if (CurrentWeapon.OnAttack(s))
                 {
                     desiredRecoilPos = CurrentWeapon.recoilPosOffset;
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset;
@@ -348,7 +348,7 @@ public class WeaponController : MonoBehaviour
 
     private void ProcessMovement()
     {
-        timer = s.PlayerMovement.Moving && s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 5f ? timer += Time.deltaTime : 0f;
+        timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
         smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
         smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero), ref swayVel, swaySmoothTime);

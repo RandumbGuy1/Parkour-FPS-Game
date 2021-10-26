@@ -77,13 +77,13 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     void OnEnable() => reloading = false;
 
-    public bool OnAttack(Transform cam)
+    public bool OnAttack(ScriptManager s)
     {
         if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
 
         if (muzzleFlash != null) muzzleFlash.Play();
 
-        Ray ray = cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
         Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
         Vector3 dir = (targetPoint - attackPoint.position);
@@ -98,15 +98,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
             Vector3 spreadDir = dir.normalized + (Vector3)rand;
 
-            float distanceForce = (dir.magnitude * 0.1f);
-            distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
-
-            GameObject bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity);
-            bullet.transform.up = spreadDir;
-
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            rb.velocity = Vector3.zero;
-            rb.AddForce(bullet.transform.up * distanceForce * shootForce, ForceMode.Impulse);
+            IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
+            bullet.OnShoot(s, spreadDir, shootForce);
         }
 
         if (readyToShoot)
