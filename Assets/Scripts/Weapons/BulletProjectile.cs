@@ -6,9 +6,13 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 {
     [Header("Projectile Settings")]
     [SerializeField] private ProjectileType type;
+    [SerializeField] private LayerMask Collides;
     [SerializeField] private float bulletLifeTime;
+    [SerializeField] private string impactEffect;
     [SerializeField] private int maxCollisions;
     private int collisionCount = 0;
+
+    private Vector3 impactPoint = Vector3.zero;
 
     private Rigidbody rb;
     private TrailRenderer tr;
@@ -47,6 +51,9 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
     void OnCollisionEnter(Collision col)
     {
+        int layer = col.gameObject.layer;
+        if (Collides != (Collides | 1 << layer)) return;
+
         collisionCount++;
         if (collisionCount < maxCollisions) return;
 
@@ -54,7 +61,9 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         Invoke("Explode", 0.005f);
 
         ContactPoint contact = col.GetContact(0);
-        ObjectPooler.Instance.SpawnParticle("LaserImpactFX", transform.position, Quaternion.LookRotation(contact.normal));
+        impactPoint = contact.point + contact.normal * 0.1f; 
+
+        ObjectPooler.Instance.SpawnParticle(impactEffect, transform.position, Quaternion.LookRotation(contact.normal));
     }
 
     void Explode()
@@ -63,5 +72,17 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
         rb.detectCollisions = false;
         gameObject.SetActive(false);
+
+        if (type != ProjectileType.Grenade) return;
+
+        Collider[] enemiesInRadius = Physics.OverlapSphere(impactPoint, 5f, Collides);
+
+        for (int i = 0; i < enemiesInRadius.Length; i++)
+        {
+            Rigidbody rb = enemiesInRadius[i].GetComponent<Rigidbody>();
+            if (rb == null) continue;
+
+            rb.AddExplosionForce(120f, impactPoint, 20f, 1.1f, ForceMode.VelocityChange);
+        }
     }
 }
