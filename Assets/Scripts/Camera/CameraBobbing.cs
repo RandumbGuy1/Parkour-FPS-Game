@@ -92,7 +92,7 @@ public class CameraBobbing : MonoBehaviour
 
         footstepDistance += walkMagnitude * 0.02f * 50f;
 
-        if (footstepDistance > 350f)
+        if (footstepDistance > 400f)
         {
             s.CameraShaker.ShakeOnce(shakeData);
             footstepDistance = 0f;

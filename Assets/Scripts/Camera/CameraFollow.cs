@@ -31,8 +31,8 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private float swayAmount;
 	[SerializeField] private float swayFrequency;
 
+	public Vector3 HeadSwayOffset { get; private set; } = Vector3.zero;
 	private Vector3 finalSwayOffset = Vector3.zero;
-	private Vector3 headSwayOffset = Vector3.zero;
 	private float headSwayScroller = 0;
 
 	private float smoothHeadTiltSway = 0f;
@@ -68,19 +68,21 @@ public class CameraFollow : MonoBehaviour
 
 		if (s.CameraLook.RotationDelta.sqrMagnitude < 5f && s.PlayerMovement.Magnitude < 1f && s.CameraShaker.Offset.sqrMagnitude < 0.01f)
 		{
+			Vector3 noiseOffset = Vector3.zero;
+
 			headSwayScroller += Time.deltaTime * swayFrequency;
 
-			headSwayOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
-			headSwayOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
+			noiseOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
+			noiseOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
 
-			headSwayOffset -= (Vector3) Vector2.one * 0.5f;
+			noiseOffset -= (Vector3) Vector2.one * 0.5f;
+			HeadSwayOffset = noiseOffset;
 		}
 
 		float horizInput = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x : 0f);
+		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 1.4f, ref smoothHeadTiltSwayVel, 0.25f);
 
-		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 1.3f, ref smoothHeadTiltSwayVel, 0.2f);
-
-		finalSwayOffset = (headSwayOffset * swayAmount) + Vector3.forward * smoothHeadTiltSway;
+		finalSwayOffset = (HeadSwayOffset * swayAmount) + Vector3.forward * smoothHeadTiltSway;
 	}
 
 	void CalcRotation()

@@ -1509,8 +1509,8 @@ MonoBehaviour:
   fireRate: 9
   weaponRecoilForce: 15
   weaponRecoilSmoothTime: 0.04
-  weaponRecoilPosOffset: {x: 0, y: -0.03, z: -0.08}
-  weaponRecoilRotOffset: {x: -0.55, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: -0.03, z: -0.07}
+  weaponRecoilRotOffset: {x: -0.6, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 80
   bulletsPerTap: 1
@@ -8377,7 +8377,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 47.1, y: 9.72}
+  m_AnchoredPosition: {x: 47.1, y: 17.33}
   m_SizeDelta: {x: 20, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &567691246
@@ -10724,7 +10724,7 @@ MonoBehaviour:
   rotateSmoothTime: {x: 12, y: 13}
   upClampAngle: 80
   downClampAngle: 80
-  swayAmount: 6
+  swayAmount: 8
   swayFrequency: 0.3
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
@@ -13441,6 +13441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeRecievers:
   - {fileID: 838078167}
+  - {fileID: 2088357452}
 --- !u!4 &1341061850
 Transform:
   m_ObjectHideFlags: 0
@@ -13740,7 +13741,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14208,7 +14209,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 10.4
+  m_Name: Save 10.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15151,7 +15152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 30.5
   maxGroundSpeed: 22
-  airMultiplier: 0.45
+  airMultiplier: 0.4
   maxAirSpeed: 50
   maxSlideSpeed: 60
   jumpForce: 48
@@ -22990,7 +22991,7 @@ GameObject:
   - component: {fileID: 2088357454}
   - component: {fileID: 2088357453}
   - component: {fileID: 2088357452}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Test Shake Thing
   m_TagString: Untagged
   m_Icon: {fileID: 0}

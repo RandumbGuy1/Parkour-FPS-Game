@@ -128,9 +128,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
 
         float maxSpeed = CalculateMaxSpeed();
-        float coefficientOfFriction = moveSpeed * (Grounded ? 1 : airMultiplier) / maxSpeed;
+        float coefficientOfFriction = moveSpeed / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 0.043f, ForceMode.VelocityChange);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 8.5f, ForceMode.Force);
 
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
@@ -152,7 +152,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
 
-        rb.AddForce(moveDir * moveSpeed * 0.043f, ForceMode.VelocityChange);
+        rb.AddForce(moveDir * moveSpeed * 8.5f, ForceMode.Force);
 
         Magnitude = rb.velocity.magnitude;
         Velocity = rb.velocity;
@@ -353,7 +353,7 @@ public class PlayerMovement : MonoBehaviour
         vaultDir.Normalize();
 
         Vector3 lastVel = Velocity;
-        lastVel.y = (lastVel.y <= 0f ? 0f : lastVel.y * 0.65f);
+        lastVel.y = (lastVel.y <= 0f ? 0f : lastVel.y * 0.2f);
 
         Vector3 vel = Velocity;
         vel.y = 0f;
@@ -375,7 +375,6 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             transform.position = vaultPoint;
             rb.velocity = lastVel;
-            if (lastVel.y >= 5f) rb.AddForce(Vector3.down * 10f, ForceMode.Impulse);
             return;
         }
 
