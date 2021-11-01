@@ -344,7 +344,7 @@ public class PlayerMovement : MonoBehaviour
     #region Vaulting
     private void CheckForVault(Vector3 normal)
     {
-        if (!IsWall(normal, 0.31f)) return;
+        if (!IsWall(normal, 0.32f)) return;
 
         if (Vaulting || WallRunning || crouching || ReachedMaxSlope) return;
 
@@ -352,12 +352,7 @@ public class PlayerMovement : MonoBehaviour
         vaultDir.y = 0f;
         vaultDir.Normalize();
 
-        Vector3 lastVel = Velocity;
-        lastVel.y = (lastVel.y <= 0f ? 0f : lastVel.y * 0.2f);
-
         Vector3 vel = Velocity;
-        vel.y = 0f;
-
         Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
 
         if (Vector3.Dot(-vaultDir, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir, InputDir) < 0.6f) return;
@@ -365,20 +360,45 @@ public class PlayerMovement : MonoBehaviour
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
-        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
+        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 1.5f) + (vaultDir);
         float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
         if (distance > vaultOffset + 0.1f) return;
 
         if (distance < 3.7f)
         {
-            s.CameraHeadBob.StepUp(transform.position - vaultPoint);
-            transform.position = vaultPoint;
-            rb.velocity = lastVel;
+            //s.CameraHeadBob.StepUp(transform.position - vaultPoint);
+            //transform.position = vaultPoint;
+            //rb.velocity = lastVel;
+            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f, Velocity)); 
             return;
         }
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+    }
+
+    private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
+    {
+        rb.detectCollisions = false;
+
+        float elapsed = 0f;
+        float distance = Vector3.Distance(transform.position, pos);
+        float duration = (distance / lastVel.magnitude);
+
+        while (elapsed < duration)
+        {
+            rb.MovePosition(Vector3.Lerp(transform.position, pos, elapsed / duration));
+            elapsed += Time.fixedDeltaTime;
+
+            rb.velocity = lastVel;
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        lastVel.y *= 0.2f;
+        rb.detectCollisions = true;
+        
+        rb.velocity = lastVel;
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
@@ -400,17 +420,6 @@ public class PlayerMovement : MonoBehaviour
 
         while (elapsed < vaultDuration)
         {
-            /*
-            if (jumping)
-            {
-                jumpedOff = true;
-                rb.isKinematic = false;
-                rb.interpolation = RigidbodyInterpolation.Interpolate;
-                rb.velocity = (Vector3.up - normal) * vaultJumpForce * 0.5f;
-                break;
-            }
-            */
-
             float t = elapsed / vaultDuration;
             t = t * t * t * (t * (6f * t - 15f) + 10f);
 

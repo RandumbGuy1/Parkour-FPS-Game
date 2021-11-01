@@ -113,8 +113,8 @@ public class WeaponController : MonoBehaviour
             }
         }
 
-        Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos - s.CameraLook.HeadSwayOffset * 0.4f; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.9f - s.CameraLook.HeadSwayOffset * 15f);
+        Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f); 
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.9f - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f));
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
