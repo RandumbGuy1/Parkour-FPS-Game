@@ -360,7 +360,7 @@ public class PlayerMovement : MonoBehaviour
         if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
-        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 1.5f) + (vaultDir);
+        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
         float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
         if (distance > vaultOffset + 0.1f) return;
@@ -370,7 +370,7 @@ public class PlayerMovement : MonoBehaviour
             //s.CameraHeadBob.StepUp(transform.position - vaultPoint);
             //transform.position = vaultPoint;
             //rb.velocity = lastVel;
-            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f, Velocity)); 
+            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f - Vector3.up * 0.55f, Velocity)); 
             return;
         }
 
