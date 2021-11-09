@@ -11380,15 +11380,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.045
+  landBobSmoothTime: 0.044
   landBobMultiplier: 0.096
   maxOffset: 3.5
   bobSpeed: 10
-  bobAmountHoriz: 0.1
-  bobAmountVert: 0.3
-  bobSmoothTime: 0.1
+  bobAmountHoriz: 0.15
+  bobAmountVert: 0.35
+  bobSmoothTime: 0.08
   shakeData: {fileID: 11400000, guid: 915b73c15e711e94f8d19869af90b586, type: 2}
-  stepUpSmoothTime: 0.05
+  stepUpSmoothTime: 0.04
   s: {fileID: 1650519438}
 --- !u!114 &963194230
 MonoBehaviour:
@@ -14209,7 +14209,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 10.7
+  m_Name: Save 10.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15153,8 +15153,8 @@ MonoBehaviour:
   moveSpeed: 30.5
   maxGroundSpeed: 22
   airMultiplier: 0.4
-  maxAirSpeed: 50
-  maxSlideSpeed: 60
+  maxAirSpeed: 60
+  maxSlideSpeed: 100
   jumpForce: 48
   maxJumpSteps: 10
   crouchScale: 1.2

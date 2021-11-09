@@ -89,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
     private bool jumping;
     private bool crouching;
 
-    public Vector3 InputDir { get { return CalculateInputDir(input, Vector2.one); } }
+    public Vector3 InputDir { get { return CalculateInputDir(input).normalized; } }
     public bool Moving { get; private set; }
 
     public float Magnitude { get; private set; }
@@ -151,8 +151,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
+        float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier);
 
-        rb.AddForce(moveDir * moveSpeed * 8.5f, ForceMode.Force);
+        if (!Vaulting && !WallRunning) rb.AddForce(moveDir * moveSpeed * 8.5f * movementMultiplier, ForceMode.Force);
 
         Magnitude = rb.velocity.magnitude;
         Velocity = rb.velocity;
@@ -163,7 +164,7 @@ public class PlayerMovement : MonoBehaviour
         Friction();
         SlopeMovement();
 
-        Vector3 inputDir = CalculateInputDir(input, CalculateMultiplier());
+        Vector3 inputDir = CalculateInputDir(input);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, GroundNormal);
 
         float dot = Vector3.Dot(Vector3.up, slopeDir);
@@ -184,7 +185,7 @@ public class PlayerMovement : MonoBehaviour
         if (inputTemp.x > 0 && RelativeVel.x > 23f || inputTemp.x < 0 && RelativeVel.x < -23f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && RelativeVel.z > 23f || inputTemp.y < 0 && RelativeVel.z < -23f) inputTemp.y = 0f;
 
-        return CalculateInputDir(inputTemp, CalculateMultiplier());
+        return CalculateInputDir(inputTemp);
     }
 
     private void SlopeMovement()
@@ -268,15 +269,10 @@ public class PlayerMovement : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
-        if (Ground != (Ground | 1 << layer)) return;
+        ContactPoint contact = col.GetContact(0);
 
-        Vector3 normal = col.GetContact(0).normal;
-
-        if (IsFloor(normal)) if (!Grounded) Land(Math.Abs(Velocity.y));
-
-        if (Environment != (Environment | 1 << layer)) return;
-
-        CheckForVault(normal);
+        if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded) Land(Math.Abs(Velocity.y));
+        if (IsWall(contact.normal, 0.33f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
     }
 
     void OnCollisionStay(Collision col)
@@ -344,8 +340,6 @@ public class PlayerMovement : MonoBehaviour
     #region Vaulting
     private void CheckForVault(Vector3 normal)
     {
-        if (!IsWall(normal, 0.32f)) return;
-
         if (Vaulting || WallRunning || crouching || ReachedMaxSlope) return;
 
         Vector3 vaultDir = normal;
@@ -353,6 +347,10 @@ public class PlayerMovement : MonoBehaviour
         vaultDir.Normalize();
 
         Vector3 vel = Velocity;
+        vel.y = 0;
+        vel.Normalize();
+        vel *= Magnitude;
+
         Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
 
         if (Vector3.Dot(-vaultDir, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir, InputDir) < 0.6f) return;
@@ -365,11 +363,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (distance > vaultOffset + 0.1f) return;
 
-        if (distance < 3.7f)
+        if (distance < 3.5f)
         {
-            //s.CameraHeadBob.StepUp(transform.position - vaultPoint);
-            //transform.position = vaultPoint;
-            //rb.velocity = lastVel;
+            /*
+            s.CameraHeadBob.StepUp(transform.position - vaultPoint);
+            transform.position = vaultPoint;
+            rb.velocity = vel;
+            */
             StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f - Vector3.up * 0.55f, Velocity)); 
             return;
         }
@@ -414,8 +414,6 @@ public class PlayerMovement : MonoBehaviour
         float elapsed = 0f;
         float vaultDuration = this.vaultDuration + distance;
 
-        bool jumpedOff = false;
-
         Grounded = false;
 
         while (elapsed < vaultDuration)
@@ -430,15 +428,11 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Vaulting = false;
+        rb.isKinematic = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        if (!jumpedOff)
-        {
-            rb.isKinematic = false;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
-
-            rb.velocity = normal * vaultForce * 0.5f;
-            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        }
+        rb.velocity = normal * vaultForce * 0.5f;
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
     }
     #endregion
 
@@ -587,17 +581,11 @@ public class PlayerMovement : MonoBehaviour
         if (input.y == 0f) readyToCounter.y++;
         else readyToCounter.y = 0;
     }
-    #endregion
 
-    #region Limiting Speed
-    private float CalculateMaxSpeed()
+    bool CounterMomentum(float input, float mag)
     {
-        if (crouched && CanCrouchWalk) return maxGroundSpeed * 0.6f;
-        if (crouched) return maxSlideSpeed;
-        if (jumping) return maxAirSpeed;
-        if (Grounded) return maxGroundSpeed;
-
-        return maxAirSpeed;
+        float threshold = 0.05f;
+        return (input > 0 && mag < -threshold || input < 0 && mag > threshold);
     }
     #endregion
 
@@ -613,6 +601,8 @@ public class PlayerMovement : MonoBehaviour
         Moving = input != Vector2.zero;
     }
 
+    private Vector3 CalculateInputDir(Vector2 input) => s.orientation.forward * input.y * 1.05f + s.orientation.right * input.x;
+
     private void ProcessInput()
     {
         SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
@@ -622,26 +612,17 @@ public class PlayerMovement : MonoBehaviour
         if (crouching && !WallRunning && !crouched) Crouch(InputDir);
         if (!crouching && crouched && canUnCrouch) UnCrouch();
     }
-
-    public Vector2 CalculateMultiplier()
-    {
-        if (Vaulting || WallRunning) return new Vector2(0f, 0f);
-        if (crouched && !CanCrouchWalk && Grounded) return new Vector2(0.05f, 0.05f);
-
-        if (Grounded) return (crouched ? new Vector2(0.1f, 0.1f) : new Vector2(1f, 1.1f));
-
-        return new Vector2(airMultiplier, airMultiplier + 0.1f);
-    }
     #endregion
-
-    private Vector3 CalculateInputDir(Vector2 input, Vector2 multiplier) => 
-        s.orientation.forward * input.y * multiplier.y + s.orientation.right * input.x * multiplier.x;
 
     void ResetWallJump() => readyToWallJump = true;
 
-    bool CounterMomentum(float input, float mag)
+    private float CalculateMaxSpeed()
     {
-        float threshold = 0.05f;
-        return (input > 0 && mag < -threshold || input < 0 && mag > threshold);
+        if (crouched && CanCrouchWalk) return maxGroundSpeed * 0.5f;
+        if (crouched) return maxSlideSpeed;
+        if (jumping) return maxAirSpeed;
+        if (Grounded) return maxGroundSpeed;
+
+        return maxAirSpeed;
     }
 }

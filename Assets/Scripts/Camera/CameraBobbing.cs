@@ -65,18 +65,18 @@ public class CameraBobbing : MonoBehaviour
 
 	public void BobOnce(float mag)
 	{
-		float magnitude = (mag * landBobMultiplier);
-		magnitude = Mathf.Round(magnitude * 100f) * 0.01f;
-		magnitude = Mathf.Clamp(magnitude, 0f, maxOffset);
+        mag *= landBobMultiplier;
+        mag = Mathf.Round(mag * 100f) * 0.01f;
+        mag = Mathf.Clamp(mag, 0f, maxOffset);
         
-		if (magnitude < 0.5f) magnitude = 0f;
+		if (mag < 0.5f) mag = 0f;
 		if (s.PlayerInput.Crouching)
         {
-            magnitude *= 0.83f;
-            magnitude = Mathf.Clamp(magnitude, 0f, 1.8f);
+            mag *= 0.83f;
+            mag = Mathf.Clamp(mag, 0f, 1.8f);
         }
 
-        desiredOffset -= magnitude;
+        desiredOffset -= mag;
 	}
 
     private void CalculateFootsteps()
@@ -105,7 +105,7 @@ public class CameraBobbing : MonoBehaviour
         speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
        
         float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f);
-        amp = Mathf.Clamp(amp, 1f, 2.15f);
+        amp = Mathf.Clamp(amp, 1f, 1.5f);
 
         return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed * speedAmp) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * bobAmountVert * amp);
     }
