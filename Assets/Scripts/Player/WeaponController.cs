@@ -94,15 +94,15 @@ public class WeaponController : MonoBehaviour
         float previousWeapon = selectedWeapon;
 
         if (s.PlayerInput.MiddleClick) aiming = !aiming;
-
+        
         if (weapons.Count > 0)
         {
             if (s.PlayerInput.Dropping) Drop();
 
             for (int i = 1; i < maxWeapons + 1; i++) if (Input.GetKeyDown(i.ToString()) && weapons.Count >= i) selectedWeapon = i - 1;
 
-            ProcessMovement();
             ProcessWeaponInput();
+            ProcessMovement();
 
             if (selectedWeapon != previousWeapon) SelectWeapon();
 
@@ -113,8 +113,8 @@ public class WeaponController : MonoBehaviour
             }
         }
 
-        Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f); 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.9f - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f));
+        Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos/* - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f)*/; 
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.9f/* - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f)*/);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -142,8 +142,8 @@ public class WeaponController : MonoBehaviour
                 {
                     s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)));
 
-                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? Random.Range(0.3f, 0.5f) : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.4f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.2f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
 
                     s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
                 }
@@ -163,7 +163,7 @@ public class WeaponController : MonoBehaviour
         }
     }
     #endregion
-
+    
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
@@ -174,6 +174,9 @@ public class WeaponController : MonoBehaviour
 
         CurrentWeapon = obj.GetComponent<IWeapon>();
         CurrentItem = obj.GetComponent<IItem>();
+
+        obj.transform.SetParent(weaponPos, true);
+        obj.transform.localScale = Vector3.one;
 
         if (weapons.Count >= maxWeapons)
         {
@@ -188,9 +191,6 @@ public class WeaponController : MonoBehaviour
             selectedWeapon = weapons.Count - 1;
             SelectWeapon(false);
         }
-
-        obj.transform.SetParent(weaponPos, true);
-        obj.transform.localScale = Vector3.one;
     }
 
     private void SelectWeapon(bool switching = true)
@@ -248,13 +248,22 @@ public class WeaponController : MonoBehaviour
 
             weaponDataText.gameObject.SetActive(false);
         }
+
+        reloadRotVel = Vector3.zero;
+        reloadRot = Vector3.zero;
+
+        switchPosVel = Vector3.zero;
+        switchRotVel = Vector3.zero;
+
+        switchOffsetPos = Vector3.zero;
+        switchOffsetRot = Vector3.zero;
     }
     #endregion
 
     #region Dynamic Weapon Movement
     private Vector3 CalculateBob()
     {
-        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.6f : 1f);
+        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.3f : 1f);
 
         return (timer <= 0 ? Vector3.zero : (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * (Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert)) * amp;
     }
@@ -350,8 +359,8 @@ public class WeaponController : MonoBehaviour
     {
         timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob(), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero), ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f), ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f), ref swayVel, swaySmoothTime);
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
 
         CalculateDefaultValues();

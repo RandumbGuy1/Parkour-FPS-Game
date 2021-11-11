@@ -1430,7 +1430,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 299661631}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.4, y: 3.98, z: 19.38}
+  m_LocalPosition: {x: 11.4, y: 3.12, z: 21.05}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1783921602}
@@ -1465,8 +1465,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.3, y: 2.0230207, z: 6.402336}
-  m_Center: {x: 0, y: -0.31945038, z: 0.19686699}
+  m_Size: {x: 0.22154522, y: 1.4898987, z: 4.632826}
+  m_Center: {x: -0.0017056465, y: -0.23437786, z: 0.16283894}
 --- !u!54 &299661635
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1498,18 +1498,18 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 1
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 3.4}
-  weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -1.72, y: -0.035, z: -1.6}
-  weaponAimRot: {x: 0, y: -18, z: 25}
+  weaponDefaultPos: {x: 1.2, y: -0.7, z: 1.7}
+  weaponDefaultRot: {x: -0.45, y: 20, z: 0}
+  weaponAimPos: {x: -1, y: 0.28, z: -0.8}
+  weaponAimRot: {x: 0.3, y: -20, z: 25}
   weaponWeight: 1.5
-  shootForce: 90
+  shootForce: 85
   attackRange: 120
   spread: 2
   fireRate: 9
   weaponRecoilForce: 15
-  weaponRecoilSmoothTime: 0.04
-  weaponRecoilPosOffset: {x: 0, y: -0.03, z: -0.07}
+  weaponRecoilSmoothTime: 0.03
+  weaponRecoilPosOffset: {x: 0, y: -0.01, z: -0.05}
   weaponRecoilRotOffset: {x: -0.6, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 80
@@ -9451,7 +9451,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &649301887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10721,7 +10721,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fov: 90
   sensitivity: 80
-  rotateSmoothTime: {x: 12, y: 13}
+  rotateSmoothTime: {x: 15, y: 15}
   upClampAngle: 80
   downClampAngle: 80
   swayAmount: 8
@@ -10751,6 +10751,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_RootOrder
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 68a8a67f55cb4aa408c72ec62858fadd,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 68a8a67f55cb4aa408c72ec62858fadd,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 68a8a67f55cb4aa408c72ec62858fadd,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 68a8a67f55cb4aa408c72ec62858fadd,
         type: 3}
@@ -14209,7 +14224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 10.8
+  m_Name: Save 10.9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15150,7 +15165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30.5
+  moveSpeed: 35
   maxGroundSpeed: 22
   airMultiplier: 0.4
   maxAirSpeed: 60
@@ -15253,9 +15268,9 @@ MonoBehaviour:
   bobAmountHoriz: 0.1
   bobAmountVert: 0.2
   bobSpeed: 8
-  bobSmoothTime: 0.1
+  bobSmoothTime: 0.12
   swayAmount: 10
-  swaySmoothTime: 0.35
+  swaySmoothTime: 0.4
   switchPosOffset: {x: 0.6, y: -1.2, z: -0.2}
   switchRotOffset: {x: 270, y: -30, z: 0}
   switchPosTime: 0.3
@@ -16169,12 +16184,12 @@ PrefabInstance:
     - target: {fileID: 9217522446149738973, guid: fc46dc40c34745c40acbc1fb514568f0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.07
       objectReference: {fileID: 0}
     - target: {fileID: 9217522446149738973, guid: fc46dc40c34745c40acbc1fb514568f0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4
+      value: 2.75
       objectReference: {fileID: 0}
     - target: {fileID: 9217522446149738973, guid: fc46dc40c34745c40acbc1fb514568f0,
         type: 3}
