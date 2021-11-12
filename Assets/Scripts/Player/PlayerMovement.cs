@@ -175,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (NearWall && IsWallLeft && CanWallJump() && input.x < 0 || NearWall && IsWallRight && CanWallJump() && input.x > 0) WallRunning = true;
 
-        if (CanWallJump() && jumping && readyToWallJump) WallJump();
+        if (CanWallJump() && jumping && readyToWallJump) Jump(false);
         if (WallRunning) WallRun();
 
         if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning && readyToWallJump) StopWallRun();
@@ -325,15 +325,39 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Jumping
-    private void Jump()
+    private void Jump(bool normalJump = true)
     {
-        stepsSinceLastJumped = 0;
+        if (normalJump)
+        {
+            stepsSinceLastJumped = 0;
 
-        Grounded = false;
-        rb.useGravity = true;
+            Grounded = false;
+            rb.useGravity = true;
 
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        rb.AddForce(Vector3.up * jumpForce * 0.8f, ForceMode.Impulse);
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            rb.AddForce(Vector3.up * jumpForce * 0.8f, ForceMode.Impulse);
+        }
+        else
+        {
+             if (!readyToWallJump) return;
+
+            readyToWallJump = false;
+            Grounded = false;
+
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
+            rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
+
+            CancelInvoke("ResetWallJump");
+            Invoke("ResetWallJump", 0.3f);
+        }
+
+        float amp = Magnitude;
+        amp *= 0.05f;
+        amp = Mathf.Clamp(amp, 0.3f, 3f) * 1.15f;
+ 
+        s.CameraShaker.ShakeOnce(amp, 8f, 0.4f, 10f, ShakeData.ShakeType.Perlin);
     }
     #endregion
 
@@ -437,27 +461,8 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Wall Movement
-    private void WallJump()
-    {
-        if (readyToWallJump)
-        {
-            readyToWallJump = false;
-            Grounded = false;
-
-            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
-            rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
-            rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
-
-            CancelInvoke("ResetWallJump");
-            Invoke("ResetWallJump", 0.3f);
-        }
-    }
-
     private void WallRun()
     {
-        float wallClimb = 0f;
-
         Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward, WallNormal);
         wallMoveDir = Vector3.Cross(wallUpCross, WallNormal);
 
@@ -465,21 +470,22 @@ public class PlayerMovement : MonoBehaviour
         {
             canAddWallRunForce = false;
             rb.useGravity = false;
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.8f, rb.velocity.z);
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
 
             float wallUpSpeed = Velocity.y;
             float wallMagnitude = Magnitude;
 
-            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 25f);
+            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 20f);
 
-            wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
-            wallClimb = Mathf.Clamp(wallClimb, -5f, 10f);
+            float wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
+            wallClimb = Mathf.Clamp(wallClimb, -3f, 12f);
+
             rb.AddForce(Vector3.up * wallClimb);
-            rb.AddForce(wallMoveDir * wallMagnitude * 0.15f, ForceMode.VelocityChange);
+            rb.AddForce(wallMoveDir * wallMagnitude * 0.25f, ForceMode.VelocityChange);
         }
 
         rb.AddForce(-WallNormal * wallHoldForce);
-        rb.AddForce(-transform.up * wallRunGravityForce, ForceMode.Acceleration);
+        rb.AddForce(-transform.up * wallRunGravityForce * 0.8f, ForceMode.Acceleration);
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
     }
 

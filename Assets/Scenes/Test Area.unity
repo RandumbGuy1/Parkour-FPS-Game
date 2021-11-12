@@ -192,10 +192,10 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 2.5}
-  weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -2, y: -0.3, z: 0}
-  weaponAimRot: {x: 0, y: -18, z: 0}
+  weaponDefaultPos: {x: 1.4, y: -0.6, z: 2}
+  weaponDefaultRot: {x: -0.45, y: 15, z: 5}
+  weaponAimPos: {x: -1.4, y: 0.2, z: -0.3}
+  weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.2
   shootForce: 80
   attackRange: 80
@@ -1498,21 +1498,21 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 1
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 1.2, y: -0.7, z: 1.7}
-  weaponDefaultRot: {x: -0.45, y: 20, z: 0}
-  weaponAimPos: {x: -1, y: 0.28, z: -0.8}
-  weaponAimRot: {x: 0.3, y: -20, z: 25}
+  weaponDefaultPos: {x: 1.05, y: -0.7, z: 1.7}
+  weaponDefaultRot: {x: -0.45, y: 10, z: 8}
+  weaponAimPos: {x: -0.87, y: 0.25, z: -1}
+  weaponAimRot: {x: -2.5, y: -10, z: 15}
   weaponWeight: 1.5
-  shootForce: 85
+  shootForce: 80
   attackRange: 120
   spread: 2
-  fireRate: 9
+  fireRate: 10
   weaponRecoilForce: 15
-  weaponRecoilSmoothTime: 0.03
+  weaponRecoilSmoothTime: 0.02
   weaponRecoilPosOffset: {x: 0, y: -0.01, z: -0.05}
   weaponRecoilRotOffset: {x: -0.6, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
-  magazineSize: 80
+  magazineSize: 90
   bulletsPerTap: 1
   reloadTime: 0.8
   weaponReloadRotOffset: {x: 720, y: 0, z: 0}
@@ -6984,10 +6984,10 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 2.5}
-  weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -2, y: -0.3, z: 0}
-  weaponAimRot: {x: 0, y: -18, z: 0}
+  weaponDefaultPos: {x: 1.4, y: -0.6, z: 2}
+  weaponDefaultRot: {x: -0.45, y: 15, z: 5}
+  weaponAimPos: {x: -1.4, y: 0.2, z: -0.3}
+  weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.2
   shootForce: 80
   attackRange: 80
@@ -7921,10 +7921,10 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 2.5}
-  weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -2, y: -0.3, z: 0}
-  weaponAimRot: {x: 0, y: -18, z: 0}
+  weaponDefaultPos: {x: 1.4, y: -0.6, z: 2}
+  weaponDefaultRot: {x: -0.45, y: 15, z: 5}
+  weaponAimPos: {x: -1.4, y: 0.2, z: -0.3}
+  weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.2
   shootForce: 80
   attackRange: 80
@@ -14224,7 +14224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 10.9
+  m_Name: Save 11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17236,10 +17236,10 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 2, y: -0.6, z: 2.5}
-  weaponDefaultRot: {x: -0.45, y: 18, z: 0}
-  weaponAimPos: {x: -2, y: -0.3, z: 0}
-  weaponAimRot: {x: 0, y: -18, z: 0}
+  weaponDefaultPos: {x: 1.4, y: -0.6, z: 2}
+  weaponDefaultRot: {x: -0.45, y: 15, z: 5}
+  weaponAimPos: {x: -1.4, y: 0.2, z: -0.3}
+  weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.2
   shootForce: 80
   attackRange: 80

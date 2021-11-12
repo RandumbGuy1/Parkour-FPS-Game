@@ -236,6 +236,15 @@ public class WeaponController : MonoBehaviour
 
         weapons.RemoveAt(selectedWeapon);
 
+        reloadRotVel = Vector3.zero;
+        reloadRot = Vector3.zero;
+
+        switchPosVel = Vector3.zero;
+        switchRotVel = Vector3.zero;
+
+        switchOffsetPos = Vector3.zero;
+        switchOffsetRot = Vector3.zero;
+
         if (weapons.Count > 0 && !pickupDrop)
         {
             selectedWeapon = (selectedWeapon + 1 < weapons.Count ? selectedWeapon : weapons.Count - 1);
@@ -248,15 +257,6 @@ public class WeaponController : MonoBehaviour
 
             weaponDataText.gameObject.SetActive(false);
         }
-
-        reloadRotVel = Vector3.zero;
-        reloadRot = Vector3.zero;
-
-        switchPosVel = Vector3.zero;
-        switchRotVel = Vector3.zero;
-
-        switchOffsetPos = Vector3.zero;
-        switchOffsetRot = Vector3.zero;
     }
     #endregion
 
