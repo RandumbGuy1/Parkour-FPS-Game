@@ -12,6 +12,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private int maxWeapons;
     public bool aiming { get; private set; } = false;
     public bool holdingWeapon { get; private set; } = false;
+    public bool canAttack { get; private set; } = true;
 
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
@@ -74,6 +75,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private GameObject circleCursor;
     [Space(10)]
     [SerializeField] private ValueSlider slider;
+    [SerializeField] private DynaimcReticle reticleEffects;
     private ScriptManager s;
 
     void Awake()
@@ -93,7 +95,7 @@ public class WeaponController : MonoBehaviour
     {
         float previousWeapon = selectedWeapon;
 
-        if (s.PlayerInput.MiddleClick) aiming = !aiming;
+        if (s.PlayerInput.MiddleClick && canAttack) aiming = !aiming;
         
         if (weapons.Count > 0)
         {
@@ -126,10 +128,15 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        bool canAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
+        canAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
 
-        if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && canAttack : s.PlayerInput.LeftClick && canAttack) Attack();
-        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) if (CurrentWeapon.SecondaryAction()) reloadRot = CurrentWeapon.reloadRotOffset;
+        if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && canAttack : s.PlayerInput.LeftClick && canAttack) Attack();       
+        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) 
+            if (CurrentWeapon.SecondaryAction())
+            {
+                aiming = false;
+                reloadRot = CurrentWeapon.reloadRotOffset;
+            }
     }
 
     #region Weapon Actions
@@ -146,6 +153,8 @@ public class WeaponController : MonoBehaviour
                     desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.2f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
 
                     s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
+
+                    reticleEffects.AddReticleRecoil(CurrentWeapon.recoilForce * (aiming ? 1f : 3f));
                 }
                 break;
 
@@ -157,7 +166,7 @@ public class WeaponController : MonoBehaviour
 
                     s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
 
-                    slider.SetSliderCooldown(1, 0.1f);
+                    slider.SetSliderCooldown(1f, 0.05f);
                 }
                 break;
         }
@@ -202,6 +211,7 @@ public class WeaponController : MonoBehaviour
 
             reloadRot = Vector3.zero;
         }
+        else aiming = false;
 
         CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
         CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
@@ -361,7 +371,7 @@ public class WeaponController : MonoBehaviour
 
         smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f), ref bobVel, bobSmoothTime);
         smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f), ref swayVel, swaySmoothTime);
-        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() + (aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
+        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * (aiming ? 0.5f : 1f) + (aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
 
         CalculateDefaultValues();
         CalculateRecoilOffset();

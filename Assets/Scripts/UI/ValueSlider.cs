@@ -26,7 +26,7 @@ public class ValueSlider : MonoBehaviour
     {
         if (desiredFill <= 0f) return;
 
-        desiredFill = Mathf.SmoothDamp(desiredFill, 0, ref fillVel.y, fillSmoothTime * 2f);
+        desiredFill = Mathf.SmoothDamp(desiredFill, 0, ref fillVel.y, fillSmoothTime * 6f);
         slider.value = Mathf.SmoothDamp(slider.value, desiredFill, ref fillVel.x, fillSmoothTime);
 
         if (desiredFill < 0.01f)

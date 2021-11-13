@@ -1501,7 +1501,7 @@ MonoBehaviour:
   weaponDefaultPos: {x: 1.05, y: -0.7, z: 1.7}
   weaponDefaultRot: {x: -0.45, y: 10, z: 8}
   weaponAimPos: {x: -0.87, y: 0.25, z: -1}
-  weaponAimRot: {x: -2.5, y: -10, z: 15}
+  weaponAimRot: {x: -2.7, y: -10, z: 15}
   weaponWeight: 1.5
   shootForce: 80
   attackRange: 120
@@ -10132,6 +10132,7 @@ MonoBehaviour:
   reticle: {fileID: 685652798}
   s: {fileID: 1650519438}
   smoothTime: 0.33
+  recoilSmoothTime: 0.02
   minSize: 150
   maxSize: 250
   minAimSize: 30
@@ -13756,7 +13757,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14224,7 +14225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 11
+  m_Name: Save 11.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15186,7 +15187,7 @@ MonoBehaviour:
   vaultOffset: 8.5
   vaultJumpForce: 40
   friction: 6
-  slideFriction: 10.5
+  slideFriction: 10
   counterThresold: 3
   GroundSnapLayer:
     serializedVersion: 2
@@ -15284,6 +15285,7 @@ MonoBehaviour:
   weaponReticle: {fileID: 685652797}
   circleCursor: {fileID: 672712341}
   slider: {fileID: 656293783}
+  reticleEffects: {fileID: 685652800}
 --- !u!1 &1652803367
 GameObject:
   m_ObjectHideFlags: 0
