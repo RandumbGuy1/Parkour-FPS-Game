@@ -61,6 +61,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
+    [SerializeField] private ShakeData landbobShakeData;
     [SerializeField] private LayerMask GroundSnapLayer;
     [SerializeField] private LayerMask Ground;
     [SerializeField] private LayerMask Environment;
@@ -135,7 +136,8 @@ public class PlayerMovement : MonoBehaviour
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
+        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && ! crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
+        if (crouched) rb.AddForce(Vector3.up * 10f, ForceMode.Acceleration);
 
         rb.useGravity = !(Vaulting || WallRunning);
         RelativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -317,7 +319,17 @@ public class PlayerMovement : MonoBehaviour
             velocityOverLifetime.z = magnitude.z;
         }
 
+        float pastMag = landbobShakeData.magnitude;
+        landbobShakeData.magnitude *= (impactForce * (crouched ? 0.6f : 0.3f));
+
+        float pastFreq = landbobShakeData.frequency;
+        landbobShakeData.frequency = (impactForce > 33f ? pastMag * 2.4f : pastFreq);
+
         s.CameraHeadBob.BobOnce(impactForce);
+        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
+
+        landbobShakeData.magnitude = pastMag;
+        landbobShakeData.frequency = pastFreq;
     }
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
@@ -353,9 +365,9 @@ public class PlayerMovement : MonoBehaviour
             Invoke("ResetWallJump", 0.3f);
         }
 
-        float amp = Magnitude;
+        float amp = Magnitude * (crouched ? 0.6f : 1f);
         amp *= 0.05f;
-        amp = Mathf.Clamp(amp, 0.3f, 3f) * 1.15f;
+        amp = Mathf.Clamp(amp, 0.6f, 3f);
  
         s.CameraShaker.ShakeOnce(amp, 8f, 0.4f, 10f, ShakeData.ShakeType.Perlin);
     }
@@ -565,7 +577,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (crouched && canUnCrouch && !CanCrouchWalk)
         {
-            rb.AddForce(-rb.velocity.normalized * slideFriction * 2.5f * (Magnitude * 0.1f)); 
+            rb.AddForce(-rb.velocity.normalized * slideFriction * 2.5f); 
             return;
         }
 

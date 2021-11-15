@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51a9a8a8608fe314687f63c813b71a21, type: 3}
+  m_Name: LandBobShake
+  m_EditorClassIdentifier: 
+  type: 0
+  magnitude: 1
+  frequency: 0
+  duration: 3
+  smoothSpeed: 5
+  blendOverLifetime:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.000091552734
+      inSlope: 41.626026
+      outSlope: 41.626026
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.05506753
+    - serializedVersion: 3
+      time: 0.07431336
+      value: 0.9929352
+      inSlope: 0.16807467
+      outSlope: 0.16807467
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.834798
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

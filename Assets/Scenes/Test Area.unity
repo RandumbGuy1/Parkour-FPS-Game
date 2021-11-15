@@ -13757,7 +13757,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14225,7 +14225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 11.1
+  m_Name: Save 11.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15187,8 +15187,9 @@ MonoBehaviour:
   vaultOffset: 8.5
   vaultJumpForce: 40
   friction: 6
-  slideFriction: 10
+  slideFriction: 15
   counterThresold: 3
+  landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768
