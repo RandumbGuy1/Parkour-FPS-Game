@@ -34,11 +34,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallHoldForce;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float wallClimbForce;
+    [SerializeField] private int wallJumpCooldownSteps;
     [Space(10)]
     [SerializeField] private float minimumJumpHeight;
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
-    private bool readyToWallJump = true;
     private float camTurnVel = 0f;
 
     public bool NearWall { get; private set; } = false;
@@ -79,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
+    private int stepsSinceLastWallJumped = 0;
 
     public Vector3 GroundNormal { get; private set; }
     public Vector3 WallNormal { get; private set; }
@@ -145,15 +146,15 @@ public class PlayerMovement : MonoBehaviour
         RecordMovementSteps();
         ProcessCrouching();
 
+        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
+        float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier);
+
         if (!CanWallJump() || !IsWallRight && !IsWallLeft)
         {
             WallRunning = false;
             canAddWallRunForce = true;
             camTurnVel = 0f;
         }
-
-        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
-        float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier);
 
         if (!Vaulting && !WallRunning) rb.AddForce(moveDir * moveSpeed * 8.5f * movementMultiplier, ForceMode.Force);
 
@@ -177,10 +178,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (NearWall && IsWallLeft && CanWallJump() && input.x < 0 || NearWall && IsWallRight && CanWallJump() && input.x > 0) WallRunning = true;
 
-        if (CanWallJump() && jumping && readyToWallJump) Jump(false);
-        if (WallRunning) WallRun();
+        if (CanWallJump() && jumping) Jump(false);
+        else if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning) StopWallRun();
 
-        if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning && readyToWallJump) StopWallRun();
+        if (WallRunning) WallRun();
 
         Vector2 inputTemp = input;
 
@@ -218,6 +219,7 @@ public class PlayerMovement : MonoBehaviour
     private void RecordMovementSteps()
     {
         if (stepsSinceLastJumped < maxJumpSteps) stepsSinceLastJumped++;
+        if (stepsSinceLastWallJumped < 100) stepsSinceLastWallJumped++;
 
         if (Grounded || SnapToGround(Magnitude)) stepsSinceLastGrounded = 0;
         else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
@@ -319,17 +321,13 @@ public class PlayerMovement : MonoBehaviour
             velocityOverLifetime.z = magnitude.z;
         }
 
-        float pastMag = landbobShakeData.magnitude;
-        landbobShakeData.magnitude *= (impactForce * (crouched ? 0.6f : 0.3f));
+        float newMag = impactForce * (crouched ? 0.6f : 0.3f);
+        float newSmooth = Mathf.Clamp(newMag * 0.5f, 0.1f, 10f);
 
-        float pastFreq = landbobShakeData.frequency;
-        landbobShakeData.frequency = (impactForce > 33f ? pastMag * 2.4f : pastFreq);
+        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
 
         s.CameraHeadBob.BobOnce(impactForce);
         s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
-
-        landbobShakeData.magnitude = pastMag;
-        landbobShakeData.frequency = pastFreq;
     }
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
@@ -351,32 +349,30 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-             if (!readyToWallJump) return;
+            if (stepsSinceLastWallJumped < wallJumpCooldownSteps) return;
 
-            readyToWallJump = false;
+            stepsSinceLastWallJumped = 0;
             Grounded = false;
 
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
-            rb.AddForce(transform.up * jumpForce * 0.7f, ForceMode.Impulse);
+            rb.AddForce(transform.up * jumpForce * 0.75f, ForceMode.Impulse);
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
-
-            CancelInvoke("ResetWallJump");
-            Invoke("ResetWallJump", 0.3f);
         }
-
+        /*
         float amp = Magnitude * (crouched ? 0.6f : 1f);
-        amp *= 0.05f;
+        amp *= 0.025f;
         amp = Mathf.Clamp(amp, 0.6f, 3f);
  
-        s.CameraShaker.ShakeOnce(amp, 8f, 0.4f, 10f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(amp, 8f, 0.6f, 10f, ShakeData.ShakeType.Perlin);
+        */
     }
     #endregion
 
     #region Vaulting
     private void CheckForVault(Vector3 normal)
     {
-        if (Vaulting || WallRunning || crouching || ReachedMaxSlope) return;
+        if (Vaulting || WallRunning || crouched || ReachedMaxSlope) return;
 
         Vector3 vaultDir = normal;
         vaultDir.y = 0f;
@@ -503,16 +499,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void StopWallRun()
     {
-        if (WallRunning && readyToWallJump)
-        {
-            readyToWallJump = false;
-            NearWall = false;
+        if (!WallRunning || stepsSinceLastWallJumped < wallJumpCooldownSteps) return;
 
-            rb.AddForce(WallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
+        stepsSinceLastWallJumped = 0;
+        NearWall = false;
 
-            CancelInvoke("ResetWallJump");
-            Invoke("ResetWallJump", 0.3f);
-        }
+        rb.AddForce(WallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
     }
 
     public bool CanWallJump()
@@ -631,8 +623,6 @@ public class PlayerMovement : MonoBehaviour
         if (!crouching && crouched && canUnCrouch) UnCrouch();
     }
     #endregion
-
-    void ResetWallJump() => readyToWallJump = true;
 
     private float CalculateMaxSpeed()
     {

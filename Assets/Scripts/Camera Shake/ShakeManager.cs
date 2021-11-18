@@ -6,7 +6,6 @@ public class ShakeManager : MonoBehaviour
 {
     [Header("Receivers")]
     [SerializeField] private List<CameraShaker> shakeRecievers = new List<CameraShaker>();
-
     public static ShakeManager Instance;
 
     void Awake()
@@ -36,7 +35,7 @@ public class ShakeManager : MonoBehaviour
         for (int i = 0; i < shakeRecievers.Count; i++)
         { 
             if (shakeSource != default(Vector3)) 
-                sd.magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
+                sd.Intialize(CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource), sd.Frequency, sd.Duration, sd.SmoothSpeed, sd.Type);
 
             shakeRecievers[i].ShakeOnce(sd);
         }
@@ -44,7 +43,7 @@ public class ShakeManager : MonoBehaviour
 
     private float CalculateDistanceBasedMagnitude(Vector3 a, Vector3 b)
     {
-        float distance = Vector3.Distance(a, b) * 0.4f;
+        float distance = Vector3.Distance(a, b) * 0.5f;
 
         distance = Mathf.Clamp(distance, 0f, 20f);
         distance = 1f - (distance / 20f);

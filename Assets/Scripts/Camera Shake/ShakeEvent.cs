@@ -20,10 +20,12 @@ public class ShakeEvent
 
     public ShakeEvent(ShakeData shakeData, Vector3 initialKickback)
     {
-        this.shakeData = shakeData;
-        timeRemaining = this.shakeData.duration;
+        this.shakeData = ScriptableObject.CreateInstance<ShakeData>();
+        this.shakeData.Initialize(shakeData);
 
-        targetDir = initialKickback * this.shakeData.magnitude;
+        timeRemaining = this.shakeData.Duration;
+
+        targetDir = initialKickback * this.shakeData.Magnitude;
 
         noiseOffset.x = Random.Range(0f, 32f);
         noiseOffset.y = Random.Range(0f, 32f);
@@ -39,7 +41,7 @@ public class ShakeEvent
     {
         timeRemaining -= Time.deltaTime;
 
-        switch (shakeData.type)
+        switch (shakeData.Type)
         {
             case ShakeData.ShakeType.KickBack:
                 {
@@ -62,17 +64,17 @@ public class ShakeEvent
                     }
                     */
 
-                    targetDir = Vector3.Lerp(targetDir, Vector3.zero, shakeData.smoothSpeed * 0.4f * Time.smoothDeltaTime);
-                    smoothDir = Vector3.Slerp(smoothDir, targetDir, shakeData.smoothSpeed * Time.smoothDeltaTime);
+                    targetDir = Vector3.Lerp(targetDir, Vector3.zero, shakeData.SmoothSpeed * 0.4f * Time.smoothDeltaTime);
+                    smoothDir = Vector3.Slerp(smoothDir, targetDir, shakeData.SmoothSpeed * Time.smoothDeltaTime);
 
                     Displacement = smoothDir * trama;
 
-                    if (targetDir.sqrMagnitude < (shakeData.magnitude * shakeData.frequency * 0.05f) * (shakeData.magnitude * shakeData.frequency * 0.05f))
+                    if (targetDir.sqrMagnitude < (shakeData.Magnitude * shakeData.Frequency * 0.05f) * (shakeData.Magnitude * shakeData.Frequency * 0.05f))
                     {
                         Vector3 randomDir = Random.insideUnitSphere;
                         while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;
 
-                        targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.magnitude;
+                        targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.Magnitude;
                     }
 
                     break;
@@ -80,7 +82,7 @@ public class ShakeEvent
 
             case ShakeData.ShakeType.Perlin:
                 {
-                    float offsetDelta = Time.deltaTime * shakeData.frequency;
+                    float offsetDelta = Time.deltaTime * shakeData.Frequency;
 
                     noiseOffset += Vector3.one * offsetDelta;
 
@@ -89,16 +91,16 @@ public class ShakeEvent
                     noise.z = Mathf.PerlinNoise(noiseOffset.z, 3f);
 
                     noise -= Vector3.one * 0.5f;
-                    noise *= shakeData.magnitude;
+                    noise *= shakeData.Magnitude;
                     noise *= trama;
 
-                    Displacement = Vector3.Lerp(Displacement, noise, shakeData.smoothSpeed);
+                    Displacement = Vector3.Lerp(Displacement, noise, shakeData.SmoothSpeed);
                     break;
                 }
         }
 
-        float agePercent = 1f - (timeRemaining / shakeData.duration);
-        trama = shakeData.blendOverLifetime.Evaluate(agePercent);
+        float agePercent = 1f - (timeRemaining / shakeData.Duration);
+        trama = shakeData.BlendOverLifetime.Evaluate(agePercent);
         trama = Mathf.Clamp(trama, 0f, 1f);
     }
 }

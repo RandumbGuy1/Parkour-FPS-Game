@@ -12,16 +12,23 @@ public class ShakeData : ScriptableObject
     }
 
     [Header("Shake Settings")]
-    public ShakeType type;
-    public float magnitude = 1f;
-    public float frequency = 1f;
-    public float duration = 1f;
-    public float smoothSpeed = 1f;
+    [SerializeField] private ShakeType type;
+    [SerializeField] private float magnitude = 1f;
+    [SerializeField] private float frequency = 1f;
+    [SerializeField] private float duration = 1f;
+    [SerializeField] private float smoothSpeed = 1f;
     [Space(10)]
-    public AnimationCurve blendOverLifetime = new AnimationCurve(
+    [SerializeField] private AnimationCurve blendOverLifetime = new AnimationCurve(
       new Keyframe(0.0f, 0.0f, Mathf.Deg2Rad * 0.0f, Mathf.Deg2Rad * 720.0f),
       new Keyframe(0.2f, 1.0f),
       new Keyframe(1.0f, 0.0f));
+
+    public ShakeType Type { get { return type; } }
+    public float Magnitude { get { return magnitude; } }
+    public float Frequency { get { return frequency; } }
+    public float Duration { get { return duration; } }
+    public float SmoothSpeed { get { return smoothSpeed; } }
+    public AnimationCurve BlendOverLifetime { get { return blendOverLifetime; } }
 
     public void Intialize(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type)
     {
@@ -30,5 +37,14 @@ public class ShakeData : ScriptableObject
         this.frequency = frequency;
         this.duration = duration;
         this.smoothSpeed = smoothness;
+    }
+
+    public void Initialize(ShakeData sd)
+    {
+        type = sd.Type;
+        magnitude = sd.Magnitude;
+        frequency = sd.Frequency;
+        duration = sd.Duration;
+        smoothSpeed = sd.SmoothSpeed;
     }
 }

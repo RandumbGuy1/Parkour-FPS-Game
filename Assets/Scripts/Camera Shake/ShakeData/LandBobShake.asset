@@ -15,7 +15,7 @@ MonoBehaviour:
   type: 0
   magnitude: 1
   frequency: 0
-  duration: 3
+  duration: 1
   smoothSpeed: 5
   blendOverLifetime:
     serializedVersion: 2

@@ -14225,7 +14225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 11.2
+  m_Name: Save 11.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15181,6 +15181,7 @@ MonoBehaviour:
   wallHoldForce: 50
   wallRunForce: 8
   wallClimbForce: 3
+  wallJumpCooldownSteps: 50
   minimumJumpHeight: 1.3
   vaultDuration: 0.08
   vaultForce: 10
