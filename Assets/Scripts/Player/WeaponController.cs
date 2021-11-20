@@ -116,7 +116,7 @@ public class WeaponController : MonoBehaviour
         }
 
         Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos/* - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f)*/; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.9f/* - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f)*/);
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f/* - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f)*/);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -149,8 +149,8 @@ public class WeaponController : MonoBehaviour
                 {
                     s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)));
 
-                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.4f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.2f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.3f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
 
                     s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
 
@@ -369,8 +369,8 @@ public class WeaponController : MonoBehaviour
     {
         timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.05f : s.CameraLook.HeadSwayOffset * 0.4f), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 10f : s.CameraLook.HeadSwayOffset * 16f), ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.03f : s.CameraLook.HeadSwayOffset * 0.4f), ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 8f : s.CameraLook.HeadSwayOffset * 16f), ref swayVel, swaySmoothTime);
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * (aiming ? 0.5f : 1f) + (aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
 
         CalculateDefaultValues();

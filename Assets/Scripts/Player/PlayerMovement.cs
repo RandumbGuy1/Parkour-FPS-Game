@@ -137,7 +137,7 @@ public class PlayerMovement : MonoBehaviour
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && ! crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
+        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && !crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
         if (crouched) rb.AddForce(Vector3.up * 10f, ForceMode.Acceleration);
 
         rb.useGravity = !(Vaulting || WallRunning);
@@ -184,9 +184,10 @@ public class PlayerMovement : MonoBehaviour
         if (WallRunning) WallRun();
 
         Vector2 inputTemp = input;
-
         if (inputTemp.x > 0 && RelativeVel.x > 23f || inputTemp.x < 0 && RelativeVel.x < -23f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && RelativeVel.z > 23f || inputTemp.y < 0 && RelativeVel.z < -23f) inputTemp.y = 0f;
+
+        if (crouched) if (Vector3.Dot(s.orientation.forward, InputDir) < 0.8f) inputTemp *= 0.1f;
 
         return CalculateInputDir(inputTemp);
     }

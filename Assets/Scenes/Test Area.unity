@@ -201,7 +201,7 @@ MonoBehaviour:
   attackRange: 80
   spread: 4
   fireRate: 6
-  weaponRecoilForce: 25
+  weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
@@ -1500,7 +1500,7 @@ MonoBehaviour:
   weaponSprite: {fileID: 0}
   weaponDefaultPos: {x: 1.05, y: -0.7, z: 1.7}
   weaponDefaultRot: {x: -0.45, y: 10, z: 8}
-  weaponAimPos: {x: -0.87, y: 0.25, z: -1}
+  weaponAimPos: {x: -0.87, y: 0.25, z: -1.5}
   weaponAimRot: {x: -2.7, y: -10, z: 15}
   weaponWeight: 1.5
   shootForce: 80
@@ -6993,7 +6993,7 @@ MonoBehaviour:
   attackRange: 80
   spread: 4
   fireRate: 6
-  weaponRecoilForce: 25
+  weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
@@ -7930,7 +7930,7 @@ MonoBehaviour:
   attackRange: 80
   spread: 4
   fireRate: 6
-  weaponRecoilForce: 25
+  weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
@@ -11396,7 +11396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landBobSmoothTime: 0.044
+  landBobSmoothTime: 0.042
   landBobMultiplier: 0.096
   maxOffset: 3.5
   bobSpeed: 10
@@ -14225,7 +14225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 11.3
+  m_Name: Save 11.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17249,7 +17249,7 @@ MonoBehaviour:
   attackRange: 80
   spread: 4
   fireRate: 6
-  weaponRecoilForce: 25
+  weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
   weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
