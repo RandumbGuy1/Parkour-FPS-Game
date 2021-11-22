@@ -9,10 +9,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     public bool automatic { get { return weaponAutomatic; } }
 
+    public float reloadSmoothTime { get { return reloadTime; } }
     public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
-    public Vector3 recoilPosOffset { get { return weaponRecoilPosOffset; } }
-    public Vector3 recoilRotOffset { get { return weaponRecoilRotOffset; } }
-
     public ShakeData recoilShakeData { get { return recoilShake; } }
 
     public Vector3 defaultPos { get { return weaponDefaultPos; } }
@@ -22,7 +20,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public Vector3 aimRot { get { return weaponAimRot; } }
 
     public float weight { get { return weaponWeight; } }
-    public float reloadSmoothTime { get { return reloadTime; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
@@ -84,7 +81,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         }
 
         if (muzzleFlash != null) muzzleFlash.Play();
-        s.WeaponControls.AddRecoil(weaponRecoilForce);
+        s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce);
 
         Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
@@ -134,10 +131,11 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     }
 
     private void ResetShot() => readyToShoot = true;
-    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=24>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
+    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=25>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
 
     public void OnDrop()
     {
-        //wow such empty
+        StopAllCoroutines();
+        reloading = false;
     }
 }

@@ -135,15 +135,15 @@ public class WeaponController : MonoBehaviour
     }
 
     #region Weapon Actions
-    public void AddRecoil(float amount = 0)
+    public void AddRecoil(Vector3 recoilPosOffset, Vector3 recoilRotOffset, float amount = 0)
     {
         switch (CurrentWeapon.weaponType)
         {
             case WeaponClass.Ranged:
                 s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)) * (amount * (aiming ? 0.05f : 0.08f)));
 
-                desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.1f));
-                desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f));
+                desiredRecoilPos = recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.1f));
+                desiredRecoilRot = recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f));
 
                 s.rb.AddForce(-s.cam.forward * amount * 0.25f, ForceMode.Impulse);
 
@@ -152,8 +152,8 @@ public class WeaponController : MonoBehaviour
                 break;
 
             case WeaponClass.Melee:
-                desiredRecoilPos = CurrentWeapon.recoilPosOffset;
-                desiredRecoilRot = CurrentWeapon.recoilRotOffset;
+                desiredRecoilPos = recoilPosOffset;
+                desiredRecoilRot = recoilRotOffset;
 
                 s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
                 slider.SetSliderCooldown(1f, 0.05f);
@@ -238,7 +238,6 @@ public class WeaponController : MonoBehaviour
         rand.z = Random.Range(-1f, 1f);
 
         rb.AddTorque(rand.normalized * throwForce * 3f, ForceMode.Impulse);
-
         weapons.RemoveAt(selectedWeapon);
 
         reloadRotVel = Vector3.zero;
