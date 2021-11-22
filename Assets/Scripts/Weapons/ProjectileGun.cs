@@ -9,7 +9,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     public bool automatic { get { return weaponAutomatic; } }
 
-    public float recoilForce { get { return weaponRecoilForce; } }
     public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
     public Vector3 recoilPosOffset { get { return weaponRecoilPosOffset; } }
     public Vector3 recoilRotOffset { get { return weaponRecoilRotOffset; } }
@@ -23,8 +22,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public Vector3 aimRot { get { return weaponAimRot; } }
 
     public float weight { get { return weaponWeight; } }
-
-    public Vector3 reloadRotOffset { get { return weaponReloadRotOffset; } }
     public float reloadSmoothTime { get { return reloadTime; } }
 
     [Header("Weapon Class")]
@@ -74,14 +71,20 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private ParticleSystem muzzleFlash;
 
     void Start() => bulletsLeft = magazineSize;
-
     void OnEnable() => reloading = false;
 
     public bool OnAttack(ScriptManager s)
     {
-        if (!readyToShoot || bulletsLeft <= 0 || reloading) return false;
+        if (!readyToShoot || reloading) return false;
+        if (bulletsLeft <= 0)
+        {
+            s.WeaponControls.AddReload(weaponReloadRotOffset);
+            StartCoroutine(Reload());
+            return false;
+        }
 
         if (muzzleFlash != null) muzzleFlash.Play();
+        s.WeaponControls.AddRecoil(weaponRecoilForce);
 
         Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
@@ -111,10 +114,11 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         return true;
     }
 
-    public bool SecondaryAction()
+    public bool SecondaryAction(ScriptManager s)
     {
         if (bulletsLeft >= magazineSize || reloading) return false;
 
+        s.WeaponControls.AddReload(weaponReloadRotOffset);
         StartCoroutine(Reload());
         return true;
     }
@@ -123,15 +127,14 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     {
         reloading = true;
 
-        yield return new WaitForSeconds(reloadTime);
+        yield return new WaitForSeconds(reloadTime * 2.5f);
 
         bulletsLeft = magazineSize;
         reloading = false;
     }
 
     private void ResetShot() => readyToShoot = true;
-
-   public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=24>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
+    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=24>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
 
     public void OnDrop()
     {

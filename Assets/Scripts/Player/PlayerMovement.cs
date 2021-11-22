@@ -184,10 +184,17 @@ public class PlayerMovement : MonoBehaviour
         if (WallRunning) WallRun();
 
         Vector2 inputTemp = input;
-        if (inputTemp.x > 0 && RelativeVel.x > 23f || inputTemp.x < 0 && RelativeVel.x < -23f) inputTemp.x = 0f;
-        if (inputTemp.y > 0 && RelativeVel.z > 23f || inputTemp.y < 0 && RelativeVel.z < -23f) inputTemp.y = 0f;
 
-        if (crouched) if (Vector3.Dot(s.orientation.forward, InputDir) < 0.8f) inputTemp *= 0.1f;
+        if (!crouched)
+        {
+            if (inputTemp.x > 0 && RelativeVel.x > 23f || inputTemp.x < 0 && RelativeVel.x < -23f) inputTemp.x = 0f;
+            if (inputTemp.y > 0 && RelativeVel.z > 23f || inputTemp.y < 0 && RelativeVel.z < -23f) inputTemp.y = 0f;
+        }
+        else
+        {
+            //if (RelativeVel.z * (1 / Vector3.Dot(rb.velocity.normalized, InputDir)) > 28f) inputTemp.y = 0f;
+            if (Vector3.Dot(s.orientation.forward, InputDir) < 0.8f) inputTemp *= 0.25f;
+        }
 
         return CalculateInputDir(inputTemp);
     }
@@ -556,7 +563,7 @@ public class PlayerMovement : MonoBehaviour
             canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
             CanCrouchWalk = Magnitude < maxGroundSpeed * 0.65f;
 
-            rb.AddForce(Vector3.down * 35f);
+            rb.AddForce(Vector3.down * 45f);
         }
 
         UpdateCrouchScale();

@@ -70,6 +70,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     public bool OnAttack(ScriptManager s)
     {
         cam = s.cam;
+        s.WeaponControls.AddRecoil();
 
         CancelInvoke("RevertAttackHitBox");
         Invoke("AttackHitBox", 0.05f);
@@ -107,7 +108,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         }
     }
    
-    public bool SecondaryAction()
+    public bool SecondaryAction(ScriptManager s)
     {
         return true;
     }

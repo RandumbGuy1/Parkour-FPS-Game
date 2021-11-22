@@ -9,17 +9,15 @@ public interface IWeapon
     bool automatic { get; }
 
     float recoilSmoothTime { get; }
-    float recoilForce { get; }
     Vector3 recoilPosOffset { get; }
     Vector3 recoilRotOffset { get; }
 
     ShakeData recoilShakeData { get; }
 
-    Vector3 reloadRotOffset { get; }
     float reloadSmoothTime { get; }
 
     bool OnAttack(ScriptManager s);
-    bool SecondaryAction();
+    bool SecondaryAction(ScriptManager s);
 }
 
 public enum WeaponClass

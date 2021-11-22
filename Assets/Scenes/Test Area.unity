@@ -203,8 +203,8 @@ MonoBehaviour:
   fireRate: 6
   weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
-  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
-  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -1.05}
+  weaponRecoilRotOffset: {x: -18, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
@@ -1509,8 +1509,8 @@ MonoBehaviour:
   fireRate: 10
   weaponRecoilForce: 15
   weaponRecoilSmoothTime: 0.02
-  weaponRecoilPosOffset: {x: 0, y: -0.01, z: -0.05}
-  weaponRecoilRotOffset: {x: -0.6, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: -0.15, z: -0.75}
+  weaponRecoilRotOffset: {x: -9, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 90
   bulletsPerTap: 1
@@ -6995,8 +6995,8 @@ MonoBehaviour:
   fireRate: 6
   weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
-  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
-  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -1.05}
+  weaponRecoilRotOffset: {x: -18, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
@@ -7932,8 +7932,8 @@ MonoBehaviour:
   fireRate: 6
   weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
-  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
-  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -1.05}
+  weaponRecoilRotOffset: {x: -18, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1
@@ -14225,7 +14225,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 11.4
+  m_Name: Save 11.5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17251,8 +17251,8 @@ MonoBehaviour:
   fireRate: 6
   weaponRecoilForce: 30
   weaponRecoilSmoothTime: 0.05
-  weaponRecoilPosOffset: {x: 0, y: 0, z: -0.07}
-  weaponRecoilRotOffset: {x: -1.2, y: 0, z: 0}
+  weaponRecoilPosOffset: {x: 0, y: 0, z: -1.05}
+  weaponRecoilRotOffset: {x: -18, y: 0, z: 0}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   magazineSize: 12
   bulletsPerTap: 1

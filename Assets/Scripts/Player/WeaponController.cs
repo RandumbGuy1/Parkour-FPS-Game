@@ -130,46 +130,41 @@ public class WeaponController : MonoBehaviour
 
         canAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
 
-        if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && canAttack : s.PlayerInput.LeftClick && canAttack) Attack();       
-        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) 
-            if (CurrentWeapon.SecondaryAction())
-            {
-                aiming = false;
-                reloadRot = CurrentWeapon.reloadRotOffset;
-            }
+        if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && canAttack : s.PlayerInput.LeftClick && canAttack) CurrentWeapon.OnAttack(s);
+        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) CurrentWeapon.SecondaryAction(s);
     }
 
     #region Weapon Actions
-    void Attack()
+    public void AddRecoil(float amount = 0)
     {
         switch (CurrentWeapon.weaponType)
         {
             case WeaponClass.Ranged:
-                if (CurrentWeapon.OnAttack(s))
-                {
-                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)));
+                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)) * (amount * (aiming ? 0.05f : 0.08f)));
 
-                    desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.3f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
-                    desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f)) * CurrentWeapon.recoilForce;
+                desiredRecoilPos = CurrentWeapon.recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.1f));
+                desiredRecoilRot = CurrentWeapon.recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f));
 
-                    s.rb.AddForce(-s.cam.forward * CurrentWeapon.recoilForce * 0.25f, ForceMode.Impulse);
+                s.rb.AddForce(-s.cam.forward * amount * 0.25f, ForceMode.Impulse);
 
-                    reticleEffects.AddReticleRecoil(CurrentWeapon.recoilForce * (aiming ? 1f : 3f));
-                }
+                if (aiming) break;
+                reticleEffects.AddReticleRecoil(amount * 3f);
                 break;
 
             case WeaponClass.Melee:
-                if (CurrentWeapon.OnAttack(s))
-                {
-                    desiredRecoilPos = CurrentWeapon.recoilPosOffset;
-                    desiredRecoilRot = CurrentWeapon.recoilRotOffset;
+                desiredRecoilPos = CurrentWeapon.recoilPosOffset;
+                desiredRecoilRot = CurrentWeapon.recoilRotOffset;
 
-                    s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
-
-                    slider.SetSliderCooldown(1f, 0.05f);
-                }
+                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
+                slider.SetSliderCooldown(1f, 0.05f);
                 break;
         }
+    }
+
+    public void AddReload(Vector3 reloadRotOffset)
+    {
+        aiming = false;
+        reloadRot = reloadRotOffset;
     }
     #endregion
     
