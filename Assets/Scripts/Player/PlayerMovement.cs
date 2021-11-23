@@ -77,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
     private bool cancelGround = false;
     private int groundCancelSteps = 0;
 
+    private int stepsSinceGrounded = 0;
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
     private int stepsSinceLastWallJumped = 0;
@@ -229,8 +230,17 @@ public class PlayerMovement : MonoBehaviour
         if (stepsSinceLastJumped < maxJumpSteps) stepsSinceLastJumped++;
         if (stepsSinceLastWallJumped < 100) stepsSinceLastWallJumped++;
 
-        if (Grounded || SnapToGround(Magnitude)) stepsSinceLastGrounded = 0;
-        else if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
+        if (Grounded || SnapToGround(Magnitude))
+        {
+            if (stepsSinceGrounded < 10) stepsSinceGrounded++;
+            stepsSinceLastGrounded = 0;
+        }
+
+        if (!Grounded)
+        {
+            if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
+            stepsSinceGrounded = 0;
+        }
     }
 
     #endregion
@@ -543,7 +553,7 @@ public class PlayerMovement : MonoBehaviour
         crouched = false;
         CanCrouchWalk = true;
 
-        rb.velocity *= 0.7f;
+        rb.velocity *= 0.8f;
     }
 
     private void UpdateCrouchScale()
@@ -637,7 +647,8 @@ public class PlayerMovement : MonoBehaviour
         if (crouched && CanCrouchWalk) return maxGroundSpeed * 0.5f;
         if (crouched) return maxSlideSpeed;
         if (jumping) return maxAirSpeed;
-        if (Grounded) return maxGroundSpeed;
+
+        if (Grounded && stepsSinceGrounded * stepsSinceGrounded > 1) return maxGroundSpeed;
 
         return maxAirSpeed;
     }
