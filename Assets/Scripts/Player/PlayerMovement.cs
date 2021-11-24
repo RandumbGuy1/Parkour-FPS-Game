@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
     [SerializeField] private int maxJumpSteps;
-    
+
     [Header("Sliding")]
     [SerializeField] private float crouchScale;
     [SerializeField] private float crouchSmoothTime;
@@ -101,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
 
     private ScriptManager s;
     private Rigidbody rb;
-    
+
     void Awake()
     {
         s = GetComponent<ScriptManager>();
@@ -130,15 +130,16 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
 
+        float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : (crouched ? airMultiplier * 0.6f : airMultiplier));
         float maxSpeed = CalculateMaxSpeed();
         float coefficientOfFriction = moveSpeed / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * 8.5f, ForceMode.Force);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f, ForceMode.Force);
 
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && !crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.68f - 1f), ForceMode.Acceleration);
+        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && !crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.7f - 1f), ForceMode.Acceleration);
         if (crouched) rb.AddForce(Vector3.up * 10f, ForceMode.Acceleration);
 
         rb.useGravity = !(Vaulting || WallRunning);
@@ -147,8 +148,7 @@ public class PlayerMovement : MonoBehaviour
         RecordMovementSteps();
         ProcessCrouching();
 
-        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
-        float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier);
+        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement(vel));
 
         if (!CanWallJump() || !IsWallRight && !IsWallLeft)
         {
@@ -175,27 +175,20 @@ public class PlayerMovement : MonoBehaviour
         return dot < 0f ? slopeDir : inputDir;
     }
 
-    private Vector3 AirMovement()
+    private Vector3 AirMovement(Vector3 sideVel)
     {
+        if (WallRunning) WallRun();
+
         if (NearWall && IsWallLeft && CanWallJump() && input.x < 0 || NearWall && IsWallRight && CanWallJump() && input.x > 0) WallRunning = true;
 
         if (CanWallJump() && jumping) Jump(false);
         else if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning) StopWallRun();
 
-        if (WallRunning) WallRun();
-
         Vector2 inputTemp = input;
+        if (crouched) if (Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
 
-        if (!crouched)
-        {
-            if (inputTemp.x > 0 && RelativeVel.x > 23f || inputTemp.x < 0 && RelativeVel.x < -23f) inputTemp.x = 0f;
-            if (inputTemp.y > 0 && RelativeVel.z > 23f || inputTemp.y < 0 && RelativeVel.z < -23f) inputTemp.y = 0f;
-        }
-        else
-        {
-            //if (RelativeVel.z * (1 / Vector3.Dot(rb.velocity.normalized, InputDir)) > 28f) inputTemp.y = 0f;
-            if (Vector3.Dot(s.orientation.forward, InputDir) < 0.8f) inputTemp *= 0.25f;
-        }
+        if (inputTemp.x > 0 && RelativeVel.x > 25f || inputTemp.x < 0 && RelativeVel.x < -25f) inputTemp.x = 0f;
+        if (inputTemp.y > 0 && RelativeVel.z > 25f || inputTemp.y < 0 && RelativeVel.z < -25f) inputTemp.y = 0f;
 
         return CalculateInputDir(inputTemp);
     }
@@ -235,8 +228,7 @@ public class PlayerMovement : MonoBehaviour
             if (stepsSinceGrounded < 10) stepsSinceGrounded++;
             stepsSinceLastGrounded = 0;
         }
-
-        if (!Grounded)
+        else
         {
             if (stepsSinceLastGrounded < 10) stepsSinceLastGrounded++;
             stepsSinceGrounded = 0;
@@ -293,7 +285,12 @@ public class PlayerMovement : MonoBehaviour
         int layer = col.gameObject.layer;
         ContactPoint contact = col.GetContact(0);
 
-        if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded) Land(Math.Abs(Velocity.y));
+        if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded && stepsSinceGrounded < 1)
+        {
+            stepsSinceGrounded++;
+            Land(Math.Abs(Velocity.y));
+        }
+
         if (IsWall(contact.normal, 0.33f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
     }
 
@@ -420,7 +417,7 @@ public class PlayerMovement : MonoBehaviour
             transform.position = vaultPoint;
             rb.velocity = vel;
             */
-            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f - Vector3.up * 0.55f, Velocity)); 
+            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f - Vector3.up * 0.55f, Velocity));
             return;
         }
 
@@ -447,7 +444,7 @@ public class PlayerMovement : MonoBehaviour
 
         lastVel.y *= 0.2f;
         rb.detectCollisions = true;
-        
+
         rb.velocity = lastVel;
     }
 
@@ -646,10 +643,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (crouched && CanCrouchWalk) return maxGroundSpeed * 0.5f;
         if (crouched) return maxSlideSpeed;
-        if (jumping) return maxAirSpeed;
+        if (jumping || !Grounded) return maxAirSpeed;
 
-        if (Grounded && stepsSinceGrounded * stepsSinceGrounded > 1) return maxGroundSpeed;
-
-        return maxAirSpeed;
+        return maxGroundSpeed;
     }
 }

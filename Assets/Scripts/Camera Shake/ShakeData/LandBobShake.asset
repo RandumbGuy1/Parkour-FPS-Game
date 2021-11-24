@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: LandBobShake
   m_EditorClassIdentifier: 
   type: 0
-  magnitude: 1
+  magnitude: 3.1491132
   frequency: 0
-  duration: 1
-  smoothSpeed: 5
+  duration: 0.8
+  smoothSpeed: 1.5745566
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:
