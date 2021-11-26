@@ -9,8 +9,9 @@ public class CameraBobbing : MonoBehaviour
 	[SerializeField] private float landBobSmoothTime;
 	[SerializeField] private float landBobMultiplier;
 	[SerializeField] private float maxOffset;
+    [SerializeField] private float slideMaxOffset;
 
-	private float landVel = 0f;
+    private float landVel = 0f;
 	private float desiredOffset = 0f;
     private float bobOffset = 0f;
 
@@ -43,8 +44,9 @@ public class CameraBobbing : MonoBehaviour
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
 
         SmoothStepUp();
+        CalculateLandOffset();
 
-        Vector3 newPos = CalculateLandOffset() + smoothOffset + vaultDesync;
+        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset + vaultDesync;
 		transform.localPosition = newPos;
 	}
 
@@ -53,30 +55,29 @@ public class CameraBobbing : MonoBehaviour
         CalculateFootsteps();
     }
 
-    private Vector3 CalculateLandOffset()
+    private void CalculateLandOffset()
 	{
-		if (desiredOffset <= 0f) desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.5f * Time.smoothDeltaTime);
+        if (desiredOffset == 0f && bobOffset == 0f) return;
+
+		if (desiredOffset <= 0f) desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.6f * Time.deltaTime);
         if (bobOffset <= 0f) bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
-        if (desiredOffset >= -0.001f) desiredOffset = 0f;
-
-		return Vector3.up * bobOffset;
+        if (desiredOffset >= -0.001f && bobOffset > -0.001f)
+        {
+            desiredOffset = 0f;
+            bobOffset = 0f;
+        }
 	}
 
 	public void BobOnce(float mag)
 	{
-        mag *= landBobMultiplier;
         mag = Mathf.Round(mag * 100f) * 0.01f;
-        mag = Mathf.Clamp(mag, 0f, maxOffset);
-        
-		if (mag < 0.5f) mag = 0f;
-		if (s.PlayerInput.Crouching)
-        {
-            mag *= 0.83f;
-            mag = Mathf.Clamp(mag, 0f, 1.8f);
-        }
+        mag = Mathf.Clamp(mag * landBobMultiplier, -maxOffset, 0f);
 
-        desiredOffset -= mag;
+        if (mag > -0.5f) return;
+        if (s.PlayerInput.Crouching) mag = Mathf.Clamp(mag * 0.83f, -slideMaxOffset, 0f);
+
+        desiredOffset += mag;
 	}
 
     private void CalculateFootsteps()
@@ -105,7 +106,7 @@ public class CameraBobbing : MonoBehaviour
         speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
        
         float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f);
-        amp = Mathf.Clamp(amp, 1f, 1.5f);
+        amp = Mathf.Clamp(amp, 1f, 1.4f);
 
         return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed * speedAmp) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * bobAmountVert * amp);
     }

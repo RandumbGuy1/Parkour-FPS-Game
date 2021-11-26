@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
         RecordMovementSteps();
         ProcessCrouching();
 
-        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement(vel));
+        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
 
         if (!CanWallJump() || !IsWallRight && !IsWallLeft)
         {
@@ -175,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
         return dot < 0f ? slopeDir : inputDir;
     }
 
-    private Vector3 AirMovement(Vector3 sideVel)
+    private Vector3 AirMovement()
     {
         if (WallRunning) WallRun();
 
@@ -288,7 +288,7 @@ public class PlayerMovement : MonoBehaviour
         if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded && stepsSinceGrounded < 1)
         {
             stepsSinceGrounded++;
-            Land(Math.Abs(Velocity.y));
+            Land(Mathf.Min(0, Velocity.y));
         }
 
         if (IsWall(contact.normal, 0.33f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
@@ -324,29 +324,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void Land(float impactForce)
-    {
-        if (impactForce > 30f)
-        {
-            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
-
-            Vector3 magnitude = rb.velocity;
-
-            velocityOverLifetime.x = magnitude.x;
-            velocityOverLifetime.z = magnitude.z;
-        }
-
-        float newMag = impactForce * (crouched ? 0.6f : 0.3f);
-        float newSmooth = Mathf.Clamp(newMag * 0.5f, 0.1f, 10f);
-
-        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
-
-        s.CameraHeadBob.BobOnce(impactForce);
-        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
-    }
-
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;
+
     #endregion
 
     #region Jumping
@@ -410,27 +390,26 @@ public class PlayerMovement : MonoBehaviour
 
         if (distance > vaultOffset + 0.1f) return;
 
-        if (distance < 3.5f)
+        if (distance < 3.7f)
         {
-            /*
-            s.CameraHeadBob.StepUp(transform.position - vaultPoint);
-            transform.position = vaultPoint;
-            rb.velocity = vel;
-            */
-            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f - Vector3.up * 0.55f, Velocity));
+            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f + Vector3.down * 0.1f, Velocity));
             return;
         }
 
+        if (Vector3.Dot(s.orientation.forward, -vaultDir) < 0.6f) return;
+
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+        Land(Mathf.Min(0, Velocity.y) * 0.6f);
     }
 
     private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
     {
-        rb.detectCollisions = false;
+        lastVel.y = 0f;
 
         float elapsed = 0f;
-        float distance = Vector3.Distance(transform.position, pos);
-        float duration = (distance / lastVel.magnitude);
+        float speed = lastVel.magnitude;
+        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.1f);
+        float duration = distance / speed;
 
         while (elapsed < duration)
         {
@@ -438,12 +417,10 @@ public class PlayerMovement : MonoBehaviour
             elapsed += Time.fixedDeltaTime;
 
             rb.velocity = lastVel;
+            WallRunning = false;
 
             yield return new WaitForFixedUpdate();
         }
-
-        lastVel.y *= 0.2f;
-        rb.detectCollisions = true;
 
         rb.velocity = lastVel;
     }
@@ -646,5 +623,26 @@ public class PlayerMovement : MonoBehaviour
         if (jumping || !Grounded) return maxAirSpeed;
 
         return maxGroundSpeed;
+    }
+
+    private void Land(float impactForce)
+    {
+        if (impactForce < -30f)
+        {
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
+
+            Vector3 magnitude = rb.velocity;
+
+            velocityOverLifetime.x = magnitude.x;
+            velocityOverLifetime.z = magnitude.z;
+        }
+
+        float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
+        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
+
+        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
+
+        s.CameraHeadBob.BobOnce(impactForce);
+        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
     }
 }

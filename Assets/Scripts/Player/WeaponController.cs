@@ -267,14 +267,14 @@ public class WeaponController : MonoBehaviour
     #region Dynamic Weapon Movement
     private Vector3 CalculateBob()
     {
-        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.3f : 1f);
+        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.15f : 1f);
 
         return (timer <= 0 ? Vector3.zero : (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * (Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert)) * amp;
     }
 
     private Vector3 CalculateLookOffset()
     {
-        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.4f : 1f);
+        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (aiming ? 0.2f : 1f);
 
         Vector2 camDelta = s.CameraLook.RotationDelta * 0.3f;
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
@@ -363,8 +363,8 @@ public class WeaponController : MonoBehaviour
     {
         timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.03f : s.CameraLook.HeadSwayOffset * 0.4f), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 8f : s.CameraLook.HeadSwayOffset * 16f), ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (aiming ? s.CameraLook.HeadSwayOffset * 0.01f : s.CameraLook.HeadSwayOffset * 0.3f), ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (aiming ? s.CameraLook.HeadSwayOffset * 4f : s.CameraLook.HeadSwayOffset * 14f), ref swayVel, swaySmoothTime);
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * (aiming ? 0.5f : 1f) + (aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
 
         CalculateDefaultValues();
