@@ -195,6 +195,8 @@ public class WeaponController : MonoBehaviour
             selectedWeapon = weapons.Count - 1;
             SelectWeapon(false);
         }
+
+        if (CurrentItem != null) CurrentItem.OnPickup();
     }
 
     private void SelectWeapon(bool switching = true)

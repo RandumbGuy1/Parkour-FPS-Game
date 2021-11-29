@@ -19,14 +19,10 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     public float weight { get { return weaponWeight; } }
 
     public float recoilSmoothTime { get { return swingSmoothing; } }
-    public Vector3 recoilPosOffset { get { return swingPosOffset; } }
-    public Vector3 recoilRotOffset { get { return swingRotOffset; } }
-
-    public ShakeData recoilShakeData { get { return recoilShake; } }
-
     public float recoilForce { get; }
     public float reloadSmoothTime { get; }
-    public Vector3 reloadRotOffset { get; }
+
+    public ShakeData recoilShakeData { get { return recoilShake; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
@@ -107,11 +103,13 @@ public class Sword : MonoBehaviour, IItem, IWeapon
             rb.AddTorque(dirToLaunch * swingForce * 0.5f, ForceMode.Impulse);
         }
     }
-   
+
     public bool SecondaryAction(ScriptManager s)
     {
         return true;
     }
+
+    public void OnPickup() { }
 
     public void OnDrop()
     {

@@ -56,6 +56,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement Control")]
     [SerializeField] private float friction;
+    [SerializeField] private float frictionMultiplier;
     [SerializeField] private float slideFriction;
     [SerializeField] private int counterThresold;
     private Vector2Int readyToCounter = Vector2Int.zero;
@@ -134,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
         float maxSpeed = CalculateMaxSpeed();
         float coefficientOfFriction = moveSpeed / maxSpeed;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f, ForceMode.Force);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier, ForceMode.Force);
 
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
@@ -575,7 +576,7 @@ public class PlayerMovement : MonoBehaviour
 
         frictionForce = Vector3.ProjectOnPlane(frictionForce, GroundNormal);
 
-        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f, ForceMode.Acceleration);
+        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f * (frictionMultiplier < 1f ? frictionMultiplier * 0.1f : frictionMultiplier), ForceMode.Acceleration);
 
         if (input.x == 0f) readyToCounter.x++;
         else readyToCounter.x = 0;
@@ -583,6 +584,8 @@ public class PlayerMovement : MonoBehaviour
         if (input.y == 0f) readyToCounter.y++;
         else readyToCounter.y = 0;
     }
+
+    public void SetFrictionMultiplier(float amount = 1f) => frictionMultiplier = amount;
 
     bool CounterMomentum(float input, float mag)
     {
