@@ -365,7 +365,7 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
-    #region Vaulting
+    #region Vaulting And Stepping
     private void CheckForVault(Vector3 normal)
     {
         if (Vaulting || WallRunning || crouched || ReachedMaxSlope) return;
@@ -409,7 +409,7 @@ public class PlayerMovement : MonoBehaviour
 
         float elapsed = 0f;
         float speed = lastVel.magnitude;
-        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.1f);
+        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.08f);
         float duration = distance / speed;
 
         while (elapsed < duration)
@@ -560,9 +560,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (jumping) return;
 
+        float multiplier = frictionMultiplier < 1f ? frictionMultiplier * 0.1f : frictionMultiplier;
+
         if (crouched && canUnCrouch && !CanCrouchWalk)
         {
-            rb.AddForce(-rb.velocity.normalized * slideFriction * 2.5f); 
+            rb.AddForce(-rb.velocity.normalized * slideFriction * 2.5f * multiplier); 
             return;
         }
 
@@ -576,7 +578,7 @@ public class PlayerMovement : MonoBehaviour
 
         frictionForce = Vector3.ProjectOnPlane(frictionForce, GroundNormal);
 
-        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f * (frictionMultiplier < 1f ? frictionMultiplier * 0.1f : frictionMultiplier), ForceMode.Acceleration);
+        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f * multiplier, ForceMode.Acceleration);
 
         if (input.x == 0f) readyToCounter.x++;
         else readyToCounter.x = 0;

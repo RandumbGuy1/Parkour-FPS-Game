@@ -36,7 +36,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
 
         float playerVelocity = shooter.PlayerMovement.Magnitude * 0.1f;
-        playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.35f);
+        playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.2f);
 
         transform.up = velocity;
 

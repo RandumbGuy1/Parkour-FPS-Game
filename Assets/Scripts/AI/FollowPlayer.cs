@@ -22,13 +22,9 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private float groundCheckInterval;
     private bool grounded;
 
-    private float startAngularDrag = 0f;
-
     private void Start()
     {
-        startAngularDrag = enemyRb.angularDrag;
         agent.speed = 0;
-
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
     }
@@ -48,6 +44,11 @@ public class FollowPlayer : MonoBehaviour
     {
         if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
 
+        agent.gameObject.SetActive(true);
+
+        agent.transform.localPosition = Vector3.zero;
+        agent.transform.localRotation = Quaternion.Euler(Vector3.zero);
+
         float sqrEnemyToPlayer = (player.position - enemyRb.transform.position).sqrMagnitude;
         float sqrAgentToPlayer = (player.position - agent.transform.position).sqrMagnitude;
 
@@ -56,21 +57,23 @@ public class FollowPlayer : MonoBehaviour
         enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
 
         if (!grounded) return;
-        agent.nextPosition = enemyRb.position;
         if (sqrEnemyToPlayer < standingDistance * standingDistance) return;
 
         agent.SetDestination(player.position);
 
-        Vector3 pathDir = (agent.path.corners.Length > 1 ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
-        /*
+        Vector3 pathDir = (agent.path.corners.Length > 1 && !agent.isOnOffMeshLink ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
+      
         for (int i = 0; i < agent.path.corners.Length - 1; i++)
         {
             Debug.DrawLine(agent.path.corners[i], agent.path.corners[i + 1], Color.red);
         }
 
         Debug.DrawRay(enemyRb.transform.position, pathDir.normalized * 3f, Color.red);
-        */
+
+        agent.isStopped = true;
         enemyRb.AddForce(pathDir.normalized * speed * 5f, ForceMode.Acceleration);
+
+        if (agent.isOnOffMeshLink) agent.gameObject.SetActive(false);
     }
 
     private void HandleRotation()

@@ -140,10 +140,10 @@ public class WeaponController : MonoBehaviour
         switch (CurrentWeapon.weaponType)
         {
             case WeaponClass.Ranged:
-                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-1f, Random.Range(-0.5f, 0.5f), Random.Range(-0.8f, 0.8f)) * (aiming ? Random.Range(0.6f, 0.8f) : Random.Range(0.85f, 1.2f)) * (amount * (aiming ? 0.05f : 0.08f)));
+                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (aiming ? 0.03f : 0.1f)));
 
-                desiredRecoilPos = recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.1f));
-                desiredRecoilRot = recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.1f));
+                desiredRecoilPos = recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.15f));
+                desiredRecoilRot = recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.15f));
 
                 s.rb.AddForce(-s.cam.forward * amount * 0.25f, ForceMode.Impulse);
 

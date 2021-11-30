@@ -6,11 +6,19 @@ public class IcePlane : MonoBehaviour
 {
     [Header("Ice Settings")]
     [SerializeField] private float iceFrictionMultiplier;
+    [SerializeField] private float iceDragMultiplier;
 
     private void OnCollisionEnter(Collision col)
     {
         ScriptManager s = col.gameObject.GetComponent<ScriptManager>();
-        if (s == null) return;
+        if (s == null) 
+        {
+            Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
+            if (rb == null) return;
+
+            rb.drag *= iceDragMultiplier;
+            return;
+        }
 
         ContactPoint contact = col.GetContact(0);
         if (Vector3.Dot(-contact.normal, transform.up) < 0.9f) return;
@@ -21,7 +29,14 @@ public class IcePlane : MonoBehaviour
     private void OnCollisionExit(Collision col)
     {
         ScriptManager s = col.gameObject.GetComponent<ScriptManager>();
-        if (s == null) return;
+        if (s == null)
+        {
+            Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
+            if (rb == null) return;
+
+            rb.drag /= iceDragMultiplier;
+            return;
+        }
 
         s.PlayerMovement.SetFrictionMultiplier();
     }
