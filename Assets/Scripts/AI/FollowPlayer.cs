@@ -9,7 +9,6 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float angularSpeed;
     [SerializeField] private float standingDistance;
-    [SerializeField] private LayerMask Environment;
     [Space(10)]
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
@@ -44,36 +43,40 @@ public class FollowPlayer : MonoBehaviour
     {
         if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
 
-        agent.gameObject.SetActive(true);
+        HandleRotation();
+
+        enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
+
+        if (agent.path.corners.Length > 0 && agent.isOnOffMeshLink)
+        {
+            agent.nextPosition = agent.currentOffMeshLinkData.endPos;
+            enemyRb.AddForce((agent.transform.position - enemyRb.transform.position).normalized * speed * 5f, ForceMode.Acceleration);
+            agent.gameObject.SetActive(false);
+        }
+
+        if (!grounded)
+        {
+            enemyRb.AddForce((player.position - enemyRb.transform.position).normalized * speed * 0.5f, ForceMode.Acceleration);
+            return;
+        }
 
         agent.transform.localPosition = Vector3.zero;
         agent.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
         float sqrEnemyToPlayer = (player.position - enemyRb.transform.position).sqrMagnitude;
-        float sqrAgentToPlayer = (player.position - agent.transform.position).sqrMagnitude;
-
-        HandleRotation();
-
-        enemyRb.AddForce(Vector3.down * 85f, ForceMode.Acceleration);
-
-        if (!grounded) return;
         if (sqrEnemyToPlayer < standingDistance * standingDistance) return;
 
+        agent.gameObject.SetActive(true);
         agent.SetDestination(player.position);
 
-        Vector3 pathDir = (agent.path.corners.Length > 1 && !agent.isOnOffMeshLink ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
+        Vector3 pathDir = (agent.path.corners.Length > 1 ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
       
         for (int i = 0; i < agent.path.corners.Length - 1; i++)
         {
             Debug.DrawLine(agent.path.corners[i], agent.path.corners[i + 1], Color.red);
         }
 
-        Debug.DrawRay(enemyRb.transform.position, pathDir.normalized * 3f, Color.red);
-
-        agent.isStopped = true;
         enemyRb.AddForce(pathDir.normalized * speed * 5f, ForceMode.Acceleration);
-
-        if (agent.isOnOffMeshLink) agent.gameObject.SetActive(false);
     }
 
     private void HandleRotation()
