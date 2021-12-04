@@ -52,6 +52,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float weaponRecoilSmoothTime;
     [SerializeField] private Vector3 weaponRecoilPosOffset;
     [SerializeField] private Vector3 weaponRecoilRotOffset;
+    [SerializeField] [Range(0f, 1f)] private float weaponRecoilAimMulti;
 
     [Header("Reload Settings")]
     [SerializeField] private int magazineSize;
@@ -99,7 +100,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         if (muzzleFlash != null) muzzleFlash.Play();
         if (muzzleLight != null) Flash();
 
-        s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce);
+        s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
         Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
@@ -173,10 +174,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         if (muzzleLight != null) muzzleLight.intensity = 0f;
     }
 
-    private void Flash() => desiredIntensity += lightIntensity;
-    private void ResetShot() => readyToShoot = true;
-    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=25>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
-
     public void OnPickup()
     {
         ResetIntensity();
@@ -191,4 +188,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
         ResetIntensity();
     }
+
+    private void Flash() => desiredIntensity += lightIntensity;
+    private void ResetShot() => readyToShoot = true;
+    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=25>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
 }

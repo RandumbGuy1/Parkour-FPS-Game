@@ -19,6 +19,7 @@ public class PlayerInput : MonoBehaviour
     public bool RightClick { get { return Input.GetMouseButtonDown(1); } }
     public bool LeftClick { get { return Input.GetMouseButtonDown(0); } }
     public bool LeftHoldClick { get { return Input.GetMouseButton(0); } }
+    public bool LeftReleaseClick { get { return Input.GetMouseButtonUp(0); } }
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;

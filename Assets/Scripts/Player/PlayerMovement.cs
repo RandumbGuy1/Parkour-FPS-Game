@@ -134,8 +134,9 @@ public class PlayerMovement : MonoBehaviour
         float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : (crouched ? airMultiplier * 0.6f : airMultiplier));
         float maxSpeed = CalculateMaxSpeed();
         float coefficientOfFriction = moveSpeed / maxSpeed;
+        float groundFrictionAccelTime = 3f;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier, ForceMode.Force);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier * Mathf.Clamp(stepsSinceGrounded / groundFrictionAccelTime, 0.3f, 1f), ForceMode.Force);
 
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
@@ -409,7 +410,7 @@ public class PlayerMovement : MonoBehaviour
 
         float elapsed = 0f;
         float speed = lastVel.magnitude;
-        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.08f);
+        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.08f) * 1.1f;
         float duration = distance / speed;
 
         while (elapsed < duration)
@@ -423,7 +424,7 @@ public class PlayerMovement : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        rb.velocity = lastVel;
+        rb.velocity = lastVel * 1.1f;
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)

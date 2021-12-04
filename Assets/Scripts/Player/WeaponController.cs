@@ -135,15 +135,15 @@ public class WeaponController : MonoBehaviour
     }
 
     #region Weapon Actions
-    public void AddRecoil(Vector3 recoilPosOffset, Vector3 recoilRotOffset, float amount = 0)
+    public void AddRecoil(Vector3 recoilPosOffset, Vector3 recoilRotOffset, float amount = 0, float aimMulti = 1f)
     {
         switch (CurrentWeapon.weaponType)
         {
             case WeaponClass.Ranged:
-                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (aiming ? 0.03f : 0.1f)));
+                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (aiming ? aimMulti : 1f))));
 
-                desiredRecoilPos = recoilPosOffset * (aiming ? 0.25f : Random.Range(0.9f, 1.15f));
-                desiredRecoilRot = recoilRotOffset * (aiming ? 0.1f : Random.Range(0.9f, 1.15f));
+                desiredRecoilPos = recoilPosOffset * (aiming ? aimMulti : Random.Range(0.9f, 1.15f));
+                desiredRecoilRot = recoilRotOffset * (aiming ? aimMulti - 0.15f : Random.Range(0.9f, 1.15f));
 
                 s.rb.AddForce(-s.cam.forward * amount * 0.25f, ForceMode.Impulse);
 
