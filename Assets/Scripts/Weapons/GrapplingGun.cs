@@ -41,6 +41,12 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float grappleHorizPullForce;
     [SerializeField] private float initialGrapplePullForce;
     [SerializeField] private float grappleRange;
+    [SerializeField] private float grappleDelay;
+    private bool readyToGrapple;
+    private Vector3 grapplePoint;
+    private bool grappling;
+
+    private int timesGrappled = 0;
 
     [Header("Collision")]
     [SerializeField] private LayerMask Grappleable;
@@ -56,17 +62,19 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private ShakeData recoilShake;
     private ScriptManager s;
 
-    Vector3 idk;
-    Vector3 idk2;
-    Vector3 idk3;
+    void OnEnable()
+    {
+        CancelInvoke("ResetGrapple");
+        Invoke("ResetGrapple", grappleDelay);
+    }
 
     void OnDisable()
     {
         StopAllCoroutines();
+        grappling = false;
 
-        idk = Vector3.zero;
-        idk2 = Vector3.zero;
-        idk3 = Vector3.zero;
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.Euler(Vector3.zero);
     }
 
     public bool OnAttack(ScriptManager s)
@@ -77,27 +85,31 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         Ray ray = this.s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (!Physics.Raycast(ray, out var hit, grappleRange, Grappleable)) return false;
 
-        Vector3 targetPoint = hit.point;
+        if (System.Math.Abs(Vector3.Dot(Vector3.up, hit.normal)) > 0.5f || !readyToGrapple) return false;
 
-        if (System.Math.Abs(Vector3.Dot(Vector3.up, hit.normal)) > 0.5f) return false;
+        grapplePoint = hit.point;
 
-        idk = targetPoint;
-        idk2 = hit.normal;
+        CancelInvoke("ResetGrapple");
+        Invoke("ResetGrapple", grappleDelay);
 
         StopAllCoroutines();
-        StartCoroutine(GrappleMovement(targetPoint, hit.normal));
+        StartCoroutine(GrappleMovement(hit.normal));
 
         return true;
     }
 
-    private IEnumerator GrappleMovement(Vector3 grapplePoint, Vector3 wallNormal)
+    private IEnumerator GrappleMovement(Vector3 wallNormal)
     {
-        s.rb.AddForce(((grapplePoint - s.transform.position).normalized + wallNormal + Vector3.up * 0.4f) * initialGrapplePullForce, ForceMode.Impulse);
+        float elapsed = 0f;
 
-        while (!s.PlayerInput.LeftReleaseClick && !s.PlayerMovement.WallRunning)
+        grappling = true;
+        readyToGrapple = false;
+        timesGrappled++;
+
+        s.rb.AddForce(wallNormal + Vector3.up * (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.Grounded ? 1.2f : 0.6f)) * initialGrapplePullForce, ForceMode.Impulse);
+
+        while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && (!s.PlayerMovement.Grounded || elapsed < 0.1f))
         {
-            idk3 = (grapplePoint - s.transform.position);
-
             Vector3 grappleToPlayer = (grapplePoint - s.transform.position);
             if (Vector3.Dot(wallNormal.normalized, grappleToPlayer.normalized) > 0.3f || grappleToPlayer.sqrMagnitude > (grappleRange + 5f) * (grappleRange + 5f)) break;
 
@@ -107,26 +119,47 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             grappleToPlayer.y = 0f;
             s.rb.AddForce(pullDir.normalized * grappleHorizPullForce, ForceMode.Acceleration);
 
+            elapsed += Time.fixedDeltaTime;
+
             yield return new WaitForFixedUpdate();
         }
 
-        idk = Vector3.zero;
-        idk2 = Vector3.zero;
-        idk3 = Vector3.zero;
+        grappling = false;
+    }
+
+    void ResetGrapple() => readyToGrapple = true;
+
+    public bool SecondaryAction(ScriptManager s) => true;
+
+    public void OnPickup() => timesGrappled = 0;
+    public void OnDrop()
+    {
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.Euler(Vector3.zero);
+
+        grappling = false;
+        timesGrappled = 0;
+    }
+
+    public void ItemUpdate() 
+    {
+        if (s == null || timesGrappled <= 0) return;
+
+        Vector3 gunToGrapple = s.WeaponControls.WeaponPos.InverseTransformDirection(grapplePoint - transform.position);      
+        Vector2 desiredPos = grappling ? (Vector2)gunToGrapple.normalized : Vector2.zero;
+        Quaternion desiredRot = grappling ? Quaternion.LookRotation(gunToGrapple) : Quaternion.Euler(Vector3.zero);
+        
+        transform.localRotation = Quaternion.Slerp(transform.localRotation, desiredRot, 7.5f * Time.deltaTime);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, 7.5f * Time.deltaTime);
     }
 
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(idk, 0.5f);
+        if (s == null || !grappling) return;
 
-        Debug.DrawRay(idk, idk2 * 3f, Color.red);
-        Debug.DrawRay(idk - idk3, idk3, Color.green);
+        Gizmos.DrawWireSphere(grapplePoint, 0.3f);
+        Debug.DrawLine(transform.position, grapplePoint, Color.red);
     }
-
-    public bool SecondaryAction(ScriptManager s) => true;
-
-    public void OnPickup() { }
-    public void OnDrop() { }
 
     public string ReadData() => " ";
 }

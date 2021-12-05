@@ -63,7 +63,7 @@ public class PlayerInteraction : MonoBehaviour
 
                 if (interactableTemp == null)
                 {
-                    if (Input.GetMouseButtonDown(0) && heldObj == null && !s.WeaponControls.holdingWeapon) Pickup(hit.transform.gameObject);
+                    if (Input.GetMouseButtonDown(0) && heldObj == null && !s.WeaponControls.HoldingWeapon) Pickup(hit.transform.gameObject);
                     return;
                 }
 

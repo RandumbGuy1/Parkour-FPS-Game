@@ -79,12 +79,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         ResetIntensity();
     }
 
-    void OnEnable()
-    {
-        reloading = false;
-        if (muzzleLight != null) StartCoroutine(UpdateFlash());
-    }
-
+    void OnEnable() => reloading = false;
     void OnDisable() => ResetIntensity();
 
     public bool OnAttack(ScriptManager s)
@@ -149,37 +144,27 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         reloading = false;
     }
 
-    private IEnumerator UpdateFlash()
-    {
-        while (isActiveAndEnabled)
-        {
-            if (desiredIntensity == 0f && muzzleLight.intensity == 0f) yield return null;
-
-            desiredIntensity = Mathf.Lerp(desiredIntensity, 0f, lightReturnSpeed * 0.5f * Time.deltaTime);
-            muzzleLight.intensity = Mathf.Lerp(muzzleLight.intensity, desiredIntensity, lightReturnSpeed * Time.deltaTime);
-
-            if (desiredIntensity < 0.01f)
-            {
-                desiredIntensity = 0f;
-                muzzleLight.intensity = 0f;
-            }
-
-            yield return null;
-        }
-    }
-
     private void ResetIntensity()
     {
         desiredIntensity = 0f;
         if (muzzleLight != null) muzzleLight.intensity = 0f;
     }
 
-    public void OnPickup()
+    public void ItemUpdate()
     {
-        ResetIntensity();
+        if (desiredIntensity == 0f && muzzleLight.intensity == 0f) return;
 
-        if (muzzleLight != null) StartCoroutine(UpdateFlash());
+        desiredIntensity = Mathf.Lerp(desiredIntensity, 0f, lightReturnSpeed * 0.5f * Time.deltaTime);
+        muzzleLight.intensity = Mathf.Lerp(muzzleLight.intensity, desiredIntensity, lightReturnSpeed * Time.deltaTime);
+
+        if (desiredIntensity < 0.01f)
+        {
+            desiredIntensity = 0f;
+            muzzleLight.intensity = 0f;
+        }
     }
+
+    public void OnPickup() => ResetIntensity();
 
     public void OnDrop()
     {

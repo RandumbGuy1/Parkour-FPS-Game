@@ -17,4 +17,5 @@ public interface IItem
     string ReadData();
     void OnPickup();
     void OnDrop();
+    void ItemUpdate();
 }

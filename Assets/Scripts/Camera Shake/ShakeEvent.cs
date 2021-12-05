@@ -12,7 +12,8 @@ public class ShakeEvent
     private Vector3 noise = Vector3.zero;
     private Vector3 noiseOffset = Vector3.zero;
 
-    private Vector3 targetDir;
+    private Vector3 desiredDir = Vector3.zero;
+    private Vector3 targetDir = Vector3.zero;
     private Vector3 smoothDir = Vector3.zero;
 
     public Vector3 Displacement { get; private set; } = Vector3.zero;
@@ -25,7 +26,19 @@ public class ShakeEvent
 
         timeRemaining = this.shakeData.Duration;
 
-        targetDir = initialKickback * this.shakeData.Magnitude;
+        if (shakeData.Type == ShakeData.ShakeType.KickBack)
+        {
+            desiredDir = initialKickback * this.shakeData.Magnitude;
+
+            if (shakeData.Frequency > 0)
+            {
+                Vector3 randomDir = Random.insideUnitSphere;
+                while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;
+
+                targetDir = (randomDir * 2.8f - desiredDir).normalized * shakeData.Magnitude;
+            }
+            else targetDir = Vector3.zero;
+        }
 
         noiseOffset.x = Random.Range(0f, 32f);
         noiseOffset.y = Random.Range(0f, 32f);
@@ -64,12 +77,13 @@ public class ShakeEvent
                     }
                     */
 
-                    targetDir = Vector3.Lerp(targetDir, Vector3.zero, shakeData.SmoothSpeed * 0.4f * Time.smoothDeltaTime);
-                    smoothDir = Vector3.Slerp(smoothDir, targetDir, shakeData.SmoothSpeed * Time.smoothDeltaTime);
+                    desiredDir = Vector3.Lerp(desiredDir, targetDir, shakeData.SmoothSpeed * 0.4f * Time.smoothDeltaTime);
+                    smoothDir = Vector3.Slerp(smoothDir, desiredDir, shakeData.SmoothSpeed * Time.smoothDeltaTime);
 
                     Displacement = smoothDir * trama;
 
-                    if (targetDir.sqrMagnitude < (shakeData.Magnitude * shakeData.Frequency * 0.05f) * (shakeData.Magnitude * shakeData.Frequency * 0.05f))
+                    if (shakeData.Frequency <= 0) break;
+                    if ((targetDir - desiredDir).sqrMagnitude < (shakeData.Magnitude * shakeData.Frequency * 0.05f) * (shakeData.Magnitude * shakeData.Frequency * 0.05f))
                     {
                         Vector3 randomDir = Random.insideUnitSphere;
                         while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;

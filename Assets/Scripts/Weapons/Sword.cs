@@ -110,6 +110,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     }
 
     public void OnPickup() { }
+    public void ItemUpdate() { }
 
     public void OnDrop()
     {

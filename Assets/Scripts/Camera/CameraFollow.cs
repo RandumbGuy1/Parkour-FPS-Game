@@ -174,7 +174,7 @@ public class CameraFollow : MonoBehaviour
         else
         {
 			if (!s.PlayerInput.Crouching) SetTilt(0, 0.2f);
-			if (s.WeaponControls.aiming) SetFov(-25, 0.2f);
+			if (s.WeaponControls.Aiming) SetFov(-25, 0.2f);
 			else SetFov(0, 0.3f);
 		}
 	}
