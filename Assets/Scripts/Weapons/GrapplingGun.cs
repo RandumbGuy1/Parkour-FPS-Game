@@ -60,6 +60,8 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
     [Header("Assignables")]
     [SerializeField] private ShakeData recoilShake;
+    [SerializeField] private GrappleRope rope;
+    [SerializeField] private Transform attackPoint;
     private ScriptManager s;
 
     void OnEnable()
@@ -88,6 +90,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         if (System.Math.Abs(Vector3.Dot(Vector3.up, hit.normal)) > 0.5f || !readyToGrapple) return false;
 
         grapplePoint = hit.point;
+        rope.DrawRope(attackPoint, grapplePoint);
 
         CancelInvoke("ResetGrapple");
         Invoke("ResetGrapple", grappleDelay);
@@ -125,6 +128,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         }
 
         grappling = false;
+        rope.OnStopDraw();
     }
 
     void ResetGrapple() => readyToGrapple = true;
@@ -139,6 +143,8 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
         grappling = false;
         timesGrappled = 0;
+
+        rope.OnStopDraw();
     }
 
     public void ItemUpdate() 
