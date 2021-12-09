@@ -69,6 +69,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Transform weaponEmptyGameObject;
     [Space(10)]
     [SerializeField] private TextMeshProUGUI weaponDataText;
+    [SerializeField] private TextMeshProUGUI weaponNameText;
     [SerializeField] private Image itemArt;
     [Space(10)]
     [SerializeField] private GameObject weaponReticle;
@@ -112,6 +113,7 @@ public class WeaponController : MonoBehaviour
 
             if (CurrentItem != null)
             {
+                weaponNameText.text = CurrentItem.ReadName();
                 weaponDataText.text = CurrentItem.ReadData();
                 itemArt.sprite = CurrentItem.itemSprite;
 

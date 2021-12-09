@@ -15,6 +15,8 @@ public interface IItem
     Sprite itemSprite { get; }
 
     string ReadData();
+    string ReadName();
+
     void OnPickup();
     void OnDrop();
     void ItemUpdate();

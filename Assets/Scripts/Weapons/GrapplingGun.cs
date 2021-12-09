@@ -82,12 +82,12 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     public bool OnAttack(ScriptManager s)
     {
         this.s = s;
-        this.s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
         Ray ray = this.s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (!Physics.Raycast(ray, out var hit, grappleRange, Grappleable)) return false;
 
         if (System.Math.Abs(Vector3.Dot(Vector3.up, hit.normal)) > 0.5f || !readyToGrapple) return false;
+        this.s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
         grapplePoint = hit.point;
         rope.DrawRope(attackPoint, grapplePoint);
@@ -111,7 +111,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
         s.rb.AddForce(wallNormal + Vector3.up * (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.Grounded ? 1.2f : 0.6f)) * initialGrapplePullForce, ForceMode.Impulse);
 
-        while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && (!s.PlayerMovement.Grounded || elapsed < 0.1f))
+        while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && (!s.PlayerMovement.Grounded || elapsed < 0.1f) && !Physics.Linecast(attackPoint.position, grapplePoint + wallNormal, Grappleable))
         {
             Vector3 grappleToPlayer = (grapplePoint - s.transform.position);
             if (Vector3.Dot(wallNormal.normalized, grappleToPlayer.normalized) > 0.3f || grappleToPlayer.sqrMagnitude > (grappleRange + 5f) * (grappleRange + 5f)) break;
@@ -134,7 +134,6 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     void ResetGrapple() => readyToGrapple = true;
 
     public bool SecondaryAction(ScriptManager s) => true;
-
     public void OnPickup() => timesGrappled = 0;
     public void OnDrop()
     {
@@ -159,13 +158,6 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, 7.5f * Time.deltaTime);
     }
 
-    void OnDrawGizmos()
-    {
-        if (s == null || !grappling) return;
-
-        Gizmos.DrawWireSphere(grapplePoint, 0.3f);
-        Debug.DrawLine(transform.position, grapplePoint, Color.red);
-    }
-
     public string ReadData() => " ";
+    public string ReadName() => transform.name;
 }

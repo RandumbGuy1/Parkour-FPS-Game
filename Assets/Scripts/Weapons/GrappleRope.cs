@@ -6,125 +6,82 @@ public class GrappleRope : MonoBehaviour
 {
     [Header("Rope Settings")]
     [SerializeField] private LineRenderer lr;
-    [SerializeField] private int quality;
-    [SerializeField] private float damper;
+    [SerializeField] private int vertexCount;
+    [Space(10)]
     [SerializeField] private float strength;
-    [SerializeField] private float velocity;
-    [SerializeField] private float wobbleCount;
-    [SerializeField] private float waveCount;
+    [SerializeField] private float damper;
     [SerializeField] private float waveHeight;
-    [SerializeField] private AnimationCurve blendOverLifeTime = new AnimationCurve(
-      new Keyframe(0.0f, 0.0f, Mathf.Deg2Rad * 0.0f, Mathf.Deg2Rad * 720.0f),
-      new Keyframe(0.2f, 1.0f),
-      new Keyframe(1.0f, 0.0f));
+    [SerializeField] private float waveCount;
+    [SerializeField] private float velocity;
 
-    private float springValue;
-    private float sprintTarget;
-    private float springVelocity;
+    private float springTarget = 0;
+    private float springVelocity = 0;
+    private float springValue = 0;
 
     private Transform gunTip;
+
     private Vector3 grapplePoint;
+    private Vector3 reachedGrapplePoint = Vector3.zero;
+
+    private Vector3 returnVel = Vector3.zero;
     private bool grappling = false;
+
+    private void Start()
+    {
+        lr.positionCount = 0;
+    }
 
     public void DrawRope(Transform gunTip, Vector3 grapplePoint)
     {
-        lr.positionCount = 2;
+        lr.positionCount = vertexCount;
+        springVelocity = velocity;
 
         this.gunTip = gunTip;
         this.grapplePoint = grapplePoint;
+
         grappling = true;
     }
 
     public void OnStopDraw()
     {
-        springVelocity = 0f;
-        springValue = 0f;
         grappling = false;
-
-        if (lr.positionCount > 0) lr.positionCount = 0;
+        springVelocity = 0;
     }
 
-    public void Update()
+    void LateUpdate()
     {
-        if (!grappling) return;
-
-        lr.SetPosition(0, gunTip.position);
-        lr.SetPosition(1, grapplePoint);
-    }
-
-    /*
-    private IEnumerator AnimateRope(Vector3 gunTip, Vector3 grapplePoint)
-    {
-        Vector2 angle = LookAtAngle(grapplePoint - gunTip);
-
-        float percent = 0f;
-        while (percent <= 1f)
+        if (gunTip == null) return;
+        if (lr.positionCount <= 0)
         {
-            percent += Time.deltaTime * velocity;
-            SetPoints(grapplePoint, gunTip, percent, angle);
-            yield return null;
+            reachedGrapplePoint = gunTip.position;
+            return;
         }
 
-        SetPoints(grapplePoint, gunTip, 1f, angle);
-    }
-
-    private void SetPoints(Vector3 targetPos, Vector3 gunTipPos, float percent, Vector2 angle)
-    {
-        Vector3 ropeEnd = Vector3.Lerp(gunTipPos, targetPos, percent);
-        float length = Vector3.Distance(gunTipPos, ropeEnd);
-
-        for (int i = 0; i < quality + 1; i++)
+        Vector3 targetPoint = (grappling ? grapplePoint : gunTip.position);
+        if ((targetPoint - reachedGrapplePoint).sqrMagnitude < 0.4f && !grappling)
         {
-            Vector3 ropePos = Vector3.zero;
-
-            ropePos.x = (float)i / (quality + 1) * length;
-
-            float reversePercent = i - percent;
-            float amplitude = Mathf.Sin(reversePercent * wobbleCount * Mathf.PI);
-            
-            ropePos.y = Mathf.Sin(waveCount * i / (quality + 1) * 2f * Mathf.PI * reversePercent) * amplitude;
-
-            Vector3 finalPos = RotatePoint((gunTipPos + ropePos), gunTipPos, angle);
+            lr.positionCount = 0;
+            return;
         }
-    }
 
-    private Vector3 RotatePoint(Vector3 point, Vector3 pivot, Vector2 angle)
-    {
-        Vector3 dir = point - pivot;
-        dir = Quaternion.Euler(0, angle.y, angle.x) * dir;
-        return dir + pivot;
-    }
+        reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, grappling ? 0.15f : (targetPoint - reachedGrapplePoint).sqrMagnitude < 9f ? 0.005f : 0.02f);
 
-    private Vector2 LookAtAngle(Vector3 targetPos)
-    {
-        return new Vector2(Mathf.Atan2(targetPos.y, targetPos.x), Mathf.Atan2(targetPos.y, targetPos.z));
-    }
-
-    private void DrawRope()
-    {
         UpdateSpring(Time.smoothDeltaTime);
+        Vector3 up = Quaternion.LookRotation((grapplePoint - gunTip.position).normalized) * Vector3.up;
 
-        Vector3 gunTipPos = gunTip.position;
-        Vector3 grapplePoint = this.grapplePoint;
-
-        Vector3 up = Quaternion.LookRotation((grapplePoint - gunTipPos).normalized) * Vector3.up;
-        grapplingPosition = Vector3.Lerp(grapplingPosition, grapplePoint, Time.deltaTime * 12f);
-
-        for (var i = 0; i < quality + 1; i++)
+        for (int i = 0; i < vertexCount; i++)
         {
-            var delta = i / (float)quality;
-            var offset = up * waveHeight * Mathf.Sin(delta * waveCount * Mathf.PI) * springValue * blendOverLifeTime.Evaluate(delta);
-
-            lr.SetPosition(i, Vector3.Lerp(gunTipPos, grapplePoint, delta) + offset);
+            var delta = i / (float) vertexCount;
+            var offset = up * waveHeight * Mathf.Sin(delta * waveCount * Mathf.PI) * springValue;
+            lr.SetPosition(i, Vector3.Lerp(gunTip.position, reachedGrapplePoint, delta) + offset);
         }
     }
 
     private void UpdateSpring(float deltaTime)
     {
-        float direction = sprintTarget - springValue >= 0 ? 1f : -1f;
-        float force = Mathf.Abs(sprintTarget - springValue) * strength;
+        float direction = springTarget - springValue >= 0 ? 1f : -1f;
+        float force = Mathf.Abs(springTarget - springValue) * strength * 50;
         springVelocity += (force * direction - springVelocity * damper) * deltaTime;
         springValue += springVelocity * deltaTime;
     }
-    */
 }

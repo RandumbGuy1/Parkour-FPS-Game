@@ -121,4 +121,5 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     }
 
     public string ReadData() => " ";
+    public string ReadName() => transform.name;
 }
