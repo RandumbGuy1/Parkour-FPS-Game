@@ -10,9 +10,13 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private float throwForce;
     [SerializeField] private int selectedWeapon;
     [SerializeField] private int maxWeapons;
+    [Space(10)]
+    [SerializeField] private int aimFovOffset;
     public bool Aiming { get; private set; } = false;
     public bool HoldingWeapon { get; private set; } = false;
     public bool CanAttack { get; private set; } = true;
+
+    public float AimFovOffset { get { return Aiming ? -aimFovOffset : 0; } }
 
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
@@ -98,7 +102,11 @@ public class WeaponController : MonoBehaviour
     {
         float previousWeapon = selectedWeapon;
 
-        if (s.PlayerInput.MiddleClick && CanAttack) Aiming = !Aiming;
+        if (s.PlayerInput.MiddleClick && CanAttack)
+        {
+            Aiming = !Aiming;
+            s.CameraLook.SetFov(Aiming ? -aimFovOffset : 0 + s.PlayerMovement.WallRunFovOffset, Aiming ? 0.2f : 0.3f);
+        }
         
         if (weapons.Count > 0)
         {

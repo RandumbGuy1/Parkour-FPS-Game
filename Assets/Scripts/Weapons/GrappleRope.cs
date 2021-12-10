@@ -18,8 +18,6 @@ public class GrappleRope : MonoBehaviour
     private float springVelocity = 0;
     private float springValue = 0;
 
-    private Transform gunTip;
-
     private Vector3 grapplePoint;
     private Vector3 reachedGrapplePoint = Vector3.zero;
 
@@ -31,12 +29,11 @@ public class GrappleRope : MonoBehaviour
         lr.positionCount = 0;
     }
 
-    public void DrawRope(Transform gunTip, Vector3 grapplePoint)
+    public void DrawRope(Vector3 grapplePoint)
     {
         lr.positionCount = vertexCount;
         springVelocity = velocity;
 
-        this.gunTip = gunTip;
         this.grapplePoint = grapplePoint;
 
         grappling = true;
@@ -48,16 +45,17 @@ public class GrappleRope : MonoBehaviour
         springVelocity = 0;
     }
 
+    public void ResetRope() => lr.positionCount = 0;
+
     void LateUpdate()
     {
-        if (gunTip == null) return;
         if (lr.positionCount <= 0)
         {
-            reachedGrapplePoint = gunTip.position;
+            reachedGrapplePoint = transform.position;
             return;
         }
 
-        Vector3 targetPoint = (grappling ? grapplePoint : gunTip.position);
+        Vector3 targetPoint = (grappling ? grapplePoint : transform.position);
         if ((targetPoint - reachedGrapplePoint).sqrMagnitude < 0.4f && !grappling)
         {
             lr.positionCount = 0;
@@ -67,13 +65,13 @@ public class GrappleRope : MonoBehaviour
         reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, grappling ? 0.15f : (targetPoint - reachedGrapplePoint).sqrMagnitude < 9f ? 0.005f : 0.02f);
 
         UpdateSpring(Time.smoothDeltaTime);
-        Vector3 up = Quaternion.LookRotation((grapplePoint - gunTip.position).normalized) * Vector3.up;
+        Vector3 up = Quaternion.LookRotation((grapplePoint - transform.position).normalized) * Vector3.up;
 
         for (int i = 0; i < vertexCount; i++)
         {
             var delta = i / (float) vertexCount;
             var offset = up * waveHeight * Mathf.Sin(delta * waveCount * Mathf.PI) * springValue;
-            lr.SetPosition(i, Vector3.Lerp(gunTip.position, reachedGrapplePoint, delta) + offset);
+            lr.SetPosition(i, Vector3.Lerp(transform.position, reachedGrapplePoint, delta) + offset);
         }
     }
 

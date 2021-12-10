@@ -10252,7 +10252,7 @@ MonoBehaviour:
   weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.3
   grapplePullForce: 30
-  grappleHorizPullForce: 20
+  grappleHorizPullForce: 30
   initialGrapplePullForce: 50
   grappleRange: 100
   grappleDelay: 1
@@ -10266,7 +10266,6 @@ MonoBehaviour:
   weaponRecoilAimMulti: 0.5
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   rope: {fileID: 1665305109}
-  attackPoint: {fileID: 1665305108}
 --- !u!114 &670829600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14658,7 +14657,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1486455896
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14973,7 +14972,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 12.71
+  m_Name: Save 12.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15484,7 +15483,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1630573897
 Transform:
   m_ObjectHideFlags: 0
@@ -15957,6 +15956,7 @@ MonoBehaviour:
   crouchScale: 1.2
   crouchSmoothTime: 0.06
   slideForce: 80
+  slideTilt: 8
   wallRunGravityForce: 10
   wallJumpForce: 45
   wallHoldForce: 50
@@ -15964,6 +15964,8 @@ MonoBehaviour:
   wallClimbForce: 3
   wallJumpCooldownSteps: 50
   minimumJumpHeight: 1.3
+  wallRunTilt: 15
+  wallRunFovOffset: 18
   vaultDuration: 0.08
   vaultForce: 10
   vaultOffset: 8.5
@@ -16046,6 +16048,7 @@ MonoBehaviour:
   throwForce: 30
   selectedWeapon: 0
   maxWeapons: 4
+  aimFovOffset: 28
   defaultPos: {x: 2, y: -0.6, z: 4}
   defaultRot: {x: -0.45, y: 18, z: 0}
   aimPos: {x: -2, y: -0.3, z: 0}
@@ -16303,8 +16306,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lr: {fileID: 1665305110}
   vertexCount: 100
-  strength: 6
-  damper: 12
+  strength: 7
+  damper: 14
   waveHeight: 8
   waveCount: 7
   velocity: 5

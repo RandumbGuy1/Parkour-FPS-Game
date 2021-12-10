@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float crouchScale;
     [SerializeField] private float crouchSmoothTime;
     [SerializeField] private float slideForce;
+    [SerializeField] private float slideTilt;
     private float crouchVel = 0f;
     private bool crouched = false;
     private bool canUnCrouch = true;
@@ -37,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private int wallJumpCooldownSteps;
     [Space(10)]
     [SerializeField] private float minimumJumpHeight;
+    [SerializeField] private float wallRunTilt;
+    [SerializeField] private float wallRunFovOffset;
     private Vector3 wallMoveDir = Vector3.zero;
     private bool canAddWallRunForce = true;
     private float camTurnVel = 0f;
@@ -45,6 +48,9 @@ public class PlayerMovement : MonoBehaviour
     public bool IsWallLeft { get; private set; } = false;
     public bool IsWallRight { get; private set; } = false;
     public bool WallRunning { get; private set; } = false;
+    private bool wallranLastFrame = false;
+
+    public float WallRunFovOffset { get { return (WallRunning ? wallRunFovOffset : 0); } }
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -163,6 +169,14 @@ public class PlayerMovement : MonoBehaviour
 
         Magnitude = rb.velocity.magnitude;
         Velocity = rb.velocity;
+
+        if (!WallRunning && wallranLastFrame)
+        {
+            s.CameraLook.SetTilt(0, 0.15f);
+            s.CameraLook.SetFov(s.WeaponControls.AimFovOffset, 0.2f);
+        }
+
+        wallranLastFrame = WallRunning;
     }
 
     private Vector3 GroundMovement()
@@ -470,6 +484,9 @@ public class PlayerMovement : MonoBehaviour
 
         if (canAddWallRunForce)
         {
+            s.CameraLook.SetTilt(wallRunTilt, 0.18f, IsWallRight ? 1 : -1);
+            s.CameraLook.SetFov(wallRunFovOffset + s.WeaponControls.AimFovOffset, 0.2f);
+
             canAddWallRunForce = false;
             rb.useGravity = false;
             rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
@@ -520,12 +537,16 @@ public class PlayerMovement : MonoBehaviour
     #region Crouching And Sliding
     private void Crouch(Vector3 dir)
     {
+        s.CameraLook.SetTilt(slideTilt, 0.15f, 1);
+
         crouched = true;
         if (Grounded && Magnitude > 0.5f) rb.AddForce(dir * slideForce * Magnitude);
     }
 
     private void UnCrouch()
     {
+        s.CameraLook.SetTilt(0, 0.2f);
+
         crouched = false;
         CanCrouchWalk = true;
 

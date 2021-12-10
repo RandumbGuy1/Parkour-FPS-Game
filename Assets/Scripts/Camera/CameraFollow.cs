@@ -47,14 +47,14 @@ public class CameraFollow : MonoBehaviour
 	{
 		cam = GetComponentInChildren<Camera>();
 		setFov = fov;
+
+		SetTilt(0, 0f);
+		SetFov(0, 0f);
 	}
 
 	void Update()
 	{
-		CameraEffects();
 		SpeedLines();
-		ChangeTilt();
-		ChangeFov();
 	}
 
 	void LateUpdate()
@@ -62,6 +62,9 @@ public class CameraFollow : MonoBehaviour
 		CalcRotation();
 		SmoothRotation();
 		ApplyRotation();
+
+		ChangeTilt();
+		ChangeFov();
 
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
@@ -113,20 +116,6 @@ public class CameraFollow : MonoBehaviour
 	}
 
     #region Camera Effects
-	private void CameraWallRunAutoTurn()
-    {
-		/*
-		desiredWallRunRot += (s.PlayerMovement.CalculateWallRunRotation() * -tiltDirection * 0.5f);
-
-		float targetRot = desiredWallRunRot - (wallRunRotation.z * 0.3f);
-
-		if (wallRunRotation.y == targetRot) return;
-		wallRunRotation.y = Mathf.SmoothDamp(wallRunRotation.y, targetRot, ref effectVel.z, 0.3f);
-
-		if (Math.Abs(targetRot - wallRunRotation.y) < 0.01f) wallRunRotation.y = targetRot;
-		*/
-	}
-
 	private void ChangeTilt()
 	{
 		if (wallRunRotation.z == targetCameraTilt) return;
@@ -158,25 +147,6 @@ public class CameraFollow : MonoBehaviour
 
 		fovTime = speed;
 		targetFov = setFov + extension;
-	}
-	#endregion
-
-	#region Process Camera Effects
-	private void CameraEffects()
-	{
-		if (s.PlayerInput.Crouching) SetTilt(8f, 0.15f, 1);
-
-		if (s.PlayerMovement.WallRunning)
-		{
-			SetTilt(15f, 0.15f, (s.PlayerMovement.IsWallRight ? 1 : -1));
-			SetFov(15f, 0.2f);
-		}
-        else
-        {
-			if (!s.PlayerInput.Crouching) SetTilt(0, 0.2f);
-			if (s.WeaponControls.Aiming) SetFov(-25, 0.2f);
-			else SetFov(0, 0.3f);
-		}
 	}
 
 	private void SpeedLines()

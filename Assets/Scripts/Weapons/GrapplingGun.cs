@@ -42,10 +42,11 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float initialGrapplePullForce;
     [SerializeField] private float grappleRange;
     [SerializeField] private float grappleDelay;
-    private bool readyToGrapple;
     private Vector3 grapplePoint;
-    private bool grappling;
+    private RaycastHit[] grappleHits;
 
+    private bool readyToGrapple;
+    private bool grappling;
     private int timesGrappled = 0;
 
     [Header("Collision")]
@@ -61,7 +62,6 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [Header("Assignables")]
     [SerializeField] private ShakeData recoilShake;
     [SerializeField] private GrappleRope rope;
-    [SerializeField] private Transform attackPoint;
     private ScriptManager s;
 
     void OnEnable()
@@ -73,7 +73,8 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     void OnDisable()
     {
         StopAllCoroutines();
-        grappling = false;
+        ResetGun();
+        rope.ResetRope();
 
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -90,7 +91,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         this.s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
         grapplePoint = hit.point;
-        rope.DrawRope(attackPoint, grapplePoint);
+        rope.DrawRope(grapplePoint);
 
         CancelInvoke("ResetGrapple");
         Invoke("ResetGrapple", grappleDelay);
@@ -111,7 +112,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
         s.rb.AddForce(wallNormal + Vector3.up * (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.Grounded ? 1.2f : 0.6f)) * initialGrapplePullForce, ForceMode.Impulse);
 
-        while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && (!s.PlayerMovement.Grounded || elapsed < 0.1f) && !Physics.Linecast(attackPoint.position, grapplePoint + wallNormal, Grappleable))
+        while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && (!s.PlayerMovement.Grounded || elapsed < 0.1f) && !Physics.Linecast(transform.position, grapplePoint + wallNormal, Grappleable))
         {
             Vector3 grappleToPlayer = (grapplePoint - s.transform.position);
             if (Vector3.Dot(wallNormal.normalized, grappleToPlayer.normalized) > 0.3f || grappleToPlayer.sqrMagnitude > (grappleRange + 5f) * (grappleRange + 5f)) break;
@@ -127,11 +128,8 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             yield return new WaitForFixedUpdate();
         }
 
-        grappling = false;
-        rope.OnStopDraw();
+        ResetGun();
     }
-
-    void ResetGrapple() => readyToGrapple = true;
 
     public bool SecondaryAction(ScriptManager s) => true;
     public void OnPickup() => timesGrappled = 0;
@@ -140,15 +138,19 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.Euler(Vector3.zero);
 
-        grappling = false;
-        timesGrappled = 0;
+        ResetGun();
 
-        rope.OnStopDraw();
+        timesGrappled = 0;
     }
 
     public void ItemUpdate() 
     {
         if (s == null || timesGrappled <= 0) return;
+
+        /*
+        grappleHits = Physics.SphereCastAll(transform.position, 15f, s.cam.forward, grappleRange / 2f, Grappleable); 
+        idk = FindNearestPoint(new List<RaycastHit>(grappleHits));
+        */
 
         Vector3 gunToGrapple = s.WeaponControls.WeaponPos.InverseTransformDirection(grapplePoint - transform.position);      
         Vector2 desiredPos = grappling ? (Vector2)gunToGrapple.normalized : Vector2.zero;
@@ -156,8 +158,36 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         
         transform.localRotation = Quaternion.Slerp(transform.localRotation, desiredRot, 7.5f * Time.deltaTime);
         transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, 7.5f * Time.deltaTime);
+
+        if (grappling) s.CameraLook.SetTilt(-s.orientation.InverseTransformDirection(grapplePoint - transform.position).x * 0.55f, 0.5f);
+    }
+
+    private Vector3 FindNearestPoint(List<RaycastHit> hits)
+    {
+        Vector3 result = Vector3.zero;
+
+        for (int i = 0; i < hits.Count; i++)
+        {
+            if (hits[i].distance < float.PositiveInfinity && System.Math.Abs(hits[i].normal.y) < 0.4f && !Physics.Linecast(hits[i].point, transform.position))
+            {
+                Vector3 closestTo = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)).GetPoint(hits[i].distance);
+                result = hits[i].collider.ClosestPoint(closestTo);
+            }
+        }
+
+        return result;
     }
 
     public string ReadData() => " ";
     public string ReadName() => transform.name;
+
+    void ResetGrapple() => readyToGrapple = true;
+
+    void ResetGun()
+    {
+        if (grappling && s != null) s.CameraLook.SetTilt(0f, 0.4f);
+
+        grappling = false;
+        rope.OnStopDraw();
+    }
 }
