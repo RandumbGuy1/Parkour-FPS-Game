@@ -10256,6 +10256,12 @@ MonoBehaviour:
   initialGrapplePullForce: 50
   grappleRange: 100
   grappleDelay: 1
+  swaySmoothTime: 0.5
+  maxTilt: 30
+  minTilt: -30
+  fovSmoothTime: 0.55
+  maxFov: 20
+  minFov: 5
   Grappleable:
     serializedVersion: 2
     m_Bits: 256
@@ -14972,7 +14978,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 12.8
+  m_Name: Save 12.91
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

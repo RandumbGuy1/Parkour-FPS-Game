@@ -12,11 +12,11 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private int maxWeapons;
     [Space(10)]
     [SerializeField] private int aimFovOffset;
-    public bool Aiming { get; private set; } = false;
     public bool HoldingWeapon { get; private set; } = false;
     public bool CanAttack { get; private set; } = true;
 
     public float AimFovOffset { get { return Aiming ? -aimFovOffset : 0; } }
+    public bool Aiming { get; private set; } = false;
 
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
@@ -94,19 +94,15 @@ public class WeaponController : MonoBehaviour
 
         weaponDataText.gameObject.SetActive(false);
 
-        weaponReticle.gameObject.SetActive(false);
-        circleCursor.gameObject.SetActive(true);
+        weaponReticle.SetActive(false);
+        circleCursor.SetActive(true);
     }
 
     void Update()
     {
         float previousWeapon = selectedWeapon;
 
-        if (s.PlayerInput.MiddleClick && CanAttack)
-        {
-            Aiming = !Aiming;
-            s.CameraLook.SetFov(Aiming ? -aimFovOffset : 0 + s.PlayerMovement.WallRunFovOffset, Aiming ? 0.2f : 0.3f);
-        }
+        if (s.PlayerInput.MiddleClick && CanAttack) Aiming = !Aiming;
         
         if (weapons.Count > 0)
         {
@@ -187,8 +183,8 @@ public class WeaponController : MonoBehaviour
     {
         weaponDataText.gameObject.SetActive(true);
 
-        weaponReticle.gameObject.SetActive(true);
-        circleCursor.gameObject.SetActive(false);
+        weaponReticle.SetActive(true);
+        circleCursor.SetActive(false);
 
         CurrentWeapon = obj.GetComponent<IWeapon>();
         CurrentItem = obj.GetComponent<IItem>();

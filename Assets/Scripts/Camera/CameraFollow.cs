@@ -6,13 +6,14 @@ using System;
 public class CameraFollow : MonoBehaviour
 {
 	private Vector3 wallRunRotation = Vector3.zero;
-	private int tiltDirection = 1;
-	private float tiltTime = 0, targetCameraTilt = 0f;
+	private float tiltTime = 0.2f, targetCameraTilt = 0f;
+
+	private GrapplingGun gp = null;
 
 	[Header("Fov")]
 	[SerializeField] private float fov;
 
-	private float targetFov = 0f, setFov, fovTime = 0;
+	private float targetFov = 0f, setFov, fovTime = 0.2f;
 	private Vector3 effectVel = Vector3.zero;
 
 	[Header("Sensitivity")]
@@ -35,9 +36,6 @@ public class CameraFollow : MonoBehaviour
 	private Vector3 finalSwayOffset = Vector3.zero;
 	private float headSwayScroller = 0;
 
-	private float smoothHeadTiltSway = 0f;
-	private float smoothHeadTiltSwayVel = 0f;
-
 	[Header("Assignables")]
 	[SerializeField] private ScriptManager s;
 	[SerializeField] private ParticleSystem sprintEffect;
@@ -48,13 +46,28 @@ public class CameraFollow : MonoBehaviour
 		cam = GetComponentInChildren<Camera>();
 		setFov = fov;
 
-		SetTilt(0, 0f);
-		SetFov(0, 0f);
+		wallRunRotation.z = 0f;
+		cam.fieldOfView = setFov;
+		targetFov = setFov;
 	}
 
 	void Update()
 	{
 		SpeedLines();
+
+		if (s.PlayerMovement.WallRunTiltOffset == 0 && s.PlayerMovement.SlideTiltOffset == 0f && (gp != null ? gp.GrappleTilt : 0) == 0)
+			tiltTime = 0.2f;
+
+		if (s.PlayerMovement.WallRunFovOffset == 0 && s.WeaponControls.AimFovOffset == 0f && (gp != null ? gp.GrappleFov : 0) == 0)
+			fovTime = 0.25f;
+
+		print(fovTime + " " + tiltTime);
+
+		ChangeTilt();
+		ChangeFov();
+
+		targetCameraTilt = s.PlayerMovement.WallRunTiltOffset + s.PlayerMovement.SlideTiltOffset + (gp != null ? gp.GrappleTilt : 0) + (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
+		targetFov = setFov + s.PlayerMovement.WallRunFovOffset + s.WeaponControls.AimFovOffset + (gp != null ? gp.GrappleFov : 0);
 	}
 
 	void LateUpdate()
@@ -62,9 +75,6 @@ public class CameraFollow : MonoBehaviour
 		CalcRotation();
 		SmoothRotation();
 		ApplyRotation();
-
-		ChangeTilt();
-		ChangeFov();
 
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
@@ -82,10 +92,7 @@ public class CameraFollow : MonoBehaviour
 			HeadSwayOffset = noiseOffset;
 		}
 
-		float horizInput = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x : 0f);
-		smoothHeadTiltSway = Mathf.SmoothDamp(smoothHeadTiltSway, horizInput * 1.25f, ref smoothHeadTiltSwayVel, 0.2f);
-
-		finalSwayOffset = (HeadSwayOffset * swayAmount) + Vector3.forward * smoothHeadTiltSway;
+		finalSwayOffset = HeadSwayOffset * swayAmount;
 	}
 
 	void CalcRotation()
@@ -115,13 +122,13 @@ public class CameraFollow : MonoBehaviour
 		s.orientation.transform.rotation = newPlayerRot;
 	}
 
-    #region Camera Effects
+	#region Camera Effects
 	private void ChangeTilt()
 	{
 		if (wallRunRotation.z == targetCameraTilt) return;
-		wallRunRotation.z = Mathf.SmoothDamp(wallRunRotation.z, targetCameraTilt * tiltDirection, ref effectVel.x, tiltTime);
+		wallRunRotation.z = Mathf.SmoothDamp(wallRunRotation.z, targetCameraTilt, ref effectVel.x, tiltTime);
 
-		if (Math.Abs(targetCameraTilt - wallRunRotation.z) < 0.01f) wallRunRotation.z = targetCameraTilt;
+		if (Math.Abs(targetCameraTilt - wallRunRotation.z) < 0.05f) wallRunRotation.z = targetCameraTilt;
 	}
 
 	private void ChangeFov()
@@ -129,25 +136,12 @@ public class CameraFollow : MonoBehaviour
 		if (fov == targetFov) return;
 		fov = Mathf.SmoothDamp(fov, targetFov, ref effectVel.y, fovTime);
 
-		if (Math.Abs(targetFov - fov) < 0.01f) fov = targetFov;
+		if (Math.Abs(targetFov - fov) < 0.05f) fov = targetFov;
 	}
 
-	public void SetTilt(float target, float speed, int i = 1)
-	{
-		if (targetCameraTilt == target) return;
+	public void SetTiltSmoothing(float speed = 0) => tiltTime = speed;
 
-		tiltDirection = i;
-		tiltTime = speed;
-		targetCameraTilt = target;
-	}
-
-	public void SetFov(float extension = 0, float speed = 0)
-	{
-		if (targetFov == setFov + extension) return;
-
-		fovTime = speed;
-		targetFov = setFov + extension;
-	}
+	public void SetFovSmoothing(float speed = 0) => fovTime = speed;
 
 	private void SpeedLines()
 	{
@@ -165,4 +159,6 @@ public class CameraFollow : MonoBehaviour
 		else if (sprintEffect.isPlaying) sprintEffect.Stop();
 	}
 	#endregion
+
+	public void SetGrapplingGun(GrapplingGun gp) => this.gp = gp;
 }

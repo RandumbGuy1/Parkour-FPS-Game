@@ -41,16 +41,30 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float wallRunTilt;
     [SerializeField] private float wallRunFovOffset;
     private Vector3 wallMoveDir = Vector3.zero;
-    private bool canAddWallRunForce = true;
     private float camTurnVel = 0f;
 
     public bool NearWall { get; private set; } = false;
     public bool IsWallLeft { get; private set; } = false;
     public bool IsWallRight { get; private set; } = false;
-    public bool WallRunning { get; private set; } = false;
-    private bool wallranLastFrame = false;
 
-    public float WallRunFovOffset { get { return (WallRunning ? wallRunFovOffset : 0); } }
+    private bool wallRunning = false;
+    public bool WallRunning 
+    {
+        get { return wallRunning;  }
+
+        set
+        {
+            bool wasWallRunning = wallRunning;
+            wallRunning = value;
+
+            if (wasWallRunning != value && value) InitialWallClimb();
+        }
+    }
+
+    public float WallRunFovOffset { get { return (wallRunning ? wallRunFovOffset : 0); } }
+    public float WallRunTiltOffset { get { return (wallRunning ? wallRunTilt * (IsWallRight ? 1 : -1) : 0); } }
+
+    public float SlideTiltOffset { get { return (crouched ? slideTilt : 0); } }
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -135,20 +149,13 @@ public class PlayerMovement : MonoBehaviour
     #region Movement
     private void Movement()
     {
-        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-
         float movementMultiplier = (Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : (crouched ? airMultiplier * 0.6f : airMultiplier));
-        float maxSpeed = CalculateMaxSpeed();
-        float coefficientOfFriction = moveSpeed / maxSpeed;
-        float groundFrictionAccelTime = 3f;
-
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier * Mathf.Clamp(stepsSinceGrounded / groundFrictionAccelTime, 0.3f, 1f), ForceMode.Force);
 
         ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) ? Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle : false);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && !crouched) rb.AddForce(Vector3.up * Physics.gravity.y * (1.7f - 1f), ForceMode.Acceleration);
-        if (crouched) rb.AddForce(Vector3.up * 10f, ForceMode.Acceleration);
+        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting && !crouched) rb.AddForce((1.7f - 1f) * Physics.gravity.y * Vector3.up, ForceMode.Acceleration);
+        if (crouched) rb.AddForce(Vector3.up * 15f, ForceMode.Acceleration);
 
         rb.useGravity = !(Vaulting || WallRunning);
         RelativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -156,49 +163,38 @@ public class PlayerMovement : MonoBehaviour
         RecordMovementSteps();
         ProcessCrouching();
 
-        Vector3 moveDir = (Grounded ? GroundMovement() : AirMovement());
+        ClampSpeed(movementMultiplier);
 
-        if (!CanWallJump() || !IsWallRight && !IsWallLeft)
-        {
-            WallRunning = false;
-            canAddWallRunForce = true;
-            camTurnVel = 0f;
-        }
+        if (Grounded) GroundMovement(movementMultiplier);
+        else AirMovement(movementMultiplier);
 
-        if (!Vaulting && !WallRunning) rb.AddForce(moveDir * moveSpeed * 8.5f * movementMultiplier, ForceMode.Force);
+        if (!CanWallJump() || !IsWallRight && !IsWallLeft) WallRunning = false;
 
         Magnitude = rb.velocity.magnitude;
         Velocity = rb.velocity;
-
-        if (!WallRunning && wallranLastFrame)
-        {
-            s.CameraLook.SetTilt(0, 0.15f);
-            s.CameraLook.SetFov(s.WeaponControls.AimFovOffset, 0.2f);
-        }
-
-        wallranLastFrame = WallRunning;
     }
 
-    private Vector3 GroundMovement()
+    private void GroundMovement(float movementMultiplier)
     {
         Friction();
         SlopeMovement();
 
         Vector3 inputDir = CalculateInputDir(input);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, GroundNormal);
+        float dot = Vector3.Dot(slopeDir, Vector3.up);
 
-        float dot = Vector3.Dot(Vector3.up, slopeDir);
-        return dot < 0f ? slopeDir : inputDir;
+        rb.AddForce(8.5f * movementMultiplier * moveSpeed * (dot > 0 ? slopeDir : inputDir), ForceMode.Force);
     }
 
-    private Vector3 AirMovement()
+    private void AirMovement(float movementMultiplier)
     {
         if (WallRunning) WallRun();
-
         if (NearWall && IsWallLeft && CanWallJump() && input.x < 0 || NearWall && IsWallRight && CanWallJump() && input.x > 0) WallRunning = true;
 
         if (CanWallJump() && jumping) Jump(false);
-        else if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning) StopWallRun();
+        else if (IsWallLeft && input.x > 0 && WallRunning || IsWallRight && input.x < 0 && WallRunning) DetachFromWallRun();
+
+        if (WallRunning || Vaulting) return;
 
         Vector2 inputTemp = input;
         if (crouched) if (Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
@@ -206,7 +202,7 @@ public class PlayerMovement : MonoBehaviour
         if (inputTemp.x > 0 && RelativeVel.x > 25f || inputTemp.x < 0 && RelativeVel.x < -25f) inputTemp.x = 0f;
         if (inputTemp.y > 0 && RelativeVel.z > 25f || inputTemp.y < 0 && RelativeVel.z < -25f) inputTemp.y = 0f;
 
-        return CalculateInputDir(inputTemp);
+        rb.AddForce(8.5f * movementMultiplier * moveSpeed * CalculateInputDir(inputTemp), ForceMode.Force);
     }
 
     private void SlopeMovement()
@@ -477,90 +473,91 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Wall Movement
+    private void InitialWallClimb()
+    {
+        camTurnVel = 0f;
+
+        Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward, WallNormal);
+        wallMoveDir = Vector3.Cross(wallUpCross, WallNormal);
+
+        s.CameraLook.SetTiltSmoothing(0.18f);
+        s.CameraLook.SetFovSmoothing(0.18f);
+
+        rb.useGravity = false;
+        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
+
+        float wallUpSpeed = Velocity.y;
+        float wallMagnitude = Magnitude;
+
+        wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 20f);
+
+        float wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
+        wallClimb = Mathf.Clamp(wallClimb, -3f, 12f);
+
+        rb.AddForce(Vector3.up * wallClimb);
+        rb.AddForce(wallMoveDir * wallMagnitude * 0.25f, ForceMode.VelocityChange);
+    }
+
     private void WallRun()
     {
         Vector3 wallUpCross = Vector3.Cross(-s.orientation.forward, WallNormal);
         wallMoveDir = Vector3.Cross(wallUpCross, WallNormal);
-
-        if (canAddWallRunForce)
-        {
-            s.CameraLook.SetTilt(wallRunTilt, 0.18f, IsWallRight ? 1 : -1);
-            s.CameraLook.SetFov(wallRunFovOffset + s.WeaponControls.AimFovOffset, 0.2f);
-
-            canAddWallRunForce = false;
-            rb.useGravity = false;
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
-
-            float wallUpSpeed = Velocity.y;
-            float wallMagnitude = Magnitude;
-
-            wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 20f);
-
-            float wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
-            wallClimb = Mathf.Clamp(wallClimb, -3f, 12f);
-
-            rb.AddForce(Vector3.up * wallClimb);
-            rb.AddForce(wallMoveDir * wallMagnitude * 0.25f, ForceMode.VelocityChange);
-        }
 
         rb.AddForce(-WallNormal * wallHoldForce);
         rb.AddForce(-transform.up * wallRunGravityForce * 0.8f, ForceMode.Acceleration);
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
     }
 
-    private void StopWallRun()
+    private void DetachFromWallRun()
     {
         if (!WallRunning || stepsSinceLastWallJumped < wallJumpCooldownSteps) return;
 
         stepsSinceLastWallJumped = 0;
         NearWall = false;
 
-        rb.AddForce(WallNormal * wallJumpForce * 0.8f, ForceMode.Impulse);
+        rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
+        rb.AddForce(Vector3.down * wallJumpForce * 0.15f, ForceMode.Impulse);
     }
 
     public bool CanWallJump()
     {
-        if (!NearWall) return false;
-        if (ReachedMaxSlope || Vaulting || Grounded || crouching) return false;
+        if (!NearWall || ReachedMaxSlope || Vaulting || Grounded || crouching) return false;
 
         return !Physics.CheckSphere(s.bottomCapsuleSphereOrigin + Vector3.down * minimumJumpHeight, 0.3f, Ground);
     }
 
     public float CalculateWallRunRotation(float rot)
     {
-        if (!WallRunning || Vector3.Dot(s.orientation.forward, WallNormal) > 0.35f || input.y < 0) return 0f;
-
-        return Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + WallNormal * 0.3f).normalized, Vector3.up), ref camTurnVel, 0.3f);
+        return (!WallRunning || Vector3.Dot(s.orientation.forward, WallNormal) > 0.4f) ? 0f : 
+            Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + WallNormal * 0.4f).normalized, Vector3.up), ref camTurnVel, 0.3f);
     }
     #endregion 
 
     #region Crouching And Sliding
-    private void Crouch(Vector3 dir)
+    private void Crouch(Vector3 dir, bool crouch = true)
     {
-        s.CameraLook.SetTilt(slideTilt, 0.15f, 1);
+        if (!crouch)
+        {
+            crouched = false;
+            CanCrouchWalk = true;
+            rb.velocity *= 0.8f;
+            return;
+        }
 
         crouched = true;
+        s.CameraLook.SetTiltSmoothing(0.15f);  
+        
         if (Grounded && Magnitude > 0.5f) rb.AddForce(dir * slideForce * Magnitude);
-    }
-
-    private void UnCrouch()
-    {
-        s.CameraLook.SetTilt(0, 0.2f);
-
-        crouched = false;
-        CanCrouchWalk = true;
-
-        rb.velocity *= 0.8f;
     }
 
     private void UpdateCrouchScale()
     {
-        if (crouching && transform.localScale.y == crouchScale || !crouching && transform.localScale.y == playerScale.y) return;
+        Vector3 targetScale = (crouching ? new Vector3(playerScale.x, crouchScale, playerScale.z) : playerScale);
 
-        transform.localScale = new Vector3(playerScale.x, Mathf.SmoothDamp(transform.localScale.y, (crouched ? crouchScale : playerScale.y), ref crouchVel, crouchSmoothTime), playerScale.z);
+        if (transform.localScale.y == targetScale.y) return;
+        if (Math.Abs(targetScale.y - transform.localScale.y) < 0.01f) transform.localScale = targetScale;
 
-        if (crouching && transform.localScale.y < crouchScale + 0.01f) transform.localScale = new Vector3(playerScale.x, crouchScale, playerScale.z);
-        if (!crouching && transform.localScale.y > playerScale.y - 0.01f) transform.localScale = playerScale;
+        transform.localScale = new Vector3(playerScale.x, Mathf.SmoothDamp(transform.localScale.y, targetScale.y, ref crouchVel, crouchSmoothTime), playerScale.z);
     }
 
     private void ProcessCrouching()
@@ -599,7 +596,6 @@ public class PlayerMovement : MonoBehaviour
         if (CounterMomentum(input.y, RelativeVel.z)) frictionForce -= s.orientation.forward * RelativeVel.z;
 
         frictionForce = Vector3.ProjectOnPlane(frictionForce, GroundNormal);
-
         if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f * multiplier, ForceMode.Acceleration);
 
         if (input.x == 0f) readyToCounter.x++;
@@ -639,9 +635,19 @@ public class PlayerMovement : MonoBehaviour
         if (Grounded) if (stepsSinceLastGrounded < 3 && jumping) Jump();
 
         if (crouching && !WallRunning && !crouched) Crouch(InputDir);
-        if (!crouching && crouched && canUnCrouch) UnCrouch();
+        if (!crouching && crouched && canUnCrouch) Crouch(InputDir, false);
     }
     #endregion
+
+    private void ClampSpeed(float movementMultiplier)
+    {
+        Vector3 vel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+        float maxSpeed = CalculateMaxSpeed();
+        float coefficientOfFriction = moveSpeed / maxSpeed;
+        float groundFrictionAccelTime = 3f;
+
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier * Mathf.Clamp(stepsSinceGrounded / groundFrictionAccelTime, 0.3f, 1f), ForceMode.Force);
+    }
 
     private float CalculateMaxSpeed()
     {
