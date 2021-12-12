@@ -16,9 +16,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 0
-  m_FogColor: {r: 0.10196079, g: 0.3372549, b: 0.6117647, a: 1}
-  m_FogMode: 1
-  m_FogDensity: 0.005
+  m_FogColor: {r: 0.8254717, g: 0.90602326, b: 1, a: 1}
+  m_FogMode: 2
+  m_FogDensity: 0.003
   m_LinearFogStart: 250
   m_LinearFogEnd: 800
   m_AmbientSkyColor: {r: 0.38474548, g: 0.42065433, b: 0.6226415, a: 1}
@@ -341,7 +341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   iceFrictionMultiplier: 0.35
-  iceDragMultiplier: 0.45
+  iceDragMultiplier: 0.2
 --- !u!65 &42061398
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10252,7 +10252,7 @@ MonoBehaviour:
   weaponAimRot: {x: 0, y: -15, z: -5}
   weaponWeight: 1.3
   grapplePullForce: 30
-  grappleHorizPullForce: 30
+  grappleHorizPullForce: 25
   initialGrapplePullForce: 50
   grappleRange: 100
   grappleDelay: 1
@@ -11157,7 +11157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fov: 90
   sensitivity: 90
-  rotateSmoothTime: {x: 20, y: 20}
+  rotateSmoothTime: {x: 25, y: 25}
   upClampAngle: 80
   downClampAngle: 80
   swayAmount: 8
@@ -12057,6 +12057,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84050eefee89ea7459729902efd448a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
   landBobSmoothTime: 0.042
   landBobMultiplier: 0.096
   maxOffset: 3.5
@@ -13581,7 +13582,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c723082f4dcbae4cab5907e99288bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boostForce: 16
+  boostForce: 15
   Obstacle:
     serializedVersion: 2
     m_Bits: 8192
@@ -14978,7 +14979,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 12.91
+  m_Name: Save 13.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15489,7 +15490,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1630573897
 Transform:
   m_ObjectHideFlags: 0
@@ -15952,9 +15953,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 35
+  moveSpeed: 30
   maxGroundSpeed: 22
-  airMultiplier: 0.4
+  airMultiplier: 0.43
   maxAirSpeed: 60
   maxSlideSpeed: 100
   jumpForce: 48
@@ -15976,11 +15977,10 @@ MonoBehaviour:
   vaultForce: 10
   vaultOffset: 8.5
   vaultJumpForce: 40
-  friction: 6
+  friction: 8
   frictionMultiplier: 1
   slideFriction: 15
-  counterThresold: 3
-  landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
+  counterThresold: 2
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768

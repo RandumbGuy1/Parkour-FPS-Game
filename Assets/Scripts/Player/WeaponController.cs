@@ -102,7 +102,11 @@ public class WeaponController : MonoBehaviour
     {
         float previousWeapon = selectedWeapon;
 
-        if (s.PlayerInput.MiddleClick && CanAttack) Aiming = !Aiming;
+        if (s.PlayerInput.MiddleClick && CanAttack)
+        {
+            Aiming = !Aiming;
+            s.CameraLook.SetFovSmoothing(0.2f);
+        }
         
         if (weapons.Count > 0)
         {

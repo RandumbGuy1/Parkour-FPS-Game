@@ -82,7 +82,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
-    [SerializeField] private ShakeData landbobShakeData;
     [SerializeField] private LayerMask GroundSnapLayer;
     [SerializeField] private LayerMask Ground;
     [SerializeField] private LayerMask Environment;
@@ -136,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        ProcessInput();
+        SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
     }
 
     void FixedUpdate()
@@ -178,6 +177,8 @@ public class PlayerMovement : MonoBehaviour
     {
         Friction();
         SlopeMovement();
+
+        if (stepsSinceLastGrounded < 3 && jumping) Jump();
 
         Vector3 inputDir = CalculateInputDir(input);
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, GroundNormal);
@@ -247,6 +248,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void ResetJumpSteps() => stepsSinceLastJumped = 0;
     #endregion
 
     #region Collision Calculations
@@ -300,7 +302,7 @@ public class PlayerMovement : MonoBehaviour
         if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded && stepsSinceGrounded < 1)
         {
             stepsSinceGrounded++;
-            Land(Mathf.Min(0, Velocity.y));
+            s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y));
         }
 
         if (IsWall(contact.normal, 0.33f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
@@ -337,7 +339,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
-    bool IsWall(Vector3 normal, float threshold) => Math.Abs(Vector3.Dot(normal, Vector3.up)) < threshold;
+    bool IsWall(Vector3 normal, float threshold) => Math.Abs(normal.y) < threshold;
 
     #endregion
 
@@ -411,7 +413,7 @@ public class PlayerMovement : MonoBehaviour
         if (Vector3.Dot(s.orientation.forward, -vaultDir) < 0.6f) return;
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
-        Land(Mathf.Min(0, Velocity.y) * 0.6f);
+        s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
     }
 
     private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
@@ -562,6 +564,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void ProcessCrouching()
     {
+        if (crouching && !WallRunning && !crouched) Crouch(InputDir);
+        if (!crouching && crouched && canUnCrouch) Crouch(InputDir, false);
+
         if (crouched)
         {
             canUnCrouch = !Physics.CheckSphere(s.playerHead.position + Vector3.up, 0.6f, Environment);
@@ -627,16 +632,6 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private Vector3 CalculateInputDir(Vector2 input) => s.orientation.forward * input.y * 1.05f + s.orientation.right * input.x;
-
-    private void ProcessInput()
-    {
-        SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
-
-        if (Grounded) if (stepsSinceLastGrounded < 3 && jumping) Jump();
-
-        if (crouching && !WallRunning && !crouched) Crouch(InputDir);
-        if (!crouching && crouched && canUnCrouch) Crouch(InputDir, false);
-    }
     #endregion
 
     private void ClampSpeed(float movementMultiplier)
@@ -656,26 +651,5 @@ public class PlayerMovement : MonoBehaviour
         if (jumping || !Grounded) return maxAirSpeed;
 
         return maxGroundSpeed;
-    }
-
-    private void Land(float impactForce)
-    {
-        if (impactForce < -30f)
-        {
-            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
-
-            Vector3 magnitude = rb.velocity;
-
-            velocityOverLifetime.x = magnitude.x;
-            velocityOverLifetime.z = magnitude.z;
-        }
-
-        float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
-        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
-
-        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
-
-        s.CameraHeadBob.BobOnce(impactForce);
-        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
     }
 }

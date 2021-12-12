@@ -55,13 +55,9 @@ public class CameraFollow : MonoBehaviour
 	{
 		SpeedLines();
 
-		if (s.PlayerMovement.WallRunTiltOffset == 0 && s.PlayerMovement.SlideTiltOffset == 0f && (gp != null ? gp.GrappleTilt : 0) == 0)
-			tiltTime = 0.2f;
+		float inputX = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 
-		if (s.PlayerMovement.WallRunFovOffset == 0 && s.WeaponControls.AimFovOffset == 0f && (gp != null ? gp.GrappleFov : 0) == 0)
-			fovTime = 0.25f;
-
-		print(fovTime + " " + tiltTime);
+		if (inputX != 0f && (gp != null ? gp.GrappleTilt : 0) == 0) SetTiltSmoothing(0.2f);
 
 		ChangeTilt();
 		ChangeFov();

@@ -6,7 +6,8 @@ using System;
 public class CameraBobbing : MonoBehaviour
 {
 	[Header("Land Bob Settings")]
-	[SerializeField] private float landBobSmoothTime;
+    [SerializeField] private ShakeData landbobShakeData;
+    [SerializeField] private float landBobSmoothTime;
 	[SerializeField] private float landBobMultiplier;
 	[SerializeField] private float maxOffset;
     [SerializeField] private float slideMaxOffset;
@@ -69,15 +70,32 @@ public class CameraBobbing : MonoBehaviour
         }
 	}
 
-	public void BobOnce(float mag)
+	public void BobOnce(float impactForce)
 	{
-        mag = Mathf.Round(mag * 100f) * 0.01f;
-        mag = Mathf.Clamp(mag * landBobMultiplier, -maxOffset, 0f);
+        if (impactForce < -30f)
+        {
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", s.transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
-        if (mag > -0.5f) return;
-        if (s.PlayerInput.Crouching) mag = Mathf.Clamp(mag * 0.83f, -slideMaxOffset, 0f);
+            Vector3 magnitude = s.rb.velocity;
 
-        desiredOffset += mag;
+            velocityOverLifetime.x = magnitude.x * 0.8f;
+            velocityOverLifetime.z = magnitude.z * 0.8f;
+        }
+
+        bool crouched = s.PlayerInput.Crouching;
+        float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
+        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
+
+        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
+        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
+
+        impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
+        impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);
+
+        if (impactForce > -0.5f) return;
+        if (crouched) impactForce = Mathf.Clamp(impactForce * 0.83f, -slideMaxOffset, 0f);
+
+        desiredOffset += impactForce;
 	}
 
     private void CalculateFootsteps()

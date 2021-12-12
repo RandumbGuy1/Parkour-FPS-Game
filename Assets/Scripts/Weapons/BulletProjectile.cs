@@ -61,7 +61,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         Invoke("Explode", 0.005f);
 
         ContactPoint contact = col.GetContact(0);
-        impactPoint = contact.point + contact.normal * 0.1f; 
+        impactPoint = contact.point - contact.normal * 0.1f;
 
         ObjectPooler.Instance.SpawnParticle(impactEffect, transform.position, Quaternion.LookRotation(contact.normal));
     }
@@ -75,14 +75,25 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
         if (type != ProjectileType.Grenade) return;
 
-        Collider[] enemiesInRadius = Physics.OverlapSphere(impactPoint, 5f, Collides);
+        Collider[] enemiesInRadius = Physics.OverlapSphere(impactPoint, 10f, Collides);
 
         for (int i = 0; i < enemiesInRadius.Length; i++)
         {
-            Rigidbody rb = enemiesInRadius[i].GetComponent<Rigidbody>();
-            if (rb == null) continue;
+            ScriptManager s = enemiesInRadius[i].gameObject.GetComponent<ScriptManager>();
+            Rigidbody rb;
 
-            rb.AddExplosionForce(120f, impactPoint, 20f, 1.1f, ForceMode.VelocityChange);
+            if (s == null) rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
+            else rb = s.rb;
+
+            if (rb == null) continue;
+            if (s != null)
+            {
+                s.PlayerMovement.ResetJumpSteps();
+                s.CameraShaker.ShakeOnce(10f, 4f, 1.5f, 4f, ShakeData.ShakeType.Perlin);
+            }
+
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.5f, rb.velocity.z);
+            rb.AddExplosionForce(55f, impactPoint, 15f, 1.5f, ForceMode.VelocityChange);
         }
     }
 }
