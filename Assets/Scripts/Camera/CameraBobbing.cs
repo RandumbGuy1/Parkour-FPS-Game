@@ -78,8 +78,8 @@ public class CameraBobbing : MonoBehaviour
 
             Vector3 magnitude = s.rb.velocity;
 
-            velocityOverLifetime.x = magnitude.x * 0.8f;
-            velocityOverLifetime.z = magnitude.z * 0.8f;
+            velocityOverLifetime.x = magnitude.x * 1.3f;
+            velocityOverLifetime.z = magnitude.z * 1.3f;
         }
 
         bool crouched = s.PlayerInput.Crouching;

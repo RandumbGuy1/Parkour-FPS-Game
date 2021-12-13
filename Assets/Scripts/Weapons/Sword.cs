@@ -53,8 +53,8 @@ public class Sword : MonoBehaviour, IItem, IWeapon
 
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private BoxCollider bc;
+    private Rigidbody rb;
+    private BoxCollider bc;
     private Transform cam;
 
     void Awake()
@@ -99,8 +99,8 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         {
             Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + Vector3.up * 2f * 0.3f + cam.forward;
 
-            rb.AddForce(dirToLaunch * swingForce * 0.5f, ForceMode.Impulse);
-            rb.AddTorque(dirToLaunch * swingForce * 0.5f, ForceMode.Impulse);
+            rb.AddForce(dirToLaunch * swingForce, ForceMode.VelocityChange);
+            rb.AddTorque(dirToLaunch * swingForce, ForceMode.VelocityChange);
         }
     }
 

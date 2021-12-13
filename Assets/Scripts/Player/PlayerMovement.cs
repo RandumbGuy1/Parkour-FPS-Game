@@ -181,10 +181,10 @@ public class PlayerMovement : MonoBehaviour
         if (stepsSinceLastGrounded < 3 && jumping) Jump();
 
         Vector3 inputDir = CalculateInputDir(input);
-        Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, GroundNormal);
+        Vector3 slopeDir = inputDir - Vector3.Project(inputDir, GroundNormal);
         float dot = Vector3.Dot(slopeDir, Vector3.up);
 
-        rb.AddForce(8.5f * movementMultiplier * moveSpeed * (dot > 0 ? slopeDir : inputDir), ForceMode.Force);
+        rb.AddForce(8.5f * movementMultiplier * moveSpeed * (dot > 0 ? inputDir : inputDir), ForceMode.Force);
     }
 
     private void AirMovement(float movementMultiplier)
@@ -510,14 +510,14 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
     }
 
-    private void DetachFromWallRun()
+    public void DetachFromWallRun()
     {
         if (!WallRunning || stepsSinceLastWallJumped < wallJumpCooldownSteps) return;
 
         stepsSinceLastWallJumped = 0;
         NearWall = false;
 
-        rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
+        rb.AddForce(WallNormal * wallJumpForce * 1.1f, ForceMode.Impulse);
         rb.AddForce(Vector3.down * wallJumpForce * 0.15f, ForceMode.Impulse);
     }
 
@@ -533,6 +533,8 @@ public class PlayerMovement : MonoBehaviour
         return (!WallRunning || Vector3.Dot(s.orientation.forward, WallNormal) > 0.4f) ? 0f : 
             Mathf.SmoothDampAngle(rot, Vector3.SignedAngle(s.orientation.forward, (wallMoveDir + WallNormal * 0.4f).normalized, Vector3.up), ref camTurnVel, 0.3f);
     }
+
+    public void SetWallrunning(bool wallRunning = true) => WallRunning = wallRunning;
     #endregion 
 
     #region Crouching And Sliding
@@ -601,13 +603,10 @@ public class PlayerMovement : MonoBehaviour
         if (CounterMomentum(input.y, RelativeVel.z)) frictionForce -= s.orientation.forward * RelativeVel.z;
 
         frictionForce = Vector3.ProjectOnPlane(frictionForce, GroundNormal);
-        if (frictionForce != Vector3.zero) rb.AddForce(frictionForce * friction * moveSpeed * 0.1f * multiplier, ForceMode.Acceleration);
+        if (frictionForce != Vector3.zero) rb.AddForce(0.2f * friction * moveSpeed * multiplier * frictionForce);
 
-        if (input.x == 0f) readyToCounter.x++;
-        else readyToCounter.x = 0;
-
-        if (input.y == 0f) readyToCounter.y++;
-        else readyToCounter.y = 0;
+        readyToCounter.x = input.x == 0f ? readyToCounter.x + 1 : 0;
+        readyToCounter.y = input.y == 0f ? readyToCounter.y + 1 : 0;
     }
 
     public void SetFrictionMultiplier(float amount = 1f) => frictionMultiplier = amount;
