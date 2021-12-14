@@ -51,6 +51,11 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private Vector3 swingRotOffset;
     [SerializeField] private ShakeData recoilShake;
 
+    private Vector3 desiredSpinOffset;
+    private Vector3 swingSpinOffset;
+    private int timesAttacked = 0;
+    private bool canAttack;
+
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
     private Rigidbody rb;
@@ -63,27 +68,38 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         bc = GetComponent<BoxCollider>();
     }
 
+    void OnDisable()
+    {
+        bc.isTrigger = false;
+        StopAllCoroutines();
+        StopAllCoroutines();
+        rb.detectCollisions = false;
+    }
+
     public bool OnAttack(ScriptManager s)
     {
+        if (bc.isTrigger && rb.detectCollisions) return false;
+
         cam = s.cam;
         s.WeaponControls.AddRecoil(swingPosOffset, swingRotOffset);
+        timesAttacked++;
 
-        CancelInvoke("RevertAttackHitBox");
-        Invoke("AttackHitBox", 0.05f);
+        desiredSpinOffset = Vector3.up * 5f + Vector3.right * 2f;
 
+        StopAllCoroutines();
+        StartCoroutine(SetAttackHitBox());
         return true;
     }
 
-    private void AttackHitBox()
+    private IEnumerator SetAttackHitBox()
     {
+        yield return new WaitForSeconds(0.01f);
+
         bc.isTrigger = true;
         rb.detectCollisions = true;
 
-        Invoke("RevertAttackHitBox", hitboxActive);
-    }
+        yield return new WaitForSeconds(hitboxActive);
 
-    private void RevertAttackHitBox()
-    {
         bc.isTrigger = false;
         rb.detectCollisions = false;
     }
@@ -110,14 +126,23 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     }
 
     public void OnPickup() { }
-    public void ItemUpdate() { }
+    public void ItemUpdate() 
+    {
+        if (timesAttacked <= 0) return;
+
+        desiredSpinOffset = Vector3.Lerp(desiredSpinOffset, Vector3.zero, 3f * Time.deltaTime);
+        swingSpinOffset = Vector3.Lerp(swingSpinOffset, desiredSpinOffset, 8f * Time.deltaTime);
+
+        transform.localPosition = swingSpinOffset;
+    }
 
     public void OnDrop()
     {
-        CancelInvoke("RevertAttackHitBox");
+        StopAllCoroutines();
 
         bc.isTrigger = false;
         rb.detectCollisions = true;
+        timesAttacked = 0;
     }
 
     public string ReadData() => " ";
