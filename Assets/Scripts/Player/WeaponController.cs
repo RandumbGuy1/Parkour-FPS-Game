@@ -256,14 +256,7 @@ public class WeaponController : MonoBehaviour
         rb.AddTorque(rand.normalized * throwForce * 3f, ForceMode.Impulse);
         weapons.RemoveAt(selectedWeapon);
 
-        reloadRotVel = Vector3.zero;
-        reloadRot = Vector3.zero;
-
-        switchPosVel = Vector3.zero;
-        switchRotVel = Vector3.zero;
-
-        switchOffsetPos = Vector3.zero;
-        switchOffsetRot = Vector3.zero;
+        ResetMovementValues();
 
         if (weapons.Count > 0 && !pickupDrop)
         {
@@ -281,16 +274,31 @@ public class WeaponController : MonoBehaviour
     #endregion
 
     #region Dynamic Weapon Movement
+    private void ResetMovementValues()
+    {
+        reloadRotVel = Vector3.zero;
+        reloadRot = Vector3.zero;
+
+        switchPosVel = Vector3.zero;
+        switchRotVel = Vector3.zero;
+        switchOffsetPos = Vector3.zero;
+        switchOffsetRot = Vector3.zero;
+
+        recoilPos = Vector3.zero;
+        recoilRot = Vector3.zero;
+        recoilPosVel = Vector3.zero;
+        recoilRotVel = Vector3.zero;
+    }
+
     private Vector3 CalculateBob()
     {
-        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (Aiming ? 0.15f : 1f);
-
+        float amp = CurrentItem != null ? 1f / CurrentItem.weight : 1f;
         return (timer <= 0 ? Vector3.zero : (Vector3.right * Mathf.Cos(timer * bobSpeed) * bobAmountHoriz) + (Vector3.up * (Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert)) * amp;
     }
 
     private Vector3 CalculateLookOffset()
     {
-        float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (Aiming ? 0.2f : 1f);
+        float amp = CurrentItem != null ? 1f / CurrentItem.weight : 1f;
 
         Vector2 camDelta = s.CameraLook.RotationDelta * 0.3f;
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
@@ -307,7 +315,7 @@ public class WeaponController : MonoBehaviour
 
     private Vector3 CalculateSway()
     {
-         float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (Aiming ? 0.4f : 1f);
+         float amp = (CurrentItem != null ? 1f / CurrentItem.weight : 1f) * (Aiming ? 0.25f : 1f);
 
          Vector2 camDelta = (s.CameraLook.RotationDelta * swayAmount) * 0.5f;
          camDelta.y -= (s.PlayerInput.InputVector.x * swayAmount) * 1.5f;
@@ -351,7 +359,7 @@ public class WeaponController : MonoBehaviour
         recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, smoothing);
         recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, smoothing);
         
-        if (desiredRecoilPos.sqrMagnitude < 0.001f && desiredRecoilRot.sqrMagnitude < 0.001f)
+        if (desiredRecoilPos.sqrMagnitude < 0.0001f && desiredRecoilRot.sqrMagnitude < 0.0001f)
         {
             desiredRecoilPos = Vector3.zero;
             desiredRecoilRot = Vector3.zero;
@@ -360,15 +368,15 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateDefaultValues()
     {
-        Vector3 targetDesiredPos = (CurrentItem != null ? CurrentItem.defaultPos : defaultPos);
-        Vector3 targetDesiredRot = (CurrentItem != null ? CurrentItem.defaultRot : defaultRot);
+        Vector3 targetDesiredPos = (CurrentItem != null ? CurrentItem.defaultPos : defaultPos) + (Aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero);
+        Vector3 targetDesiredRot = (CurrentItem != null ? CurrentItem.defaultRot : defaultRot) + (Aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero);
 
         if (smoothDefaultPos == targetDesiredPos && smoothDefaultRot == targetDesiredRot) return;
 
-        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.55f);
-        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.55f);
+        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.25f);
+        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.25f);
 
-        if ((smoothDefaultPos - targetDesiredPos).sqrMagnitude < 0.00001f && (smoothDefaultRot - targetDesiredRot).sqrMagnitude < 0.00001f)
+        if ((smoothDefaultPos - targetDesiredPos).sqrMagnitude < 0.0000001f && (smoothDefaultRot - targetDesiredRot).sqrMagnitude < 0.0000001f)
         {
             smoothDefaultPos = targetDesiredPos;
             smoothDefaultRot = targetDesiredRot;
@@ -379,9 +387,12 @@ public class WeaponController : MonoBehaviour
     {
         timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob, CalculateBob() - (Aiming ? s.CameraLook.HeadSwayOffset * 0.01f : s.CameraLook.HeadSwayOffset * 0.3f), ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (Aiming ? (CurrentItem != null ? CurrentItem.aimRot : aimRot) : Vector3.zero) + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - (Aiming ? s.CameraLook.HeadSwayOffset * 4f : s.CameraLook.HeadSwayOffset * 14f), ref swayVel, swaySmoothTime);
-        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * (Aiming ? 0.5f : 1f) + (Aiming ? (CurrentItem != null ? CurrentItem.aimPos : aimPos) : Vector3.zero), ref lookVel, 0.2f);
+        float swayAimMulti = Aiming ? 0.03f : 1f;
+        float bobAimMulti = Aiming ? 0.08f : 1f;
+
+        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob() - s.CameraLook.HeadSwayOffset * 0.3f) * bobAimMulti, ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - s.CameraLook.HeadSwayOffset * swayAimMulti, ref swayVel, swaySmoothTime);
+        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * swayAimMulti, ref lookVel, 0.2f);
 
         CalculateDefaultValues();
         CalculateRecoilOffset();

@@ -154,7 +154,9 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             s.rb.AddForce(grappleFallSpeedClamp * Mathf.Clamp(-s.rb.velocity.y * 0.8f, 0.75f, 1.3f) * Vector3.up, ForceMode.Acceleration);
 
             grappleToPlayer.y = 0f;
-            s.rb.AddForce(grappleToPlayer.normalized * grappleHorizPullForce, ForceMode.Acceleration);
+            Vector2 horizPlayerMovement = new Vector2(s.PlayerMovement.RelativeVel.x, s.PlayerMovement.RelativeVel.z);
+
+            s.rb.AddForce(grappleToPlayer.normalized * (grappleHorizPullForce - horizPlayerMovement.magnitude * 0.4f), ForceMode.Acceleration);
 
             groundElapsed = (s.PlayerMovement.Grounded ? groundElapsed += Time.fixedDeltaTime : 0f);
             wallIntersectElapsed = (Physics.Linecast(transform.position, grapplePoint + wallNormal, Grappleable) ? wallIntersectElapsed += Time.fixedDeltaTime : 0f);
