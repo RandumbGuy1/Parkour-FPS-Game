@@ -6,17 +6,17 @@ using System;
 public class Sword : MonoBehaviour, IItem, IWeapon
 {
     public WeaponClass weaponType { get { return type; } }
-    public Sprite itemSprite { get { return weaponSprite; } }
+    public Sprite ItemSprite { get { return weaponSprite; } }
 
     public bool automatic { get { return weaponAutomatic; } }
 
-    public Vector3 defaultPos { get { return weaponDefaultPos; } }
-    public Vector3 defaultRot { get { return weaponDefaultRot; } }
+    public Vector3 DefaultPos { get { return weaponDefaultPos; } }
+    public Vector3 DefaultRot { get { return weaponDefaultRot; } }
 
-    public Vector3 aimPos { get { return weaponAimPos; } }
-    public Vector3 aimRot { get { return weaponAimRot; } }
+    public Vector3 AimPos { get { return weaponAimPos; } }
+    public Vector3 AimRot { get { return weaponAimRot; } }
 
-    public float weight { get { return weaponWeight; } }
+    public float Weight { get { return weaponWeight; } }
 
     public float recoilSmoothTime { get { return swingSmoothing; } }
     public float recoilForce { get; }

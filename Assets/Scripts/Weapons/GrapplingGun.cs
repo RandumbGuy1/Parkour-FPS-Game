@@ -5,7 +5,7 @@ using UnityEngine;
 public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 {
     public WeaponClass weaponType { get { return type; } }
-    public Sprite itemSprite { get { return weaponSprite; } }
+    public Sprite ItemSprite { get { return weaponSprite; } }
 
     public bool automatic { get { return false; } }
 
@@ -13,13 +13,13 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
     public ShakeData recoilShakeData { get { return recoilShake; } }
 
-    public Vector3 defaultPos { get { return weaponDefaultPos; } }
-    public Vector3 defaultRot { get { return weaponDefaultRot; } }
+    public Vector3 DefaultPos { get { return weaponDefaultPos; } }
+    public Vector3 DefaultRot { get { return weaponDefaultRot; } }
 
-    public Vector3 aimPos { get { return weaponAimPos; } }
-    public Vector3 aimRot { get { return weaponAimRot; } }
+    public Vector3 AimPos { get { return weaponAimPos; } }
+    public Vector3 AimRot { get { return weaponAimRot; } }
 
-    public float weight { get { return weaponWeight; } }
+    public float Weight { get { return weaponWeight; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
@@ -149,14 +149,14 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             Vector3 grappleToPlayer = (grapplePoint - s.transform.position);
             if (grappleToPlayer.sqrMagnitude > (grappleRange + 5f) * (grappleRange + 5f)) break;
 
-            s.rb.AddForce(Vector3.ClampMagnitude(grappleToPlayer * 0.1f, 1.5f) * grapplePullForce, ForceMode.Acceleration);
+            s.rb.AddForce(Vector3.ClampMagnitude(grappleToPlayer * 0.1f, 1.55f) * grapplePullForce, ForceMode.Acceleration);
             s.rb.AddForce(0.5f * grappleCameraPullForce * (s.orientation.forward + s.cam.forward * 0.5f).normalized, ForceMode.Acceleration);
-            s.rb.AddForce(grappleFallSpeedClamp * Mathf.Clamp(-s.rb.velocity.y * 0.8f, 0.75f, 1.3f) * Vector3.up, ForceMode.Acceleration);
+            s.rb.AddForce(grappleFallSpeedClamp * Mathf.Clamp(-s.rb.velocity.y * 0.055f, 0.9f, 1.5f) * Vector3.up, ForceMode.Acceleration);
 
             grappleToPlayer.y = 0f;
             Vector2 horizPlayerMovement = new Vector2(s.PlayerMovement.RelativeVel.x, s.PlayerMovement.RelativeVel.z);
 
-            s.rb.AddForce(grappleToPlayer.normalized * (grappleHorizPullForce - horizPlayerMovement.magnitude * 0.4f), ForceMode.Acceleration);
+            s.rb.AddForce(grappleToPlayer.normalized * (grappleHorizPullForce - horizPlayerMovement.magnitude * 0.7f), ForceMode.Acceleration);
 
             groundElapsed = (s.PlayerMovement.Grounded ? groundElapsed += Time.fixedDeltaTime : 0f);
             wallIntersectElapsed = (Physics.Linecast(transform.position, grapplePoint + wallNormal, Grappleable) ? wallIntersectElapsed += Time.fixedDeltaTime : 0f);

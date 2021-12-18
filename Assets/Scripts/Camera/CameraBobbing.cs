@@ -25,6 +25,8 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 bobVel = Vector3.zero;
     private float timer;
     private Vector3 smoothOffset = Vector3.zero;
+    public Vector3 SmoothOffset 
+    { get { return new Vector3(smoothOffset.y, smoothOffset.x * 0.8f, smoothOffset.z); } }
 
     [Header("Footstep Settings")]
     [SerializeField] private ShakeData shakeData; 
@@ -43,11 +45,9 @@ public class CameraBobbing : MonoBehaviour
         timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer + Time.deltaTime : 0f;
 
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
-
-        SmoothStepUp();
         CalculateLandOffset();
 
-        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset + vaultDesync;
+        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset;
 		transform.localPosition = newPos;
 	}
 
@@ -123,10 +123,10 @@ public class CameraBobbing : MonoBehaviour
         float speedAmp = s.PlayerMovement.Magnitude * 0.065f;
         speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
        
-        float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f);
+        float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f) * (s.WeaponControls.Aiming ? 0.5f : 1f);
         amp = Mathf.Clamp(amp, 1f, 1.4f);
 
-        return (timer <= 0 ? Vector3.zero : s.orientation.right * Mathf.Cos(timer * bobSpeed * speedAmp) * bobAmountHoriz + Vector3.up * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * bobAmountVert * amp);
+        return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed * speedAmp) * s.orientation.right) + (amp * bobAmountVert * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * Vector3.up));
     }
 
     private void SmoothStepUp()

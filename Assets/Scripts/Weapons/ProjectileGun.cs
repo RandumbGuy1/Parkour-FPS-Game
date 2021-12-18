@@ -5,7 +5,7 @@ using UnityEngine;
 public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 {
     public WeaponClass weaponType { get { return type; } }
-    public Sprite itemSprite { get { return weaponSprite; } }
+    public Sprite ItemSprite { get { return weaponSprite; } }
 
     public bool automatic { get { return weaponAutomatic; } }
 
@@ -13,13 +13,13 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
     public ShakeData recoilShakeData { get { return recoilShake; } }
 
-    public Vector3 defaultPos { get { return weaponDefaultPos; } }
-    public Vector3 defaultRot { get { return weaponDefaultRot; } }
+    public Vector3 DefaultPos { get { return weaponDefaultPos; } }
+    public Vector3 DefaultRot { get { return weaponDefaultRot; } }
 
-    public Vector3 aimPos { get { return weaponAimPos; } }
-    public Vector3 aimRot { get { return weaponAimRot; } }
+    public Vector3 AimPos { get { return weaponAimPos; } }
+    public Vector3 AimRot { get { return weaponAimRot; } }
 
-    public float weight { get { return weaponWeight; } }
+    public float Weight { get { return weaponWeight; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;

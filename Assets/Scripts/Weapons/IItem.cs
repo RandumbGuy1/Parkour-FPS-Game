@@ -4,15 +4,15 @@ using UnityEngine;
 
 public interface IItem
 {
-    float weight { get; }
+    float Weight { get; }
 
-    Vector3 defaultPos { get; }
-    Vector3 defaultRot { get; }
+    Vector3 DefaultPos { get; }
+    Vector3 DefaultRot { get; }
 
-    Vector3 aimPos { get; }
-    Vector3 aimRot { get; }
+    Vector3 AimPos { get; }
+    Vector3 AimRot { get; }
 
-    Sprite itemSprite { get; }
+    Sprite ItemSprite { get; }
 
     string ReadData();
     string ReadName();
