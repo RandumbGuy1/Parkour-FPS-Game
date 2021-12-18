@@ -77,12 +77,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84d3783cab710db46bdf259f1ef6aa1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  type: 1
   Collides:
     serializedVersion: 2
     m_Bits: 12033
   bulletLifeTime: 1.5
-  impactEffect: LaserImpactFX
+  impactEffect: ExplosionImpactFX
   maxCollisions: 1
 --- !u!96 &-4907684775474906716
 TrailRenderer:

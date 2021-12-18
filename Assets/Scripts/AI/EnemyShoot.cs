@@ -31,7 +31,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
         if (!readyToShoot) return false;
 
         Vector3 dir = (target.position - enemyPos.position);
-        Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f;
+        Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f + Vector3.up * 2f;
         dir = (target.position - attackPoint);
 
         for (int i = 0; i < bulletsPerTap; i++)
