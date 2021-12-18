@@ -9,10 +9,6 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float angularSpeed;
     [SerializeField] private float standingDistance;
-    [Space(10)]
-    [SerializeField] private NavMeshAgent agent;
-    [SerializeField] private Transform player;
-    [SerializeField] private Rigidbody enemyRb;
 
     [Header("Ground Check Settings")]
     [SerializeField] private LayerMask Ground;
@@ -20,6 +16,12 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private Vector3 groundCheckOffset;
     [SerializeField] private float groundCheckInterval;
     private bool grounded;
+
+    [Header("Assignables")]
+    [SerializeField] private EnemyShoot shooting;
+    [SerializeField] private NavMeshAgent agent;
+    [SerializeField] private Transform player;
+    [SerializeField] private Rigidbody enemyRb;
 
     private void Start()
     {
@@ -42,14 +44,14 @@ public class FollowPlayer : MonoBehaviour
     void FollowThePlayer()
     {
         HandleRotation();
-        enemyRb.AddForce(Vector3.down * 80f * enemyRb.mass, ForceMode.Acceleration);
+        enemyRb.AddForce(80f * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
 
         if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
 
         if (agent.path.corners.Length > 0 && agent.isOnOffMeshLink)
         {
             agent.nextPosition = agent.currentOffMeshLinkData.endPos;
-            enemyRb.AddForce((agent.transform.position - enemyRb.transform.position).normalized * speed * 5f, ForceMode.Acceleration);
+            enemyRb.AddForce(5f * speed * (agent.transform.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
             agent.gameObject.SetActive(false);
         }
 
@@ -60,7 +62,7 @@ public class FollowPlayer : MonoBehaviour
         if (!grounded)
         {
             agent.gameObject.SetActive(false);
-            enemyRb.AddForce((player.position - enemyRb.transform.position).normalized * speed * 0.5f, ForceMode.Acceleration);
+            enemyRb.AddForce(0.5f * speed * (player.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
             return;
         }
 
@@ -69,9 +71,13 @@ public class FollowPlayer : MonoBehaviour
         agent.SetDestination(player.position);
 
         Vector3 pathDir = (agent.path.corners.Length > 1 ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
-        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.5f) return;
+        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.5f && !Physics.Linecast(enemyRb.transform.position, player.position, Ground))
+        {
+            shooting.OnAttack(player.GetComponent<ScriptManager>());
+            return;
+        } 
 
-        enemyRb.AddForce(pathDir.normalized * speed * 5f, ForceMode.Acceleration);
+        enemyRb.AddForce(5f * speed * pathDir.normalized, ForceMode.Acceleration);
     }
 
     private void HandleRotation()

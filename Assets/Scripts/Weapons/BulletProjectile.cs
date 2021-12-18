@@ -35,15 +35,20 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         float distanceForce = (velocity.magnitude * 0.1f);
         distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
 
-        float playerVelocity = shooter.PlayerMovement.Magnitude * 0.1f;
-        playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.2f);
+        float playerVelocity = 1f;
+
+        if (shooter != null)
+        {
+            playerVelocity = shooter.PlayerMovement.Magnitude * 0.1f;
+            playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.2f);
+
+            if (Vector3.Dot(shooter.PlayerMovement.Velocity, transform.up) < -0.1f) playerVelocity = 1f;
+        }
 
         transform.up = velocity;
 
-        if (Vector3.Dot(shooter.PlayerMovement.Velocity, transform.up) < -0.1f) playerVelocity = 1f;
-
         rb.velocity = Vector3.zero;
-        rb.AddForce(transform.up * distanceForce * shootForce * 25f * playerVelocity, ForceMode.Impulse);
+        rb.AddForce(25f * distanceForce * playerVelocity * shootForce * transform.up, ForceMode.Impulse);
 
         CancelInvoke("Explode");
         Invoke("Explode", bulletLifeTime);

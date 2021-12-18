@@ -19,24 +19,20 @@ public class ShakeManager : MonoBehaviour
         Instance = this;
     }
 
-    public void ShakeAll(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 shakeSource = default(Vector3))
+    public void ShakeAll(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 shakeSource = default)
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
         {
-            if (shakeSource != default(Vector3))
-                magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
-
+            if (shakeSource != default) magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
             shakeRecievers[i].ShakeOnce(magnitude, frequency, duration, smoothness, type);
         }
     }
 
-    public void ShakeAll(ShakeData sd, Vector3 shakeSource = default(Vector3))
+    public void ShakeAll(ShakeData sd, Vector3 shakeSource = default)
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
         { 
-            if (shakeSource != default(Vector3)) 
-                sd.Intialize(CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource), sd.Frequency, sd.Duration, sd.SmoothSpeed, sd.Type);
-
+            if (shakeSource != default) sd.Intialize(CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource), sd.Frequency, sd.Duration, sd.SmoothSpeed, sd.Type);
             shakeRecievers[i].ShakeOnce(sd);
         }
     }
