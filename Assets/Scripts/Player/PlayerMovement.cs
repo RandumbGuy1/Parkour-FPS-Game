@@ -441,6 +441,7 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
     {
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
         Vaulting = true;
@@ -456,10 +457,7 @@ public class PlayerMovement : MonoBehaviour
 
         while (elapsed < vaultDuration)
         {
-            float t = elapsed / vaultDuration;
-            t = t * t * t * (t * (6f * t - 15f) + 10f);
-
-            transform.position = Vector3.Lerp(vaultOriginalPos, pos, t);
+            transform.position = Vector3.Lerp(vaultOriginalPos, pos, Mathf.SmoothStep(0, 1, elapsed));
             elapsed += Time.deltaTime * 2f;
 
             yield return null;
@@ -468,8 +466,9 @@ public class PlayerMovement : MonoBehaviour
         Vaulting = false;
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
-        rb.velocity = normal * vaultForce * 0.5f;
+        rb.velocity = 0.5f * vaultForce * normal;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
     }
     #endregion

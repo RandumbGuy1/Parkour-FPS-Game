@@ -113,7 +113,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
             Vector3 spreadDir = dir.normalized + (Vector3)rand;
 
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
-            bullet.OnShoot(s, spreadDir, shootForce);
+            bullet.OnShoot(s, targetPoint, hit.normal, spreadDir, shootForce);
         }
 
         if (readyToShoot)

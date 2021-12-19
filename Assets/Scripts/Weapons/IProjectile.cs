@@ -4,10 +4,10 @@ using UnityEngine;
 
 public interface IProjectile
 {
-    ProjectileType bulletType { get; }
-    float lifeTime { get; }
+    ProjectileType BulletType { get; }
+    float LifeTime { get; }
 
-    void OnShoot(ScriptManager shooter, Vector3 velocity, float shootForce);
+    void OnShoot(ScriptManager shooter, Vector3 targetPoint, Vector3 targetNormal, Vector3 velocity, float shootForce);
 }
 
 public enum ProjectileType

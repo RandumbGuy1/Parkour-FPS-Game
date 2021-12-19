@@ -13,6 +13,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
     public ShakeData recoilShakeData { get { return null; } }
 
     [Header("Shooting Settings")]
+    [SerializeField] private LayerMask CollideAttack;
     [SerializeField] private float shootForce;
     [SerializeField] private float spread;
     [SerializeField] private float bulletsPerTap;
@@ -31,7 +32,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
         if (!readyToShoot) return false;
 
         Vector3 dir = (target.position - enemyPos.position);
-        Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f + Vector3.up * 2f;
+        Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f;
         dir = (target.position - attackPoint);
 
         for (int i = 0; i < bulletsPerTap; i++)
@@ -39,11 +40,12 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             Vector2 rand = Vector2.zero;
             rand.x = (Random.Range(-1f, 1f)) * spread * 0.003f;
             rand.y = (Random.Range(-1f, 1f)) * spread * 0.003f;
-
             Vector3 spreadDir = dir.normalized + (Vector3)rand;
 
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint, Quaternion.identity).GetComponent<IProjectile>();
-            bullet.OnShoot(null, spreadDir + targetRb.velocity * 0.001f, shootForce);
+
+            Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
+            bullet.OnShoot(null, hit.point, hit.normal, spreadDir + targetRb.velocity * 0.001f, shootForce);
         }
 
         if (readyToShoot)
@@ -56,6 +58,5 @@ public class EnemyShoot : MonoBehaviour, IWeapon
     }
 
     public bool SecondaryAction(ScriptManager s) => true;
-
     private void ResetShot() => readyToShoot = true;
 }
