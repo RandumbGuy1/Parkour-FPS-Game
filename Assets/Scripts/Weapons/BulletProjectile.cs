@@ -25,16 +25,16 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         rb.detectCollisions = false;
     }
 
-    public void OnShoot(ScriptManager shooter, Vector3 targetPoint, Vector3 targetNormal, Vector3 velocity, float shootForce)
+    public void OnShoot(ScriptManager shooter, Vector3 shooterPos, Vector3 targetPoint, Vector3 targetNormal, Vector3 velocity, float shootForce)
     {
         tr.Clear();
-
-        if (Physics.CheckSphere(transform.position, 0.8f, CollidesWith))
+        /*
+        if (Vector3.Dot(velocity.normalized, shooter != null ? shooter.cam.forward : (transform.position - shooterPos).normalized) < 0.3f)
         {
             Explode(targetPoint, targetNormal, true);
             return;
         }
-
+        */
         float distanceForce = (velocity.magnitude * 0.1f);
         distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
 
@@ -70,7 +70,9 @@ public class BulletProjectile : MonoBehaviour, IProjectile
                 break;
             }
 
-            if (Physics.Raycast(lastPos, (rb.position - lastPos).normalized, out var hit, (rb.position - lastPos).magnitude, CollidesWith))
+            Vector3 lastToNowPos = rb.position - lastPos;
+
+            if (Physics.SphereCast(lastPos + lastToNowPos.normalized, 0.1f, lastToNowPos.normalized, out var hit, lastToNowPos.magnitude * 1.05f, CollidesWith))
             {
                 Explode(hit.point, hit.normal, true);
                 break;
@@ -92,7 +94,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
         if (!collided) return;
 
-        ObjectPooler.Instance.SpawnParticle(impactEffect, point + normal * 0.25f, Quaternion.LookRotation(normal));
+        ObjectPooler.Instance.SpawnParticle(impactEffect, point + normal * 0.4f, Quaternion.LookRotation(normal));
         Collider[] enemiesInRadius = Physics.OverlapSphere(point, explosionRadius, CollidesWith);
 
         for (int i = 0; i < enemiesInRadius.Length; i++)

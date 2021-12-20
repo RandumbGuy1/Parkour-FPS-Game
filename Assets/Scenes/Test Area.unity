@@ -98,7 +98,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 843de829c857a8a44b71eca06ec08c25,
+    type: 2}
   m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
@@ -1633,6 +1634,7 @@ Transform:
   m_Children:
   - {fileID: 1783921602}
   - {fileID: 867266071}
+  - {fileID: 1440964998}
   m_Father: {fileID: 766557913}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1705,7 +1707,7 @@ MonoBehaviour:
   attackRange: 120
   spread: 2
   fireRate: 10
-  lightIntensity: 35
+  lightIntensity: 30
   lightReturnSpeed: 30
   weaponRecoilForce: 13
   weaponRecoilSmoothTime: 0.02
@@ -1719,7 +1721,7 @@ MonoBehaviour:
   Environment:
     serializedVersion: 2
     m_Bits: 1792
-  attackPoint: {fileID: 1783921602}
+  attackPoint: {fileID: 1440964998}
   muzzleFlash: {fileID: 525132390}
   muzzleLight: {fileID: 571904774}
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
@@ -9128,7 +9130,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.7364536, b: 0.1745283, a: 1}
   m_Intensity: 0
-  m_Range: 24
+  m_Range: 30
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -15970,6 +15972,36 @@ MonoBehaviour:
   fireRate: 8
   enemyPos: {fileID: 1645547701}
   target: {fileID: 1650519434}
+--- !u!1 &1440964997
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1440964998}
+  m_Layer: 11
+  m_Name: Attack Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1440964998
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1440964997}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.084, z: 2.37}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 299661632}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1442870520
 GameObject:
   m_ObjectHideFlags: 0
@@ -16528,7 +16560,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 13.71
+  m_Name: Save 13.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19253,7 +19285,7 @@ PrefabInstance:
     - target: {fileID: 9217522446149738973, guid: fc46dc40c34745c40acbc1fb514568f0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.051
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: 9217522446149738973, guid: fc46dc40c34745c40acbc1fb514568f0,
         type: 3}

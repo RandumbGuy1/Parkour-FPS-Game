@@ -66,7 +66,10 @@ public class FollowPlayer : MonoBehaviour
             return;
         }
 
-        float sqrEnemyToPlayer = (player.position - enemyRb.transform.position).sqrMagnitude;
+        Vector3 enemyToPlayer = (player.position - enemyRb.transform.position);
+        enemyToPlayer.y *= 0.5f;
+
+        float sqrEnemyToPlayer = enemyToPlayer.sqrMagnitude;
         agent.gameObject.SetActive(true);
         agent.SetDestination(player.position);
 

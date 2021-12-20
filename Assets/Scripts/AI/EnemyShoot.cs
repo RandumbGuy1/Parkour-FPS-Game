@@ -45,7 +45,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint, Quaternion.identity).GetComponent<IProjectile>();
 
             Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
-            bullet.OnShoot(null, hit.point, hit.normal, spreadDir + targetRb.velocity * 0.001f, shootForce);
+            bullet.OnShoot(null, transform.position, hit.point, hit.normal, spreadDir + targetRb.velocity * 0.001f, shootForce);
         }
 
         if (readyToShoot)
