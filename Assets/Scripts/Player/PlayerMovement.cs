@@ -418,17 +418,19 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
     {
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        rb.isKinematic = true;
         lastVel.y = 0f;
 
         float elapsed = 0f;
         float speed = lastVel.magnitude;
-        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.08f) * 1.1f;
+        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.3f);
         float duration = distance / speed;
 
         while (elapsed < duration)
         {
             rb.MovePosition(Vector3.Lerp(transform.position, pos, elapsed / duration));
-            elapsed += Time.fixedDeltaTime;
+            elapsed += Time.fixedDeltaTime * (1f + (elapsed / duration)) * 1.7f;
 
             rb.velocity = lastVel;
             WallRunning = false;
@@ -437,6 +439,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         rb.velocity = lastVel * 1.1f;
+        rb.isKinematic = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
     }
 
     private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
@@ -505,8 +509,8 @@ public class PlayerMovement : MonoBehaviour
         wallMoveDir = Vector3.Cross(wallUpCross, WallNormal);
 
         rb.AddForce(-WallNormal * wallHoldForce);
-        rb.AddForce(-transform.up * wallRunGravityForce * 0.8f, ForceMode.Acceleration);
-        rb.AddForce(wallMoveDir * wallRunForce, ForceMode.Acceleration);
+        rb.AddForce(0.8f * wallRunGravityForce * -transform.up, ForceMode.Acceleration);
+        rb.AddForce(wallMoveDir * wallRunForce * Mathf.Clamp(input.y, 0f, 1f), ForceMode.Acceleration);
     }
 
     public void DetachFromWallRun()

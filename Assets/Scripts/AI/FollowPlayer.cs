@@ -74,9 +74,9 @@ public class FollowPlayer : MonoBehaviour
         agent.SetDestination(player.position);
 
         Vector3 pathDir = (agent.path.corners.Length > 1 ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
-        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.5f && !Physics.Linecast(enemyRb.transform.position, player.position, Ground))
+        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.1f && !Physics.Linecast(enemyRb.transform.position, player.position, Ground))
         {
-            if (shooting != null) shooting.OnAttack(player.GetComponent<ScriptManager>());
+            if (shooting != null) shooting.OnAttack();
             return;
         } 
 

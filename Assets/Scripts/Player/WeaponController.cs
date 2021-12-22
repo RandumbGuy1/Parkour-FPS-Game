@@ -132,19 +132,19 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        CanAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.weaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
+        CanAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.WeaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
 
-        if (CurrentWeapon.automatic ? s.PlayerInput.LeftHoldClick && CanAttack : s.PlayerInput.LeftClick && CanAttack) CurrentWeapon.OnAttack(s);
-        if ((CurrentWeapon.weaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) CurrentWeapon.SecondaryAction(s);
+        if (CurrentWeapon.Automatic ? s.PlayerInput.LeftHoldClick && CanAttack : s.PlayerInput.LeftClick && CanAttack) CurrentWeapon.OnAttack();
+        if ((CurrentWeapon.WeaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) CurrentWeapon.SecondaryAction();
     }
 
     #region Weapon Actions
     public void AddRecoil(Vector3 recoilPosOffset, Vector3 recoilRotOffset, float amount = 0, float aimMulti = 1f)
     {
-        switch (CurrentWeapon.weaponType)
+        switch (CurrentWeapon.WeaponType)
         {
             case WeaponClass.Ranged:
-                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f))));
+                s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f))));
 
                 desiredRecoilPos = recoilPosOffset * (Aiming ? aimMulti : Random.Range(0.9f, 1.15f));
                 desiredRecoilRot = recoilRotOffset * (Aiming ? aimMulti - 0.15f : Random.Range(0.9f, 1.15f));
@@ -159,7 +159,7 @@ public class WeaponController : MonoBehaviour
                 desiredRecoilPos = recoilPosOffset;
                 desiredRecoilRot = recoilRotOffset;
 
-                s.CameraShaker.ShakeOnce(CurrentWeapon.recoilShakeData, Vector3.left);
+                s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, Vector3.left);
                 slider.SetSliderCooldown(1f, 0.05f);
                 break;
         }
@@ -176,7 +176,6 @@ public class WeaponController : MonoBehaviour
     public void AddWeapon(GameObject obj)
     {
         weaponDataText.gameObject.SetActive(true);
-
         weaponReticle.SetActive(true);
         circleCursor.SetActive(false);
 
@@ -190,17 +189,16 @@ public class WeaponController : MonoBehaviour
         {
             Drop(true);
             weapons.Insert(selectedWeapon, obj);
-            SelectWeapon(false);
         }
         else
         {
             weapons.Add(obj);
-
             selectedWeapon = weapons.Count - 1;
-            SelectWeapon(false);
         }
 
-        if (CurrentItem != null) CurrentItem.OnPickup();
+        SelectWeapon(false);
+
+        if (CurrentItem != null) CurrentItem.OnPickup(s);
     }
 
     private void SelectWeapon(bool switching = true)
@@ -209,10 +207,11 @@ public class WeaponController : MonoBehaviour
         {
             switchOffsetPos = switchPosOffset;
             switchOffsetRot = switchRotOffset;
-
-            reloadRot = Vector3.zero;
         }
         else Aiming = false;
+
+        reloadRot = Vector3.zero;
+        reloadRotVel = Vector3.zero;
 
         CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
         CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
@@ -222,7 +221,7 @@ public class WeaponController : MonoBehaviour
 
     private void Drop(bool pickupDrop = false)
     {
-        Rigidbody rb = weapons[selectedWeapon].gameObject.GetComponent<Rigidbody>();
+        Rigidbody rb = weapons[selectedWeapon].GetComponent<Rigidbody>();
 
         CurrentItem.OnDrop();
 
@@ -255,8 +254,8 @@ public class WeaponController : MonoBehaviour
         }
         else if (weapons.Count == 0)
         {
-            weaponReticle.gameObject.SetActive(false);
-            circleCursor.gameObject.SetActive(true);
+            weaponReticle.SetActive(false);
+            circleCursor.SetActive(true);
 
             weaponDataText.gameObject.SetActive(false);
         }
@@ -266,13 +265,13 @@ public class WeaponController : MonoBehaviour
     #region Dynamic Weapon Movement
     private void ResetMovementValues()
     {
-        reloadRotVel = Vector3.zero;
         reloadRot = Vector3.zero;
+        reloadRotVel = Vector3.zero;
 
-        switchPosVel = Vector3.zero;
-        switchRotVel = Vector3.zero;
         switchOffsetPos = Vector3.zero;
         switchOffsetRot = Vector3.zero;
+        switchPosVel = Vector3.zero;
+        switchRotVel = Vector3.zero;
 
         recoilPos = Vector3.zero;
         recoilRot = Vector3.zero;
@@ -333,7 +332,7 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null || reloadRot == Vector3.zero) return;
 
-        reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, CurrentWeapon.reloadSmoothTime);
+        reloadRot = Vector3.SmoothDamp(reloadRot, Vector3.zero, ref reloadRotVel, CurrentWeapon.ReloadSmoothTime);
 
         if (reloadRot.sqrMagnitude < 0.001f) reloadRot = Vector3.zero;
     }
@@ -342,10 +341,10 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null || desiredRecoilPos == Vector3.zero && desiredRecoilRot == Vector3.zero) return;
 
-        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, (CurrentWeapon.weaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
-        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, (CurrentWeapon.weaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
+        desiredRecoilPos = Vector3.Lerp(desiredRecoilPos, Vector3.zero, (CurrentWeapon.WeaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
+        desiredRecoilRot = Vector3.Lerp(desiredRecoilRot, Vector3.zero, (CurrentWeapon.WeaponType == WeaponClass.Melee ? 3f : 9f) * Time.deltaTime);
 
-        float smoothing = CurrentWeapon.recoilSmoothTime;
+        float smoothing = CurrentWeapon.RecoilSmoothTime;
         recoilPos = Vector3.SmoothDamp(recoilPos, desiredRecoilPos, ref recoilPosVel, smoothing);
         recoilRot = Vector3.SmoothDamp(recoilRot, desiredRecoilRot, ref recoilRotVel, smoothing);
         

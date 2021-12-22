@@ -13,11 +13,12 @@ public interface IItem
     Vector3 AimRot { get; }
 
     Sprite ItemSprite { get; }
+    ScriptManager Player { get; }
 
     string ReadData();
     string ReadName();
 
-    void OnPickup();
+    void OnPickup(ScriptManager s);
     void OnDrop();
     void ItemUpdate();
 }

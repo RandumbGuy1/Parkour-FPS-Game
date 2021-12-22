@@ -4,15 +4,15 @@ using UnityEngine;
 
 public interface IWeapon
 {
-    WeaponClass weaponType { get; }
+    WeaponClass WeaponType { get; }
 
-    bool automatic { get; }
-    float recoilSmoothTime { get; }
-    float reloadSmoothTime { get; }
-    ShakeData recoilShakeData { get; }
+    bool Automatic { get; }
+    float RecoilSmoothTime { get; }
+    float ReloadSmoothTime { get; }
+    ShakeData RecoilShakeData { get; }
 
-    bool OnAttack(ScriptManager s);
-    bool SecondaryAction(ScriptManager s);
+    bool OnAttack();
+    bool SecondaryAction();
 }
 
 public enum WeaponClass

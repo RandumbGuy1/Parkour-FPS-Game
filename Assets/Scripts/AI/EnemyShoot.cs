@@ -1,16 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyShoot : MonoBehaviour, IWeapon
 {
-    public WeaponClass weaponType { get { return WeaponClass.Ranged; } }
+    public WeaponClass WeaponType { get { return WeaponClass.Ranged; } }
 
-    public bool automatic { get { return true; } }
+    public bool Automatic { get { return true; } }
 
-    public float recoilSmoothTime { get { return 0f; } }
-    public float reloadSmoothTime { get { return 0f; } }
-    public ShakeData recoilShakeData { get { return null; } }
+    public float RecoilSmoothTime { get { return 0f; } }
+    public float ReloadSmoothTime { get { return 0f; } }
+    public ShakeData RecoilShakeData { get { return null; } }
 
     [Header("Shooting Settings")]
     [SerializeField] private LayerMask CollideAttack;
@@ -27,7 +25,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
 
     void Awake() => targetRb = target.GetComponent<Rigidbody>();
 
-    public bool OnAttack(ScriptManager s)
+    public bool OnAttack()
     {
         if (!readyToShoot) return false;
 
@@ -45,18 +43,18 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint, Quaternion.identity).GetComponent<IProjectile>();
 
             Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
-            bullet.OnShoot(null, transform.position, hit.point, hit.normal, spreadDir + targetRb.velocity * 0.001f, shootForce);
+            bullet.OnShoot(null, hit, spreadDir + targetRb.velocity * 0.001f, shootForce);
         }
 
         if (readyToShoot)
         {
             readyToShoot = false;
-            Invoke("ResetShot", 1 / fireRate);
+            Invoke(nameof(ResetShot), 1 / fireRate);
         }
 
         return true;
     }
 
-    public bool SecondaryAction(ScriptManager s) => true;
+    public bool SecondaryAction() => true;
     private void ResetShot() => readyToShoot = true;
 }

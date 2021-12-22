@@ -5,10 +5,11 @@ using System;
 
 public class Sword : MonoBehaviour, IItem, IWeapon
 {
-    public WeaponClass weaponType { get { return type; } }
+    public ScriptManager Player { get { return s; } }
+    public WeaponClass WeaponType { get { return type; } }
     public Sprite ItemSprite { get { return weaponSprite; } }
 
-    public bool automatic { get { return weaponAutomatic; } }
+    public bool Automatic { get { return weaponAutomatic; } }
 
     public Vector3 DefaultPos { get { return weaponDefaultPos; } }
     public Vector3 DefaultRot { get { return weaponDefaultRot; } }
@@ -18,11 +19,11 @@ public class Sword : MonoBehaviour, IItem, IWeapon
 
     public float Weight { get { return weaponWeight; } }
 
-    public float recoilSmoothTime { get { return swingSmoothing; } }
+    public float RecoilSmoothTime { get { return swingSmoothing; } }
     public float recoilForce { get; }
-    public float reloadSmoothTime { get; }
+    public float ReloadSmoothTime { get; }
 
-    public ShakeData recoilShakeData { get { return recoilShake; } }
+    public ShakeData RecoilShakeData { get { return recoilShake; } }
 
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
@@ -60,7 +61,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private Transform attackPoint;
     private Rigidbody rb;
     private BoxCollider bc;
-    private Transform cam;
+    private ScriptManager s;
 
     void Awake()
     {
@@ -76,11 +77,10 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         rb.detectCollisions = false;
     }
 
-    public bool OnAttack(ScriptManager s)
+    public bool OnAttack()
     {
         if (bc.isTrigger && rb.detectCollisions) return false;
 
-        cam = s.cam;
         s.WeaponControls.AddRecoil(swingPosOffset, swingRotOffset);
         timesAttacked++;
 
@@ -113,19 +113,16 @@ public class Sword : MonoBehaviour, IItem, IWeapon
 
         if (rb != null)
         {
-            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + Vector3.up * 2f * 0.3f + cam.forward;
+            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + Vector3.up * 2f * 0.3f + s.cam.forward;
 
             rb.AddForce(dirToLaunch * swingForce, ForceMode.VelocityChange);
             rb.AddTorque(dirToLaunch * swingForce, ForceMode.VelocityChange);
         }
     }
 
-    public bool SecondaryAction(ScriptManager s)
-    {
-        return true;
-    }
+    public bool SecondaryAction() => true;
+    public void OnPickup(ScriptManager s) => this.s = s;
 
-    public void OnPickup() { }
     public void ItemUpdate() 
     {
         if (timesAttacked <= 0) return;
@@ -143,6 +140,8 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         bc.isTrigger = false;
         rb.detectCollisions = true;
         timesAttacked = 0;
+
+        s = null;
     }
 
     public string ReadData() => " ";

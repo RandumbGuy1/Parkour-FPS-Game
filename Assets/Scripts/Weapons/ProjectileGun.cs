@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 {
-    public WeaponClass weaponType { get { return type; } }
+    public ScriptManager Player { get { return s; } }
+    public WeaponClass WeaponType { get { return type; } }
     public Sprite ItemSprite { get { return weaponSprite; } }
 
-    public bool automatic { get { return weaponAutomatic; } }
+    public bool Automatic { get { return weaponAutomatic; } }
 
-    public float reloadSmoothTime { get { return reloadTime; } }
-    public float recoilSmoothTime { get { return weaponRecoilSmoothTime; } }
-    public ShakeData recoilShakeData { get { return recoilShake; } }
+    public float ReloadSmoothTime { get { return reloadTime; } }
+    public float RecoilSmoothTime { get { return weaponRecoilSmoothTime; } }
+    public ShakeData RecoilShakeData { get { return recoilShake; } }
 
     public Vector3 DefaultPos { get { return weaponDefaultPos; } }
     public Vector3 DefaultRot { get { return weaponDefaultRot; } }
@@ -72,6 +73,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private ParticleSystem muzzleFlash;
     [SerializeField] private Light muzzleLight;
     [SerializeField] private ShakeData recoilShake;
+    private ScriptManager s;
 
     void Start()
     {
@@ -82,7 +84,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     void OnEnable() => reloading = false;
     void OnDisable() => ResetIntensity();
 
-    public bool OnAttack(ScriptManager s)
+    public bool OnAttack()
     {
         if (!readyToShoot || reloading) return false;
         if (bulletsLeft <= 0)
@@ -113,19 +115,19 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
             Vector3 spreadDir = dir.normalized + (Vector3)rand;
 
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
-            bullet.OnShoot(s, s.transform.position, targetPoint, hit.normal, spreadDir, shootForce);
+            bullet.OnShoot(s, hit, spreadDir, shootForce);
         }
 
         if (readyToShoot)
         {
             readyToShoot = false;
-            Invoke("ResetShot", 1 / fireRate);
+            Invoke(nameof(ResetShot), 1 / fireRate);
         }
 
         return true;
     }
 
-    public bool SecondaryAction(ScriptManager s)
+    public bool SecondaryAction()
     {
         if (bulletsLeft >= magazineSize || reloading) return false;
 
@@ -164,7 +166,11 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         }
     }
 
-    public void OnPickup() => ResetIntensity();
+    public void OnPickup(ScriptManager s)
+    {
+        this.s = s;
+        ResetIntensity();
+    }
 
     public void OnDrop()
     {
@@ -172,6 +178,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         reloading = false;
 
         ResetIntensity();
+        s = null;
     }
 
     private void Flash() => desiredIntensity += lightIntensity;
