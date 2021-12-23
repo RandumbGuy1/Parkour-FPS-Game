@@ -414,6 +414,7 @@ public class PlayerMovement : MonoBehaviour
 
         StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
+        s.CameraShaker.ShakeOnce(Math.Abs(Velocity.y) * 0.4f, 4f, 0.6f, 5f, ShakeData.ShakeType.Perlin);
     }
 
     private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
@@ -643,7 +644,7 @@ public class PlayerMovement : MonoBehaviour
         float coefficientOfFriction = moveSpeed / maxSpeed;
         float groundFrictionAccelTime = 3f;
 
-        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(-vel * coefficientOfFriction * movementMultiplier * 8.5f * frictionMultiplier * Mathf.Clamp(stepsSinceGrounded / groundFrictionAccelTime, 0.3f, 1f), ForceMode.Force);
+        if (vel.sqrMagnitude > maxSpeed * maxSpeed) rb.AddForce(8.5f * coefficientOfFriction * frictionMultiplier * (Grounded ? Mathf.Clamp(stepsSinceGrounded / groundFrictionAccelTime, 0.3f, 1f) : 0.8f) * movementMultiplier * -vel, ForceMode.Force);
     }
 
     private float CalculateMaxSpeed()

@@ -80,8 +80,8 @@ MonoBehaviour:
   CollidesWith:
     serializedVersion: 2
     m_Bits: 12033
-  explosionRadius: 0.1
-  explosionForce: 15
+  explosionRadius: 0.08
+  explosionForce: 20
   bulletLifeTime: 1.5
   impactEffect: LaserImpactFX
   trails:

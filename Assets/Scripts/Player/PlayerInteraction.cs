@@ -152,7 +152,7 @@ public class PlayerInteraction : MonoBehaviour
         if ((grabPos.position - heldObj.transform.position).sqrMagnitude < 20f) objRb.drag = 8f;
         else objRb.drag = 3f;
 
-        objRb.AddForce(followVel * objSpeed * 0.1f, ForceMode.VelocityChange);
+        objRb.AddForce(0.1f * objSpeed * followVel, ForceMode.VelocityChange);
     }
 
     private void Pickup(GameObject obj)
