@@ -14,27 +14,23 @@ public class GrappleRope : MonoBehaviour
     [SerializeField] private float waveCount;
     [SerializeField] private float velocity;
 
+    [Header("Assignables")]
+    [SerializeField] private Transform grapplePoint;
+
     private float springTarget = 0;
     private float springVelocity = 0;
     private float springValue = 0;
 
-    private Vector3 grapplePoint;
     private Vector3 reachedGrapplePoint = Vector3.zero;
-
     private Vector3 returnVel = Vector3.zero;
     private bool grappling = false;
 
-    private void Start()
-    {
-        lr.positionCount = 0;
-    }
+    private void Start() => lr.positionCount = 0;
 
-    public void DrawRope(Vector3 grapplePoint)
+    public void DrawRope()
     {
         lr.positionCount = vertexCount;
         springVelocity = velocity;
-
-        this.grapplePoint = grapplePoint;
 
         grappling = true;
     }
@@ -55,17 +51,19 @@ public class GrappleRope : MonoBehaviour
             return;
         }
 
-        Vector3 targetPoint = (grappling ? grapplePoint : transform.position);
+        Vector3 targetPoint = (grappling ? grapplePoint.position : transform.position);
         if ((targetPoint - reachedGrapplePoint).sqrMagnitude < 0.4f && !grappling)
         {
             lr.positionCount = 0;
             return;
         }
 
-        reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, grappling ? 0.15f : (targetPoint - reachedGrapplePoint).sqrMagnitude < 9f ? 0.005f : 0.02f);
+        bool closeToGrapplePoint = (targetPoint - reachedGrapplePoint).sqrMagnitude < 10f;
+
+        reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, grappling ? (closeToGrapplePoint ? 0.01f : 0.15f) : (closeToGrapplePoint ? 0.005f : 0.02f));
 
         UpdateSpring(Time.smoothDeltaTime);
-        Vector3 up = Quaternion.LookRotation((grapplePoint - transform.position).normalized) * Vector3.up;
+        Vector3 up = Quaternion.LookRotation((grapplePoint.position - transform.position).normalized) * Vector3.up;
 
         for (int i = 0; i < vertexCount; i++)
         {

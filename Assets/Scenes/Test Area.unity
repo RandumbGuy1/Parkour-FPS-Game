@@ -123,6 +123,36 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 23800000, guid: 41fe99504259a2e438708e0af04dcbf1, type: 2}
+--- !u!1 &18135525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 18135526}
+  m_Layer: 11
+  m_Name: Grapple Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &18135526
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18135525}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 670829598}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &29537786
 GameObject:
   m_ObjectHideFlags: 0
@@ -8783,7 +8813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &562165511
 Transform:
   m_ObjectHideFlags: 0
@@ -8813,7 +8843,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 30
   angularSpeed: 9
-  standingDistance: 15
+  standingDistance: 20
   Ground:
     serializedVersion: 2
     m_Bits: 11008
@@ -10470,6 +10500,7 @@ Transform:
   m_Children:
   - {fileID: 1749715937}
   - {fileID: 1665305108}
+  - {fileID: 18135526}
   m_Father: {fileID: 766557913}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -10493,7 +10524,7 @@ MonoBehaviour:
   weaponAimRot: {x: 2.5, y: -10, z: -5}
   weaponWeight: 1.3
   grapplePullForce: 22
-  grappleCameraPullForce: 67
+  grappleCameraPullForce: 70
   grappleHorizPullForce: 22
   grappleFallSpeedClamp: 40
   initialGrapplePullForce: 40
@@ -10506,7 +10537,10 @@ MonoBehaviour:
   minFov: 5
   Grappleable:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 9472
+  GrappleRopeIntersects:
+    serializedVersion: 2
+    m_Bits: 8960
   weaponRecoilForce: 20
   weaponRecoilSmoothTime: 0.035
   weaponRecoilPosOffset: {x: 0, y: 0, z: -0.55}
@@ -10514,6 +10548,7 @@ MonoBehaviour:
   weaponRecoilAimMulti: 0.5
   recoilShake: {fileID: 11400000, guid: 7c4b0b287ad1bbe48bceebeebb76c81a, type: 2}
   rope: {fileID: 1665305109}
+  grapplePoint: {fileID: 18135526}
 --- !u!114 &670829600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15920,7 +15955,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16570,7 +16605,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 14.2
+  m_Name: Save 14.31
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17292,7 +17327,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1630573897
 Transform:
   m_ObjectHideFlags: 0
@@ -18117,6 +18152,7 @@ MonoBehaviour:
   waveHeight: 8
   waveCount: 8
   velocity: 6
+  grapplePoint: {fileID: 18135526}
 --- !u!120 &1665305110
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -20163,7 +20199,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1908489827}
-  m_Material: {fileID: 13400000, guid: 1a258a6f76c8cc04d8eafbe50f0f5d11, type: 2}
+  m_Material: {fileID: 13400000, guid: b091105dd3b2b4445a3509857f626d51, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
