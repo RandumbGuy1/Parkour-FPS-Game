@@ -14,40 +14,37 @@ public class CameraBobbing : MonoBehaviour
 
     private float landVel = 0f;
 	private float desiredOffset = 0f;
-    private float bobOffset = 0f;
+    private float landBobOffset = 0f;
 
     [Header("View Bob Settings")]
-    [SerializeField] private float bobSpeed;
-    [SerializeField] private float bobAmountHoriz;
-    [SerializeField] private float bobAmountVert;
-    [Range(0f, 0.5f)] [SerializeField] private float bobSmoothTime;
+    [SerializeField] private float viewBobSpeed;
+    [SerializeField] private float viewBobAmountHoriz;
+    [SerializeField] private float viewBobAmountVert;
+    [Range(0f, 0.5f)] [SerializeField] private float viewBobSmoothTime;
 
+    public float BobTimer { get; private set; }
     private Vector3 bobVel = Vector3.zero;
-    private float timer;
-    private Vector3 smoothOffset = Vector3.zero;
-    public Vector3 SmoothOffset 
-    { get { return new Vector3(smoothOffset.y, smoothOffset.x * 0.8f, smoothOffset.z); } }
+  
+    private Vector3 viewBobOffset = Vector3.zero;
+    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z); } }
 
     [Header("Footstep Settings")]
     [SerializeField] private ShakeData shakeData; 
-    [Space(10)]
     [SerializeField] private float stepUpSmoothTime;
     private float footstepDistance = 0f;
-
-    private Vector3 vaultDesync;
-    private Vector3 vaultVel = Vector3.zero;
 
     [Header("Assignables")]
     [SerializeField] private ScriptManager s;
 
     void LateUpdate()
 	{
-        timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer + Time.deltaTime : 0f;
+        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f ? BobTimer + Time.deltaTime : 0f;
 
-        smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
-        CalculateLandOffset();
+        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.08f, 1f, Mathf.Infinity);
+        viewBobOffset = Vector3.SmoothDamp(viewBobOffset, HeadBob(), ref bobVel, viewBobSmoothTime * speedAmp * (BobTimer <= 0 ? 3f : 1f));
+        CalculateLandOffset(); 
 
-        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset + (s.PlayerMovement.CrouchOffset * 1.8f);
+        Vector3 newPos = (Vector3.up * landBobOffset) + viewBobOffset * 0.6f + s.PlayerMovement.CrouchOffset;
 		transform.localPosition = newPos;
 	}
 
@@ -58,51 +55,21 @@ public class CameraBobbing : MonoBehaviour
 
     private void CalculateLandOffset()
 	{
-        if (desiredOffset == 0f && bobOffset == 0f) return;
+        if (desiredOffset == 0f && landBobOffset == 0f) return;
 
 		if (desiredOffset <= 0f) desiredOffset = Mathf.Lerp(desiredOffset, 0f, 7.6f * Time.deltaTime);
-        if (bobOffset <= 0f) bobOffset = Mathf.SmoothDamp(bobOffset, desiredOffset, ref landVel, landBobSmoothTime);
+        if (landBobOffset <= 0f) landBobOffset = Mathf.SmoothDamp(landBobOffset, desiredOffset, ref landVel, landBobSmoothTime);
 
-        if (desiredOffset >= -0.001f && bobOffset > -0.001f)
+        if (desiredOffset >= -0.001f && landBobOffset > -0.001f)
         {
             desiredOffset = 0f;
-            bobOffset = 0f;
+            landBobOffset = 0f;
         }
-	}
-
-	public void BobOnce(float impactForce)
-	{
-        if (impactForce < -30f)
-        {
-            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", s.transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
-
-            Vector3 magnitude = s.rb.velocity;
-
-            velocityOverLifetime.x = magnitude.x * 1.3f;
-            velocityOverLifetime.z = magnitude.z * 1.3f;
-        }
-
-        bool crouched = s.PlayerInput.Crouching;
-        float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
-        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 13.5f);
-
-        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
-
-        float randomYZ = UnityEngine.Random.Range(-0.2f, 0.2f);
-        s.CameraShaker.ShakeOnce(landbobShakeData, new Vector3(1f, randomYZ, randomYZ));
-
-        impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
-        impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);
-
-        if (impactForce > -0.5f) return;
-        if (crouched) impactForce = Mathf.Clamp(impactForce * 0.5f, -slideMaxOffset, 0f);
-
-        desiredOffset += impactForce;
 	}
 
     private void CalculateFootsteps()
     {
-        if (timer <= 0)
+        if (BobTimer <= 0 || s.WeaponControls.Aiming)
         {
             footstepDistance = 0f;
             return;
@@ -122,26 +89,40 @@ public class CameraBobbing : MonoBehaviour
 
     private Vector3 HeadBob()
     {
-        float speedAmp = s.PlayerMovement.Magnitude * 0.065f;
-        speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
+        if (BobTimer <= 0) return Vector3.zero;
 
-        float scroller = timer * bobSpeed * speedAmp;
+        float amp = s.PlayerMovement.Magnitude * 0.055f * (s.PlayerMovement.WallRunning ? 2f : 1f);
+        amp = Mathf.Clamp(amp, 0.85f, 1.35f) * Mathf.Max(1f + landBobOffset * 1f, 0f);
 
-        float magAmp = s.PlayerMovement.Magnitude * 0.07f * (s.PlayerMovement.WallRunning ? 1.5f : 1f) * (s.WeaponControls.Aiming || bobOffset <= -0.05f ? 0.5f : 1f);
-        magAmp = Mathf.Clamp(magAmp, 0.8f, 1.3f);
-
-        return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(scroller)) * Vector3.right + (bobAmountVert * Math.Abs(Mathf.Sin(scroller))) * Vector3.up) * magAmp;
+        float scroller = BobTimer * viewBobSpeed;
+        return (viewBobAmountHoriz * Mathf.Cos(scroller) * Vector3.right + viewBobAmountVert * Math.Abs(Mathf.Sin(scroller)) * Vector3.up) * amp;
     }
-    /*
-    private void SmoothStepUp()
+
+    public void BobOnce(float impactForce)
     {
-        if (vaultDesync == Vector3.zero) return;
+        if (impactForce < -30f)
+        {
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", s.transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
 
-        vaultDesync = Vector3.SmoothDamp(vaultDesync, Vector3.zero, ref vaultVel, stepUpSmoothTime);
+            Vector3 magnitude = s.rb.velocity;
 
-        if (vaultDesync.sqrMagnitude < 0.001f) vaultDesync = Vector3.zero;
+            velocityOverLifetime.x = magnitude.x * 1.3f;
+            velocityOverLifetime.z = magnitude.z * 1.3f;
+        }
+
+        bool crouched = s.PlayerInput.Crouching;
+        float newMag = -impactForce * (crouched ? 0.5f : 0.3f);
+        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
+
+        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
+        s.CameraShaker.ShakeOnce(landbobShakeData, new Vector3(1f, UnityEngine.Random.Range(-0.05f, 0.05f), UnityEngine.Random.Range(-0.05f, 0.05f)));
+
+        impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
+        impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);
+
+        if (impactForce > -0.5f) return;
+        if (crouched) impactForce = Mathf.Clamp(impactForce * 0.5f, -slideMaxOffset, 0f);
+
+        desiredOffset += impactForce;
     }
-
-    public void StepUp(Vector3 offset) => vaultDesync = Vector3.zero + offset;
-    */
 }

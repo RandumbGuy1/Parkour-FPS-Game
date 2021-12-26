@@ -45,10 +45,7 @@ public class ShakeEvent
         noiseOffset.z = Random.Range(0f, 32f);
     }
 
-    bool InBounds(float amount, float max, float min)
-    {
-        return amount >= min && amount <= max;
-    }
+    bool InBounds(float amount, float max, float min) => amount >= min && amount <= max;
 
     public void UpdateShake()
     {
@@ -58,25 +55,6 @@ public class ShakeEvent
         {
             case ShakeData.ShakeType.KickBack:
                 {
-                    /*
-                    elapsed += Time.deltaTime * shakeData.frequency;
-
-                    movingDir = Vector3.Lerp(movingDir, targetDir, elapsed);
-                    smoothDir = Vector3.SmoothDamp(smoothDir, movingDir, ref vel, shakeData.smoothness);
-
-                    Displacement = movingDir * trama;
-
-                    if (elapsed >= 1f)
-                    {
-                        Vector3 randomDir = Random.insideUnitSphere;
-
-                        while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.4f, -0.4f)) randomDir = Random.insideUnitSphere;
-
-                        targetDir = (randomDir * 2.8f - targetDir).normalized * shakeData.magnitude;
-                        elapsed = 0f;
-                    }
-                    */
-
                     desiredDir = Vector3.Lerp(desiredDir, targetDir, shakeData.SmoothSpeed * 0.4f * Time.smoothDeltaTime);
                     smoothDir = Vector3.Slerp(smoothDir, desiredDir, shakeData.SmoothSpeed * Time.smoothDeltaTime);
 
@@ -108,7 +86,7 @@ public class ShakeEvent
                     noise *= shakeData.Magnitude;
                     noise *= trama;
 
-                    Displacement = Vector3.Lerp(Displacement, noise, shakeData.SmoothSpeed);
+                    Displacement = Vector3.Slerp(Displacement, noise, shakeData.SmoothSpeed * offsetDelta * 15f);
                     break;
                 }
         }

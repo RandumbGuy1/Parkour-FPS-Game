@@ -21,8 +21,6 @@ public class WeaponController : MonoBehaviour
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
 
-    private float timer = 0f;
-
     private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero, lookVel = Vector3.zero;
     private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero, smoothLookOffset = Vector3.zero;
 
@@ -279,7 +277,7 @@ public class WeaponController : MonoBehaviour
         recoilRotVel = Vector3.zero;
     }
 
-    private Vector3 CalculateBob()
+    private Vector3 CalculateBob(float timer)
     {
         float amp = CurrentItem != null ? 1f / CurrentItem.Weight : 1f;
         return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed) * Vector3.right) + ((Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert * Vector3.up)) * amp;
@@ -375,13 +373,12 @@ public class WeaponController : MonoBehaviour
     private void ProcessMovement()
     {
         if (CurrentItem == null) return;
-        timer = (s.PlayerMovement.Grounded && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Moving || s.PlayerMovement.WallRunning) && s.PlayerMovement.Magnitude > 0.5f ? timer += Time.deltaTime : 0f;
 
         float swayAimMulti = Aiming ? 0.03f : 1f;
         float bobAimMulti = Aiming ? 0.08f : 1f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob() - s.CameraLook.HeadSwayOffset * 0.2f) * bobAimMulti, ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() + (s.PlayerInput.Crouching ? Vector3.forward * slideTilt : Vector3.zero) - s.CameraLook.HeadSwayOffset * swayAimMulti, ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob(s.CameraHeadBob.BobTimer) - s.CameraLook.HeadSwayOffset * 0.2f) * bobAimMulti, ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() - s.CameraLook.HeadSwayOffset * swayAimMulti + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward), ref swayVel, swaySmoothTime);
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * swayAimMulti, ref lookVel, 0.21f);
 
         CalculateDefaultValues();

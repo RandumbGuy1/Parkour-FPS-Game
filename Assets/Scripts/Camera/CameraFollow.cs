@@ -56,14 +56,13 @@ public class CameraFollow : MonoBehaviour
 		SpeedLines();
 
 		float inputX = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
-
 		if (inputX != 0f && (gp != null ? gp.GrappleTilt : 0) == 0) SetTiltSmoothing(0.2f);
-
-		ChangeTilt();
-		ChangeFov();
 
 		targetCameraTilt = s.PlayerMovement.WallRunTiltOffset + s.PlayerMovement.SlideTiltOffset + (gp != null ? gp.GrappleTilt : 0) + (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		targetFov = setFov + s.PlayerMovement.WallRunFovOffset + s.WeaponControls.AimFovOffset + (gp != null ? gp.GrappleFov : 0);
+
+		ChangeTilt();
+		ChangeFov();
 	}
 
 	void LateUpdate()
@@ -71,29 +70,15 @@ public class CameraFollow : MonoBehaviour
 		CalcRotation();
 		SmoothRotation();
 		ApplyRotation();
+		IdleCameraSway();
 
 		cam.fieldOfView = fov;
 		transform.position = s.playerHead.position;
-
-		if (s.CameraLook.RotationDelta.sqrMagnitude < 5f && s.PlayerMovement.Magnitude < 1f && s.CameraShaker.Offset.sqrMagnitude < 0.01f)
-		{
-			Vector3 noiseOffset = Vector3.zero;
-
-			headSwayScroller += Time.deltaTime * swayFrequency;
-
-			noiseOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
-			noiseOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
-
-			noiseOffset -= (Vector3) Vector2.one * 0.5f;
-			HeadSwayOffset = noiseOffset;
-		}
-
-		finalSwayOffset = HeadSwayOffset * swayAmount;
 	}
 
 	void CalcRotation()
 	{
-		RotationDelta = s.PlayerInput.MouseInputVector * sensitivity * 0.02f;
+		RotationDelta = 0.02f * sensitivity * s.PlayerInput.MouseInputVector;
 
 		rotation.y += RotationDelta.y;
 		rotation.x -= RotationDelta.x;
@@ -111,7 +96,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.SmoothOffset * 3f);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.ViewBobOffset * 3.5f);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
@@ -119,6 +104,24 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	#region Camera Effects
+	private void IdleCameraSway()
+    {
+		if (!s.WeaponControls.Aiming && s.PlayerMovement.Grounded)
+		{
+			Vector3 noiseOffset = Vector3.zero;
+
+			headSwayScroller += Time.deltaTime * swayFrequency;
+
+			noiseOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
+			noiseOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
+
+			noiseOffset -= (Vector3)Vector2.one * 0.5f;
+			HeadSwayOffset = noiseOffset;
+		}
+
+		finalSwayOffset = Vector3.Slerp(finalSwayOffset, HeadSwayOffset * Mathf.Clamp(swayAmount - s.PlayerMovement.Magnitude * 0.3f, 0, 100f), 15f * Time.deltaTime);
+	}
+
 	private void ChangeTilt()
 	{
 		if (wallRunRotation.z == targetCameraTilt) return;
@@ -136,7 +139,6 @@ public class CameraFollow : MonoBehaviour
 	}
 
 	public void SetTiltSmoothing(float speed = 0) => tiltTime = speed;
-
 	public void SetFovSmoothing(float speed = 0) => fovTime = speed;
 
 	private void SpeedLines()
