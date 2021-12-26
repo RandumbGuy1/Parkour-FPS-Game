@@ -8813,7 +8813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &562165511
 Transform:
   m_ObjectHideFlags: 0
@@ -12619,9 +12619,9 @@ MonoBehaviour:
   maxOffset: 3.5
   slideMaxOffset: 2
   bobSpeed: 9.5
-  bobAmountHoriz: 0.15
-  bobAmountVert: 0.35
-  bobSmoothTime: 0.06
+  bobAmountHoriz: 0.2
+  bobAmountVert: 0.4
+  bobSmoothTime: 0.065
   shakeData: {fileID: 11400000, guid: 915b73c15e711e94f8d19869af90b586, type: 2}
   stepUpSmoothTime: 0.04
   s: {fileID: 1650519438}
@@ -15955,7 +15955,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16605,7 +16605,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 14.33
+  m_Name: Save 14.43
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17327,7 +17327,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1630573897
 Transform:
   m_ObjectHideFlags: 0
@@ -17799,8 +17799,8 @@ MonoBehaviour:
   maxSlideSpeed: 100
   jumpForce: 48
   maxJumpSteps: 10
-  crouchScale: 1.2
-  crouchSmoothTime: 0.06
+  crouchScale: 1.3
+  crouchSmoothTime: 0.1
   slideForce: 80
   slideTilt: 8
   wallRunGravityForce: 10

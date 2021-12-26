@@ -47,7 +47,7 @@ public class CameraBobbing : MonoBehaviour
         smoothOffset = Vector3.SmoothDamp(smoothOffset, HeadBob(), ref bobVel, bobSmoothTime);
         CalculateLandOffset();
 
-        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset;
+        Vector3 newPos = (Vector3.up * bobOffset) + smoothOffset + (s.PlayerMovement.CrouchOffset * 1.8f);
 		transform.localPosition = newPos;
 	}
 
@@ -84,16 +84,18 @@ public class CameraBobbing : MonoBehaviour
 
         bool crouched = s.PlayerInput.Crouching;
         float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
-        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
+        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 13.5f);
 
         landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
-        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
+
+        float randomYZ = UnityEngine.Random.Range(-0.2f, 0.2f);
+        s.CameraShaker.ShakeOnce(landbobShakeData, new Vector3(1f, randomYZ, randomYZ));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);
 
         if (impactForce > -0.5f) return;
-        if (crouched) impactForce = Mathf.Clamp(impactForce * 0.83f, -slideMaxOffset, 0f);
+        if (crouched) impactForce = Mathf.Clamp(impactForce * 0.5f, -slideMaxOffset, 0f);
 
         desiredOffset += impactForce;
 	}
@@ -122,13 +124,15 @@ public class CameraBobbing : MonoBehaviour
     {
         float speedAmp = s.PlayerMovement.Magnitude * 0.065f;
         speedAmp = Mathf.Clamp(speedAmp, 0.8f, 1.1f);
-       
-        float amp = s.PlayerMovement.Magnitude * 0.068f * (s.PlayerMovement.WallRunning ? 1.3f : 1f) * (s.WeaponControls.Aiming ? 0.5f : 1f);
-        amp = Mathf.Clamp(amp, 1f, 1.4f);
 
-        return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed * speedAmp) * s.orientation.right) + (amp * bobAmountVert * Math.Abs(Mathf.Sin(timer * bobSpeed * speedAmp)) * Vector3.up));
+        float scroller = timer * bobSpeed * speedAmp;
+
+        float magAmp = s.PlayerMovement.Magnitude * 0.07f * (s.PlayerMovement.WallRunning ? 1.5f : 1f) * (s.WeaponControls.Aiming || bobOffset <= -0.05f ? 0.5f : 1f);
+        magAmp = Mathf.Clamp(magAmp, 0.8f, 1.3f);
+
+        return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(scroller)) * Vector3.right + (bobAmountVert * Math.Abs(Mathf.Sin(scroller))) * Vector3.up) * magAmp;
     }
-
+    /*
     private void SmoothStepUp()
     {
         if (vaultDesync == Vector3.zero) return;
@@ -139,4 +143,5 @@ public class CameraBobbing : MonoBehaviour
     }
 
     public void StepUp(Vector3 offset) => vaultDesync = Vector3.zero + offset;
+    */
 }
