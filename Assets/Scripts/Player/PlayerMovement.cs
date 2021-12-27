@@ -20,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     private bool sprinting = false;
     private float timeSinceLastTap = 0f;
 
+    public bool Sprinting { get { return autoSprint || sprinting; } set { sprinting = value; } }
+
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
     [SerializeField] private int maxJumpSteps;
@@ -78,7 +80,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float vaultDuration;
     [SerializeField] private float vaultForce;
     [SerializeField] private float vaultOffset;
-    [SerializeField] private float vaultJumpForce;
 
     public bool Vaulting { get; private set; } = false;
 
@@ -109,6 +110,8 @@ public class PlayerMovement : MonoBehaviour
     private int stepsSinceLastGrounded = 0;
     private int stepsSinceLastJumped = 0;
     private int stepsSinceLastWallJumped = 0;
+
+    public bool JustJumped { get { return stepsSinceLastJumped < 4; } }
 
     public Vector3 GroundNormal { get; private set; }
     public Vector3 WallNormal { get; private set; }
@@ -312,7 +315,7 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y));
         }
 
-        if (IsWall(contact.normal, 0.33f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
+        if (IsWall(contact.normal, 0.3f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
     }
 
     void OnCollisionStay(Collision col)
@@ -375,13 +378,6 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(0.75f * jumpForce * GroundNormal, ForceMode.Impulse);
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
-        /*
-        float amp = Magnitude * (crouched ? 0.6f : 1f);
-        amp *= 0.025f;
-        amp = Mathf.Clamp(amp, 0.6f, 3f);
- 
-        s.CameraShaker.ShakeOnce(amp, 8f, 0.6f, 10f, ShakeData.ShakeType.Perlin);
-        */
     }
     #endregion
 
@@ -392,88 +388,58 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 vaultDir = normal;
         vaultDir.y = 0f;
-        vaultDir.Normalize();
 
         Vector3 vel = Velocity;
         vel.y = 0;
-        vel.Normalize();
-        vel *= Magnitude;
 
-        Vector3 vaultCheck = transform.position + Vector3.up * 1.5f;
+        Vector3 vaultCheck = transform.position + Vector3.up * 2.5f;
+        Vector3 lastPos = transform.position;
 
-        if (Vector3.Dot(-vaultDir, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir, InputDir) < 0.6f) return;
+        if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.6f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
-        if (!Physics.Raycast(vaultCheck - vaultDir, Vector3.down, out var vaultHit, 3f, Environment)) return;
+        if (!Physics.Raycast(vaultCheck + (vel.normalized * 0.5f - vaultDir.normalized).normalized, Vector3.down, out var vaultHit, 4.5f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
-        Vector3 vaultPoint = vaultHit.point + (Vector3.up * 2f) + (vaultDir);
-        float distance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
+        Vector3 vaultPoint = vaultHit.point + Vector3.up * 2f;
+        float verticalDistance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
-        if (distance > vaultOffset + 0.1f) return;
+        if (verticalDistance > vaultOffset + 0.1f) return;
 
-        if (distance < 3.7f)
+        float distance = Vector3.Distance(lastPos, vaultPoint);
+        float duration = distance / Magnitude;
+
+        if (verticalDistance < 3.7f)
         {
-            StartCoroutine(ResolveStepUp(vaultPoint - vaultDir * 0.6f + Vector3.down * 0.1f, Velocity));
+            StepUpDesyncSmoothing(vaultPoint, lastPos, duration);
+            rb.velocity = vel * (Sprinting ? 1f : 0.5f);
             return;
         }
 
-        if (Vector3.Dot(s.orientation.forward, -vaultDir) < 0.6f) return;
+        if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
-        StartCoroutine(Vault(vaultPoint, -vaultDir, distance));
+        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, duration * 3f);
+        StartCoroutine(Vault(duration * 1.3f, -vaultDir));
+
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
-        s.CameraShaker.ShakeOnce(Math.Abs(Velocity.y) * 0.4f, 4f, 0.6f, 5f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f, ShakeData.ShakeType.Perlin);
     }
 
-    private IEnumerator ResolveStepUp(Vector3 pos, Vector3 lastVel)
+    private void StepUpDesyncSmoothing(Vector3 point, Vector3 lastPos, float duration)
     {
-        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-        rb.isKinematic = true;
-        lastVel.y = 0f;
+        transform.position = point;
+        Vector3 offsetDir = lastPos - point;
 
-        float elapsed = 0f;
-        float speed = lastVel.magnitude;
-        float distance = Mathf.Pow(Vector3.Distance(rb.position, pos), 1.3f);
-        float duration = distance / speed;
-
-        while (elapsed < duration)
-        {
-            rb.MovePosition(Vector3.Lerp(transform.position, pos, elapsed / duration));
-            elapsed += Time.fixedDeltaTime * (1f + (elapsed / duration)) * 1.7f;
-
-            rb.velocity = lastVel;
-            WallRunning = false;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        rb.velocity = lastVel * 1.1f;
-        rb.isKinematic = false;
-        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        s.CameraHeadBob.PlayerDesyncFromCollider(offsetDir, Mathf.Clamp(duration * 0.2f, 0.03f, 0.15f));
     }
 
-    private IEnumerator Vault(Vector3 pos, Vector3 normal, float distance)
+    private IEnumerator Vault(float duration, Vector3 normal)
     {
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
         Vaulting = true;
 
-        distance = (distance * distance) * 0.05f;
-        distance = Mathf.Round(distance * 100.0f) * 0.01f;
-
-        Vector3 vaultOriginalPos = transform.position;
-        float elapsed = 0f;
-        float vaultDuration = this.vaultDuration + distance;
-
-        Grounded = false;
-
-        while (elapsed < vaultDuration)
-        {
-            transform.position = Vector3.Lerp(vaultOriginalPos, pos, Mathf.SmoothStep(0, 1, elapsed));
-            elapsed += Time.deltaTime * 2f;
-
-            yield return null;
-        }
+        yield return new WaitForSeconds(duration);
 
         Vaulting = false;
         rb.isKinematic = false;
@@ -508,7 +474,7 @@ public class PlayerMovement : MonoBehaviour
         wallClimb = Mathf.Clamp(wallClimb, -3f, 12f);
 
         rb.AddForce(Vector3.up * wallClimb);
-        rb.AddForce(wallMoveDir * wallMagnitude * 0.25f, ForceMode.VelocityChange);
+        rb.AddForce(0.25f * wallMagnitude * wallMoveDir, ForceMode.VelocityChange);
     }
 
     private void WallRun()
@@ -529,7 +495,7 @@ public class PlayerMovement : MonoBehaviour
         NearWall = false;
 
         rb.AddForce(WallNormal * wallJumpForce * 1.1f, ForceMode.Impulse);
-        rb.AddForce(Vector3.down * wallJumpForce * 0.15f, ForceMode.Impulse);
+        rb.AddForce(0.15f * wallJumpForce * Vector3.down, ForceMode.Impulse);
     }
 
     public bool CanWallJump()
@@ -589,7 +555,7 @@ public class PlayerMovement : MonoBehaviour
         if (!crouching && crouched && canUnCrouch) Crouch(InputDir, false);
         if (!crouched) return;
 
-        canUnCrouch = !Physics.CheckCapsule(s.bottomCapsuleSphereOrigin, s.playerHead.position, 0.65f, Environment);
+        canUnCrouch = !Physics.CheckCapsule(s.bottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
 
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     }
@@ -666,21 +632,18 @@ public class PlayerMovement : MonoBehaviour
         if (crouched) return maxSlideSpeed;
         if (jumping || !Grounded) return maxAirSpeed;
 
-        if (sprinting || autoSprint) return maxGroundSpeed * sprintMultiplier;
+        if (Sprinting || autoSprint) return maxGroundSpeed * sprintMultiplier;
         return maxGroundSpeed;
     }
 
     private void HandleSprinting()
     {
-        if (!Moving || !Grounded)
-        {
-            sprinting = false;
-            return;
-        }
+        if (!Moving) Sprinting = false;
+        if (!Grounded) return;
 
         if (s.PlayerInput.SprintTap)
         {
-            if (Time.time - timeSinceLastTap <= sprintDoubleTapTime) sprinting = true;
+            if (Time.time - timeSinceLastTap <= sprintDoubleTapTime) Sprinting = true;
             timeSinceLastTap = Time.time;
         }
     }
