@@ -11,39 +11,29 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     [SerializeField] private float bulletLifeTime;
     [SerializeField] private string impactEffect;
     private bool exploded = false;
+    private float damage = 0;
 
     [SerializeField] private List<TrailRenderer> trails = new List<TrailRenderer>();
     private Rigidbody rb;
-    private MeshRenderer mr;
 
     public ProjectileType BulletType { get { return ProjectileType.Bullet; } }
     public float LifeTime { get { return bulletLifeTime; } }
 
     void Awake()
     {
-        mr = GetComponentInChildren<MeshRenderer>();
         rb = GetComponent<Rigidbody>();
         rb.detectCollisions = false;
     }
 
-    public void OnShoot(ScriptManager shooter, RaycastHit target, Vector3 velocity, float shootForce)
+    public void OnShoot(ScriptManager shooter, RaycastHit target, Vector3 velocity, float shootForce, float bulletDamage)
     {
         foreach (TrailRenderer trail in trails) trail.Clear();
-        exploded = false;
-        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
-        /*
-        if (targetNormal != Vector3.zero)
-        {
-            if (Vector3.Dot((targetPoint - transform.position).normalized, -targetNormal.normalized) < 0.3f)
-            {
-                Explode(targetPoint, targetNormal, true);
-                return;
-            }
-        }
-        */
-        //float distanceForce = (velocity.magnitude * 0.1f);
-        //distanceForce = Mathf.Clamp(distanceForce, 0, 3f);
+        rb.isKinematic = false;
+
+        exploded = false;
+        damage = bulletDamage;
+
         float playerVelocity = 1f;
 
         if (shooter != null)
@@ -91,9 +81,9 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     {
         if (exploded) return;
 
-        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-        rb.detectCollisions = false;
         rb.velocity = Vector3.zero;
+        rb.isKinematic = true;
+
         exploded = true;
         Invoke(nameof(DeactivateBullet), 0.15f);
 
@@ -105,25 +95,23 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         for (int i = 0; i < enemiesInRadius.Length; i++)
         {
             ScriptManager s = enemiesInRadius[i].gameObject.GetComponent<ScriptManager>();
-            Rigidbody rb;
+            Rigidbody rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
+            IDamagable damageable = enemiesInRadius[i].gameObject.GetComponent<IDamagable>();
 
-            if (s == null) rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
-            else rb = s.rb;
+            if (damageable != null) damageable.OnDamage(damage);
 
-            if (rb == null) continue;
             if (s != null)
             {
                 s.PlayerMovement.ResetJumpSteps();
                 s.CameraShaker.ShakeOnce(10f, 4f, 1.5f, 4f, ShakeData.ShakeType.Perlin);
             }
 
+            if (rb == null) continue;
+
             rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.5f, rb.velocity.z);
             rb.AddExplosionForce(explosionForce, point, explosionRadius * 1.5f, 0f, ForceMode.Impulse);
         }
     }
 
-    void DeactivateBullet()
-    {
-        gameObject.SetActive(false);
-    }
+    void DeactivateBullet() => gameObject.SetActive(false);
 }

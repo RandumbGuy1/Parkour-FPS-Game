@@ -35,9 +35,11 @@ public class PlayerMovement : MonoBehaviour
     private bool crouched = false;
     private bool canUnCrouch = true;
     private float playerScale;
+    private float slideAngledTilt = 0;
 
     public Vector3 CrouchOffset { get { return (playerScale - s.cc.height) * transform.localScale.y * Vector3.down; } }
     public bool CanCrouchWalk { get { return !crouched || (Magnitude < maxGroundSpeed * 0.7f); } }
+    public float SlideTiltOffset { get { return slideAngledTilt; } }
 
     [Header("WallRunning")]
     [SerializeField] private float wallRunGravityForce;
@@ -73,8 +75,6 @@ public class PlayerMovement : MonoBehaviour
 
     public float WallRunFovOffset { get { return (wallRunning ? wallRunFovOffset : 0); } }
     public float WallRunTiltOffset { get { return (wallRunning ? wallRunTilt * (IsWallRight ? 1 : -1) : 0); } }
-
-    public float SlideTiltOffset { get { return (crouched ? slideTilt : 0); } }
 
     [Header("Vaulting")]
     [SerializeField] private float vaultDuration;
@@ -392,18 +392,18 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vel = Velocity;
         vel.y = 0;
 
-        Vector3 vaultCheck = transform.position + Vector3.up * 2.5f;
+        Vector3 vaultCheck = transform.position + Vector3.up * 2f;
         Vector3 lastPos = transform.position;
 
-        if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.6f) return;
+        if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.4f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, Environment)) return;
-        if (!Physics.Raycast(vaultCheck + (vel.normalized * 0.5f - vaultDir.normalized).normalized, Vector3.down, out var vaultHit, 4.5f, Environment)) return;
+        if (!Physics.Raycast(vaultCheck + (vel.normalized * 0.5f - vaultDir.normalized).normalized, Vector3.down, out var vaultHit, 3.5f, Environment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
         Vector3 vaultPoint = vaultHit.point + Vector3.up * 2f;
         float verticalDistance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
 
-        if (verticalDistance > vaultOffset + 0.1f) return;
+        if (verticalDistance > vaultOffset + 0.1f || verticalDistance < 1.65f) return;
 
         float distance = Vector3.Distance(lastPos, vaultPoint);
         float duration = distance / Magnitude;
@@ -520,9 +520,10 @@ public class PlayerMovement : MonoBehaviour
         crouched = crouch;
         s.CameraLook.SetTiltSmoothing(0.15f);
 
-        if (!crouched && Grounded)
+        if (!crouched)
         {
-            rb.velocity *= 0.65f;
+            slideAngledTilt = 0;
+            if (Grounded) rb.velocity *= 0.65f;
             return;
         }
 
@@ -555,8 +556,10 @@ public class PlayerMovement : MonoBehaviour
         if (!crouching && crouched && canUnCrouch) Crouch(InputDir, false);
         if (!crouched) return;
 
-        canUnCrouch = !Physics.CheckCapsule(s.bottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
+        if (CanCrouchWalk) slideAngledTilt = 0;
+        else if (slideAngledTilt == 0 && Grounded && stepsSinceLastJumped > 5) slideAngledTilt = input.x * slideTilt;
 
+        canUnCrouch = !Physics.CheckCapsule(s.bottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     }
     #endregion
@@ -610,7 +613,7 @@ public class PlayerMovement : MonoBehaviour
         Moving = input != Vector2.zero;
 
         UpdateCrouchScale();
-        HandleSprinting();
+        if (!autoSprint) HandleSprinting();
     }
 
     private Vector3 CalculateInputDir(Vector2 input) => 1.05f * input.y * s.orientation.forward + s.orientation.right * input.x;

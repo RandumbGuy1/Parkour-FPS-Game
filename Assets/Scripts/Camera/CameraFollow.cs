@@ -18,6 +18,7 @@ public class CameraFollow : MonoBehaviour
 
 	[Header("Sensitivity")]
 	[SerializeField] private float sensitivity;
+	[SerializeField] private float aimSensitivity;
 	[SerializeField] private Vector2 rotateSmoothTime;
 
 	[Header("Clamp Rotation")]
@@ -78,7 +79,7 @@ public class CameraFollow : MonoBehaviour
 
 	void CalcRotation()
 	{
-		RotationDelta = 0.02f * sensitivity * s.PlayerInput.MouseInputVector;
+		RotationDelta = 0.02f * (s.WeaponControls.Aiming ? aimSensitivity : sensitivity) * s.PlayerInput.MouseInputVector;
 
 		rotation.y += RotationDelta.y;
 		rotation.x -= RotationDelta.x;
@@ -106,7 +107,7 @@ public class CameraFollow : MonoBehaviour
 	#region Camera Effects
 	private void IdleCameraSway()
     {
-		if (!s.WeaponControls.Aiming && s.PlayerMovement.Grounded)
+		if (!s.WeaponControls.Aiming && s.PlayerMovement.Grounded && s.PlayerMovement.Magnitude < 5f)
 		{
 			Vector3 noiseOffset = Vector3.zero;
 
@@ -116,10 +117,10 @@ public class CameraFollow : MonoBehaviour
 			noiseOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
 
 			noiseOffset -= (Vector3)Vector2.one * 0.5f;
-			HeadSwayOffset = noiseOffset;
+			HeadSwayOffset = Vector3.Slerp(HeadSwayOffset, noiseOffset, 15f * Time.deltaTime);
 		}
 
-		finalSwayOffset = Vector3.Slerp(finalSwayOffset, HeadSwayOffset * Mathf.Clamp(swayAmount - s.PlayerMovement.Magnitude * 0.3f, 0, 100f), 15f * Time.deltaTime);
+		finalSwayOffset = HeadSwayOffset * swayAmount;
 	}
 
 	private void ChangeTilt()

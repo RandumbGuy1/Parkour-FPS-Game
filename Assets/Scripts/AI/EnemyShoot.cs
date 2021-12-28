@@ -12,6 +12,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
 
     [Header("Shooting Settings")]
     [SerializeField] private LayerMask CollideAttack;
+    [SerializeField] private float damagePerShot;
     [SerializeField] private float shootForce;
     [SerializeField] private float spread;
     [SerializeField] private float bulletsPerTap;
@@ -43,7 +44,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint, Quaternion.identity).GetComponent<IProjectile>();
 
             Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
-            bullet.OnShoot(null, hit, spreadDir + targetRb.velocity * 0.001f, shootForce);
+            bullet.OnShoot(null, hit, spreadDir + targetRb.velocity * 0.001f, shootForce, damagePerShot);
         }
 
         if (readyToShoot)
