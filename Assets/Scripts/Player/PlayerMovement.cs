@@ -142,13 +142,7 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
-    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
-
-    void Update()
-    {
-        SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
-    }
+    void Update() => SetInput(s.PlayerInput.InputVector, s.PlayerInput.Jumping, s.PlayerInput.Crouching);
 
     void FixedUpdate()
     {

@@ -66,9 +66,6 @@ public class CameraFollow : MonoBehaviour
 		targetFov = setFov;
 	}
 
-	void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
-	void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
-
 	void Update()
 	{
 		if (state == CameraState.Spectate) return;
@@ -94,6 +91,22 @@ public class CameraFollow : MonoBehaviour
 
 		cam.fieldOfView = fov;
 		UpdateCameraPosition();
+	}
+
+	void UpdateCameraPosition()
+	{
+		switch (state)
+		{
+			case CameraState.FPS:
+				transform.position = s.playerHead.position;
+				break;
+
+			case CameraState.Spectate:
+				Vector2 input = s.PlayerInput.InputVector.normalized;
+				specateOffset += cam.transform.TransformDirection(new Vector3(input.x, 0f, input.y));
+				transform.position = Vector3.Lerp(transform.position, lastHeadPos + specateOffset, 3f * Time.deltaTime);
+				break;
+		}
 	}
 
 	void CalcRotation()
@@ -185,26 +198,10 @@ public class CameraFollow : MonoBehaviour
 		if (newState != PlayerState.Dead) return;
 
 		state = CameraState.Spectate;
+		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f;
+		s.CameraShaker.enabled = false;
 
-		lastHeadPos = s.playerHead.position;
-
-		//Cursor.lockState = CursorLockMode.None;
-		//Cursor.visible = true;
-	}
-
-	void UpdateCameraPosition()
-	{
-		switch (state)
-		{
-			case CameraState.FPS:
-				transform.position = s.playerHead.position;
-				break;
-
-			case CameraState.Spectate:
-				Vector2 input = s.PlayerInput.InputVector.normalized;
-				specateOffset += cam.transform.TransformDirection(new Vector3(input.x, 0f, input.y));
-				transform.position = Vector3.Lerp(transform.position, lastHeadPos + specateOffset, 5f * Time.deltaTime);
-				break;
-		}
-	}
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.visible = true;
+	}	
 }

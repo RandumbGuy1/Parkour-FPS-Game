@@ -25,8 +25,15 @@ public class ScriptManager : MonoBehaviour
 
     public Vector3 BottomCapsuleSphereOrigin { get { return transform.position - Vector3.up * (cc.height - cc.radius); } }
 
-    private void Awake()
+    void Awake() => Application.targetFrameRate = 80;
+    void OnEnable() => PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+    void OnDisable() => PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+
+    public void OnPlayerStateChanged(PlayerState newState)
     {
-        Application.targetFrameRate = 80;
+        PlayerMovement.OnPlayerStateChanged(newState);
+        WeaponControls.OnPlayerStateChanged(newState);
+        PlayerInteraction.OnPlayerStateChanged(newState);
+        CameraLook.OnPlayerStateChanged(newState);
     }
 }

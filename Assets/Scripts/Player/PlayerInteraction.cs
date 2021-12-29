@@ -38,9 +38,6 @@ public class PlayerInteraction : MonoBehaviour
         lr.positionCount = 0;
     }
 
-    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
-    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
-
     void FixedUpdate()
     {
         if (heldObj != null) CheckObject();

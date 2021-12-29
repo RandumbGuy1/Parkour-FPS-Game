@@ -20,10 +20,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     public float MaxHealth { get { return maxHealth; } }
     public float CurrentHealth { get { return currentHealth; } }
 
-    void Awake()
-    {
-        currentHealth = maxHealth;
-    }
+    void Awake() => currentHealth = maxHealth;
 
     public void OnDamage(float damage)
     {

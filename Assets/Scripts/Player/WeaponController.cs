@@ -86,9 +86,6 @@ public class WeaponController : MonoBehaviour
         circleCursor.SetActive(true);
     }
 
-    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
-    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
-
     void Update()
     {
         float previousWeapon = selectedWeapon;
