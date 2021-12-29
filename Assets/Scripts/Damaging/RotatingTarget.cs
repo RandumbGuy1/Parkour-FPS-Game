@@ -20,25 +20,28 @@ public class RotatingTarget : MonoBehaviour, IDamagable
     [Header("Damage Settings")]
     [SerializeField] private Material targetMaterial;
     [SerializeField] private Color targetDamageColor;
-    [SerializeField] private float backToNormalColorSmoothTime;
+    [SerializeField] private float normalColorSmoothTime;
+    [Space(10)]
+    [SerializeField] private float targetNormalIntensity;
+    [SerializeField] private float targetDamageIntensity;
+    [SerializeField] private float normalIntensitySmoothTime;
+    [Space(10)]
+
+    private float currentIntensity = 0f;
+    private float desiredIntensity = 0f;
+
     private Color targetColor;
 
     public float MaxHealth { get { return maxHealth; } }
     public float CurrentHealth { get { return currentHealth; } }
 
-    void Awake()
-    {
-        currentHealth = maxHealth;
-    }
-
-    void OnEnable()
-    {
-        StartCoroutine(SineFloating(transform.position));
-    }
+    void Awake() => currentHealth = maxHealth;
+    void OnEnable() => StartCoroutine(SineFloating(transform.position));
 
     public void OnDamage(float damage) 
     {
         if (!targetActive) return;
+
         if (currentHealth <= 0)
         {
             StartCoroutine(TargetRotateReset());
@@ -48,17 +51,16 @@ public class RotatingTarget : MonoBehaviour, IDamagable
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Infinity);
 
+        desiredIntensity = targetDamageIntensity;
         targetColor = targetDamageColor;
     }
 
     private IEnumerator TargetRotateReset()
     {
         targetActive = false;
-        currentHealth = maxHealth;
-
         float elapsed = 0f;
 
-        while (elapsed < rotateSmoothTime)
+        while (elapsed < rotateSmoothTime * 0.4f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(rotation), elapsed / rotateSmoothTime);
             elapsed += Time.deltaTime * 2f;
@@ -69,7 +71,7 @@ public class RotatingTarget : MonoBehaviour, IDamagable
         yield return new WaitForSeconds(idleWaitTime);
         elapsed = 0f;
 
-        while (elapsed < rotateSmoothTime)
+        while (elapsed < rotateSmoothTime * 0.2f)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(Vector3.zero), elapsed / rotateSmoothTime);
             elapsed += Time.deltaTime * 2f;
@@ -78,6 +80,7 @@ public class RotatingTarget : MonoBehaviour, IDamagable
         }
 
         targetActive = true;
+        currentHealth = maxHealth;
     }
 
     private IEnumerator SineFloating(Vector3 originalPos)
@@ -91,8 +94,12 @@ public class RotatingTarget : MonoBehaviour, IDamagable
 
             scroller += Time.deltaTime;
 
-            targetColor = Color.Lerp(targetColor, Color.grey, backToNormalColorSmoothTime * 0.5f * Time.deltaTime);
-            targetMaterial.color = Color.Lerp(targetMaterial.color, targetColor, backToNormalColorSmoothTime * Time.deltaTime * 2f);
+            desiredIntensity = Mathf.Lerp(desiredIntensity, targetNormalIntensity, normalIntensitySmoothTime * 0.3f * Time.deltaTime);
+            currentIntensity = Mathf.Lerp(currentIntensity, desiredIntensity, normalIntensitySmoothTime * 2f * Time.deltaTime);
+
+            targetColor = Color.Lerp(targetColor, Color.white, normalColorSmoothTime * 0.05f * Time.deltaTime);
+            targetMaterial.SetColor("_EmissionColor", Color.Lerp(targetMaterial.color, targetColor * currentIntensity, normalColorSmoothTime * Time.deltaTime * 2f));
+            targetMaterial.SetColor("_Color", Color.Lerp(targetMaterial.color, targetColor * currentIntensity, normalColorSmoothTime * Time.deltaTime * 2f));
 
             yield return null;
         }

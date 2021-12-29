@@ -13,6 +13,17 @@ public class CameraFollow : MonoBehaviour
 	[Header("Fov")]
 	[SerializeField] private float fov;
 
+	[Header("Camera States")]
+	[SerializeField] private CameraState state;
+	private Vector3 specateOffset = Vector3.zero;
+	private Vector3 lastHeadPos = Vector3.zero;
+
+	public enum CameraState
+    {
+		FPS,
+		Spectate
+    }
+
 	private float targetFov = 0f, setFov, fovTime = 0.2f;
 	private Vector3 effectVel = Vector3.zero;
 
@@ -47,13 +58,21 @@ public class CameraFollow : MonoBehaviour
 		cam = GetComponentInChildren<Camera>();
 		setFov = fov;
 
+		Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
+
 		wallRunRotation.z = 0f;
 		cam.fieldOfView = setFov;
 		targetFov = setFov;
 	}
 
+	void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+	void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+
 	void Update()
 	{
+		if (state == CameraState.Spectate) return;
+
 		SpeedLines();
 
 		float inputX = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
@@ -74,7 +93,7 @@ public class CameraFollow : MonoBehaviour
 		IdleCameraSway();
 
 		cam.fieldOfView = fov;
-		transform.position = s.playerHead.position;
+		UpdateCameraPosition();
 	}
 
 	void CalcRotation()
@@ -160,4 +179,32 @@ public class CameraFollow : MonoBehaviour
 	#endregion
 
 	public void SetGrapplingGun(GrapplingGun gp) => this.gp = gp;
+
+	public void OnPlayerStateChanged(PlayerState newState)
+	{
+		if (newState != PlayerState.Dead) return;
+
+		state = CameraState.Spectate;
+
+		lastHeadPos = s.playerHead.position;
+
+		//Cursor.lockState = CursorLockMode.None;
+		//Cursor.visible = true;
+	}
+
+	void UpdateCameraPosition()
+	{
+		switch (state)
+		{
+			case CameraState.FPS:
+				transform.position = s.playerHead.position;
+				break;
+
+			case CameraState.Spectate:
+				Vector2 input = s.PlayerInput.InputVector.normalized;
+				specateOffset += cam.transform.TransformDirection(new Vector3(input.x, 0f, input.y));
+				transform.position = Vector3.Lerp(transform.position, lastHeadPos + specateOffset, 5f * Time.deltaTime);
+				break;
+		}
+	}
 }

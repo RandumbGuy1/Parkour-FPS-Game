@@ -38,6 +38,9 @@ public class PlayerInteraction : MonoBehaviour
         lr.positionCount = 0;
     }
 
+    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+
     void FixedUpdate()
     {
         if (heldObj != null) CheckObject();
@@ -49,8 +52,9 @@ public class PlayerInteraction : MonoBehaviour
         GrabInput();
     }
 
-    private void LateUpdate() => DrawGrabLine();
+    void LateUpdate() => DrawGrabLine();
 
+    #region Interaction Detection
     private void CheckForInteractable()
     {
         if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables, QueryTriggerInteraction.Ignore))
@@ -107,7 +111,9 @@ public class PlayerInteraction : MonoBehaviour
             interactable = null;
         }
     }
+    #endregion
 
+    #region Interaction Handling
     private void Interact(Interactable interactable)
     {
          switch (interactable.type)
@@ -137,13 +143,6 @@ public class PlayerInteraction : MonoBehaviour
         lr.endWidth = vel;
     }
 
-    void GrabInput()
-    {
-        if (heldObj == null) return;
-
-        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
-    }
-
     private void CheckObject()
     {
         Vector3 followVel = (grabPos.position - heldObj.transform.position);
@@ -153,6 +152,14 @@ public class PlayerInteraction : MonoBehaviour
         else objRb.drag = 3f;
 
         objRb.AddForce(0.1f * objSpeed * followVel, ForceMode.VelocityChange);
+    }
+    #endregion
+
+    void GrabInput()
+    {
+        if (heldObj == null) return;
+
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
     }
 
     private void Pickup(GameObject obj)
@@ -175,6 +182,8 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Drop()
     {
+        if (heldObj == null && objRb == null) return;
+
         objRb.useGravity = true;
 
         objRb.drag = storedDrag;
@@ -194,5 +203,13 @@ public class PlayerInteraction : MonoBehaviour
         objRb = null;
 
         lr.positionCount = 0;
+    }
+
+    public void OnPlayerStateChanged(PlayerState newState)
+    {
+        if (newState != PlayerState.Dead) return;
+
+        Drop();
+        enabled = false;
     }
 }

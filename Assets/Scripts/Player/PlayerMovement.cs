@@ -138,11 +138,12 @@ public class PlayerMovement : MonoBehaviour
         s = GetComponent<ScriptManager>();
         rb = GetComponent<Rigidbody>();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         playerScale = s.cc.height;
+        rb.freezeRotation = true;
     }
+
+    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
 
     void Update()
     {
@@ -161,7 +162,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float movementMultiplier = Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier * (crouched ? 0.5f : 1f);
 
-        ReachedMaxSlope = (Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle);
+        ReachedMaxSlope = (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
         if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting) rb.AddForce((1.7f - 1f) * Physics.gravity.y * Vector3.up, ForceMode.Acceleration);
@@ -229,7 +230,7 @@ public class PlayerMovement : MonoBehaviour
     private bool SnapToGround(float speed)
     {
         if (speed < 3f || stepsSinceLastGrounded > 3 || stepsSinceLastJumped < maxJumpSteps || Vaulting || Grounded) return false;
-        if (!Physics.Raycast(s.bottomCapsuleSphereOrigin, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
+        if (!Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var snapHit, 1.8f, GroundSnapLayer)) return false;
 
         Grounded = true;
 
@@ -401,7 +402,7 @@ public class PlayerMovement : MonoBehaviour
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
 
         Vector3 vaultPoint = vaultHit.point + Vector3.up * 2f;
-        float verticalDistance = vaultPoint.y - s.bottomCapsuleSphereOrigin.y;
+        float verticalDistance = vaultPoint.y - s.BottomCapsuleSphereOrigin.y;
 
         if (verticalDistance > vaultOffset + 0.1f || verticalDistance < 1.65f) return;
 
@@ -502,7 +503,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!NearWall || ReachedMaxSlope || Vaulting || Grounded || crouching) return false;
 
-        return !Physics.CheckSphere(s.bottomCapsuleSphereOrigin + Vector3.down * minimumJumpHeight, 0.3f, Ground);
+        return !Physics.CheckSphere(s.BottomCapsuleSphereOrigin + Vector3.down * minimumJumpHeight, 0.3f, Ground);
     }
 
     public float CalculateWallRunRotation(float rot)
@@ -559,7 +560,7 @@ public class PlayerMovement : MonoBehaviour
         if (CanCrouchWalk) slideAngledTilt = 0;
         else if (slideAngledTilt == 0 && Grounded && stepsSinceLastJumped > 5) slideAngledTilt = input.x * slideTilt;
 
-        canUnCrouch = !Physics.CheckCapsule(s.bottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
+        canUnCrouch = !Physics.CheckCapsule(s.BottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     }
     #endregion
@@ -649,5 +650,16 @@ public class PlayerMovement : MonoBehaviour
             if (Time.time - timeSinceLastTap <= sprintDoubleTapTime) Sprinting = true;
             timeSinceLastTap = Time.time;
         }
+    }
+
+    public void OnPlayerStateChanged(PlayerState newState)
+    {
+        if (newState != PlayerState.Dead) return;
+
+        enabled = false;
+
+        rb.freezeRotation = false;
+        rb.AddExplosionForce(25f, s.BottomCapsuleSphereOrigin + Vector3.down + s.orientation.forward, 5f, 1f, ForceMode.VelocityChange);
+        rb.drag = 2f;
     }
 }

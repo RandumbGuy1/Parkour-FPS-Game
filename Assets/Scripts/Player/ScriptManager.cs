@@ -5,8 +5,10 @@ using UnityEngine;
 public class ScriptManager : MonoBehaviour
 {
     [Header("Player Scripts")]
+    public PlayerHealth PlayerHealth;
     public PlayerMovement PlayerMovement;
     public PlayerInput PlayerInput;
+    public PlayerInteraction PlayerInteraction;
     public WeaponController WeaponControls;
 
     [Header("Camera Scripts")]
@@ -21,7 +23,7 @@ public class ScriptManager : MonoBehaviour
     public Rigidbody rb;
     public CapsuleCollider cc;
 
-    public Vector3 bottomCapsuleSphereOrigin { get { return transform.position - Vector3.up * (cc.height - cc.radius); } }
+    public Vector3 BottomCapsuleSphereOrigin { get { return transform.position - Vector3.up * (cc.height - cc.radius); } }
 
     private void Awake()
     {

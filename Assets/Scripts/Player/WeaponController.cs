@@ -86,6 +86,9 @@ public class WeaponController : MonoBehaviour
         circleCursor.SetActive(true);
     }
 
+    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+
     void Update()
     {
         float previousWeapon = selectedWeapon;
@@ -217,7 +220,7 @@ public class WeaponController : MonoBehaviour
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
     }
 
-    private void Drop(bool pickupDrop = false)
+    private void Drop(bool pickupDrop = false, bool all = false)
     {
         Rigidbody rb = weapons[selectedWeapon].GetComponent<Rigidbody>();
 
@@ -240,7 +243,7 @@ public class WeaponController : MonoBehaviour
         rand.y = Random.Range(-1f, 1f);
         rand.z = Random.Range(-1f, 1f);
 
-        rb.AddTorque(rand.normalized * throwForce * 3f, ForceMode.Impulse);
+        rb.AddTorque(3f * throwForce * rand.normalized, ForceMode.Impulse);
         weapons.RemoveAt(selectedWeapon);
 
         ResetMovementValues();
@@ -249,6 +252,12 @@ public class WeaponController : MonoBehaviour
         {
             selectedWeapon = (selectedWeapon + 1 < weapons.Count ? selectedWeapon : weapons.Count - 1);
             SelectWeapon();
+
+            if (all)
+            {
+                rb.AddExplosionForce(15f, s.BottomCapsuleSphereOrigin + (Vector3.down * 0.5f) + Random.insideUnitSphere, 15f, 1f, ForceMode.Impulse);
+                Drop(false, true);
+            }
         }
         else if (weapons.Count == 0)
         {
@@ -387,4 +396,12 @@ public class WeaponController : MonoBehaviour
         CalculateReloadOffset();
     }
     #endregion
+
+    public void OnPlayerStateChanged(PlayerState newState)
+    {
+        if (newState != PlayerState.Dead) return;
+
+        if (HoldingWeapon) Drop(false, true);
+        enabled = false;
+    }
 }
