@@ -6,10 +6,13 @@ public class CameraShaker : MonoBehaviour
 {
     public Vector3 Offset { get; private set; }
 
+    private bool canAddShakes = true;
     private List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
 
     public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 initialKickback = default(Vector3))
     {
+        if (!canAddShakes) return;
+
         ShakeData shakeData = ScriptableObject.CreateInstance<ShakeData>();
         shakeData.Intialize(magnitude, frequency, duration, smoothness, type);
 
@@ -18,8 +21,12 @@ public class CameraShaker : MonoBehaviour
 
     public void ShakeOnce(ShakeData shakeData, Vector3 initialKickback = default(Vector3))
     {
+        if (!canAddShakes) return;
+
         shakeEvents.Add(new ShakeEvent(shakeData, initialKickback));
     }
+
+    public void DisableShakes() => canAddShakes = false;
 
     void LateUpdate()
     {

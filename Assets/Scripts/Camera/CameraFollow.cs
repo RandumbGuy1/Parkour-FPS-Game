@@ -199,7 +199,9 @@ public class CameraFollow : MonoBehaviour
 
 		state = CameraState.Spectate;
 		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f;
-		s.CameraShaker.enabled = false;
+
+		s.CameraShaker.ShakeOnce(35f, 6f, 1.5f, 10f, ShakeData.ShakeType.Perlin);
+		s.CameraShaker.DisableShakes();
 
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
