@@ -13453,10 +13453,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d634056198f82e44a87f534cb9294cd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusSmoothTime: 0.7
-  playerDeathFocusDistance: 0.05
-  aberrationSmoothTime: 0.8
+  focusSmoothTime: 0.2
+  playerDeathFocusDistance: 0.03
+  aberrationSmoothTime: 0.2
   playerDeathAberration: 1
+  vignetteSmoothTime: 0.25
   s: {fileID: 1650519438}
 --- !u!1 &1021989825
 GameObject:
@@ -16919,7 +16920,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 14.85
+  m_Name: Save 14.92
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18026,7 +18027,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011273a5fe2bbc546b8954423bee2ba2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 50
+  maxHealth: 100
+  regenFactor: 1
+  regenFrequency: 12.5
+  regenCooldown: 5
   playerGraphics: {fileID: 2015820420}
   playerRagdoll: {fileID: 1121200823}
 --- !u!4 &1650519434

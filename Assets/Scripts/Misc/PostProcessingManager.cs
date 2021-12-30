@@ -10,10 +10,22 @@ public class PostProcessingManager : MonoBehaviour
     [Header("Depth Settings")]
     [SerializeField] private float focusSmoothTime;
     [SerializeField] private float playerDeathFocusDistance;
+    private float desiredFocusDistance;
+    private float startFocusDistance;
+    private bool updateDepth = true;
 
     [Header("Chromatic Settings")]
     [SerializeField] private float aberrationSmoothTime;
     [SerializeField] private float playerDeathAberration;
+    private float desiredAberration;
+    private float startAberration;
+    private bool updateAberration = true;
+
+    [Header("Vignette Settings")]
+    [SerializeField] private float vignetteSmoothTime;
+    private float desiredVignette;
+    private float startVignette;
+    private bool updateVignette = true;
 
     [Header("Assignables")]
     [SerializeField] private ScriptManager s;
@@ -22,27 +34,88 @@ public class PostProcessingManager : MonoBehaviour
     private Volume volume;
     private DepthOfField depthProfile;
     private ChromaticAberration chromaProfile;
+    private Vignette vignetteProfile;
 
     void Awake()
     {
         Instance = this;
 
         volume = GetComponent<Volume>();
-        volume.profile.TryGet(out depthProfile);
-        volume.profile.TryGet(out chromaProfile);
+        updateDepth = volume.profile.TryGet(out depthProfile);
+        updateAberration = volume.profile.TryGet(out chromaProfile);
+        updateVignette = volume.profile.TryGet(out vignetteProfile);
+
+        if (updateVignette) desiredVignette = vignetteProfile.intensity.value;
+        if (updateAberration) desiredAberration = chromaProfile.intensity.value;
+        if (updateDepth) desiredFocusDistance = depthProfile.focusDistance.value;
+
+        startFocusDistance = desiredFocusDistance;
+        startAberration = desiredAberration;
+        startVignette = desiredVignette;
     }
 
-    void OnEnable() => s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
-    void OnDisable() => s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+    void OnEnable()
+    {
+        StartCoroutine(UpdatePostProcessing());
+
+        s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
+        s.PlayerHealth.OnPlayerDamage += OnPlayerDamage;
+    }
+        
+    void OnDisable()
+    {
+        s.PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
+        s.PlayerHealth.OnPlayerDamage -= OnPlayerDamage;
+    }
+
+    public void OnPlayerDamage(float damage)
+    {
+        desiredVignette += damage * 0.7f;
+        desiredVignette = Mathf.Clamp(desiredVignette, startVignette, Mathf.Infinity);
+
+        desiredFocusDistance -= damage;
+        desiredFocusDistance = Mathf.Clamp(desiredFocusDistance, 0f, startFocusDistance);
+    }
 
     public void OnPlayerStateChanged(PlayerState newState)
     {
         if (newState != PlayerState.Dead) return;
 
-        StartCoroutine(PingPongProfileValue(aberrationSmoothTime, playerDeathAberration, () => chromaProfile.intensity.value, result => chromaProfile.intensity.value = result));
-        StartCoroutine(PingPongProfileValue(focusSmoothTime, playerDeathFocusDistance, () => depthProfile.focusDistance.value, result => depthProfile.focusDistance.value = result));
+        desiredFocusDistance = playerDeathFocusDistance;
+        desiredAberration = playerDeathAberration;
+        desiredVignette = 0f;
+
+        vignetteSmoothTime = 0.15f;
     }
 
+    public void ResetDeathValues()
+    {
+        desiredFocusDistance = startFocusDistance;
+        desiredAberration = startAberration;
+    }
+
+    private IEnumerator UpdatePostProcessing()
+    {
+        while (true)
+        {
+            if (updateVignette) SmoothlyChangeValues(result => vignetteProfile.intensity.value = result, () => vignetteProfile.intensity.value, vignetteSmoothTime, desiredVignette, 0f);
+            if (updateDepth) SmoothlyChangeValues(result => depthProfile.focusDistance.value = result, () => depthProfile.focusDistance.value, focusSmoothTime, desiredFocusDistance, 0f);
+            if (updateAberration) SmoothlyChangeValues(result => chromaProfile.intensity.value = result, () => chromaProfile.intensity.value, aberrationSmoothTime, desiredAberration, 0f);
+
+            yield return null;
+        }
+    }
+
+    private void SmoothlyChangeValues(Action<float> SetValue, Func<float> Value, float smoothing, float intensity, float velocity)
+    {
+        if (Value() == intensity) return;
+
+        SetValue(Mathf.SmoothDamp(Value(), intensity, ref velocity, smoothing));
+
+        if (Math.Abs(intensity - Value()) < 0.01f) SetValue(intensity);
+    }
+
+    /*
     private IEnumerator PingPongProfileValue(float smoothing, float intensity, Func<float> currentVariable, Action<float> variableResult)
     {
         Vector2 vel = Vector2.zero;
@@ -64,16 +137,5 @@ public class PostProcessingManager : MonoBehaviour
             yield return null;
         }
     }
-
-    private IEnumerator SmoothProfileValue(float smoothing, float intensity, float startValue, Action<float> variableResult)
-    {
-        float elapsed = 0;
-
-        while (elapsed < smoothing)
-        {
-            variableResult(Mathf.Lerp(startValue, intensity, Mathf.SmoothStep(0, 1, elapsed / smoothing)));
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-    }
+    */
 }

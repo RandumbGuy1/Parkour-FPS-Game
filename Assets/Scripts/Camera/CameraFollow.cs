@@ -24,6 +24,8 @@ public class CameraFollow : MonoBehaviour
 		Spectate
     }
 
+	private bool resettedDeathEffects = false;
+
 	private float targetFov = 0f, setFov, fovTime = 0.2f;
 	private Vector3 effectVel = Vector3.zero;
 
@@ -61,7 +63,6 @@ public class CameraFollow : MonoBehaviour
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
 
-		wallRunRotation.z = 0f;
 		cam.fieldOfView = setFov;
 		targetFov = setFov;
 	}
@@ -70,14 +71,13 @@ public class CameraFollow : MonoBehaviour
 	{
 		if (state == CameraState.Spectate) return;
 
-		SpeedLines();
-
 		float inputX = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		if (inputX != 0f && (gp != null ? gp.GrappleTilt : 0) == 0) SetTiltSmoothing(0.2f);
 
 		targetCameraTilt = s.PlayerMovement.WallRunTiltOffset + s.PlayerMovement.SlideTiltOffset + (gp != null ? gp.GrappleTilt : 0) + (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		targetFov = setFov + s.PlayerMovement.WallRunFovOffset + s.WeaponControls.AimFovOffset + (gp != null ? gp.GrappleFov : 0);
 
+		SpeedLines();
 		ChangeTilt();
 		ChangeFov();
 	}
@@ -105,6 +105,8 @@ public class CameraFollow : MonoBehaviour
 				Vector2 input = s.PlayerInput.InputVector.normalized;
 				specateOffset += cam.transform.TransformDirection(new Vector3(input.x, 0f, input.y));
 				transform.position = Vector3.Lerp(transform.position, lastHeadPos + specateOffset, 3f * Time.deltaTime);
+
+				ResetDeathEffects(specateOffset.sqrMagnitude > 9f || RotationDelta.sqrMagnitude > 9f);
 				break;
 		}
 	}
@@ -199,11 +201,25 @@ public class CameraFollow : MonoBehaviour
 
 		state = CameraState.Spectate;
 		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f;
+		specateOffset = Vector3.zero;
 
 		s.CameraShaker.ShakeOnce(35f, 6f, 1.5f, 10f, ShakeData.ShakeType.Perlin);
 		s.CameraShaker.DisableShakes();
 
+		s.CameraHeadBob.enabled = false;
+
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
 	}	
+
+	private void ResetDeathEffects(bool reset)
+    {
+		if (resettedDeathEffects) return;
+
+		if (reset)
+        {
+			PostProcessingManager.Instance.ResetDeathValues();
+			resettedDeathEffects = true;
+		}
+    }
 }
