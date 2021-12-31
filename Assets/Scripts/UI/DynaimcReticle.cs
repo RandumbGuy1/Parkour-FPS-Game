@@ -11,8 +11,8 @@ public class DynaimcReticle : MonoBehaviour
     [Header("Dynamic Reticle")]
     [SerializeField] private float smoothTime;
     [SerializeField] private float recoilSmoothTime;
-    [SerializeField] [Range(100f, 200f)] private float minSize;
-    [SerializeField] [Range(200f, 300f)] private float maxSize;
+    [SerializeField] [Range(0f, 100f)] private float minSize;
+    [SerializeField] [Range(100f, 400f)] private float maxSize;
     [Space(15)]
     [SerializeField] [Range(0f, 50f)] private float minAimSize;
 
@@ -40,7 +40,7 @@ public class DynaimcReticle : MonoBehaviour
         reticle.sizeDelta = Vector2.one * size + Vector2.one * smoothRecoilSize;
     }
 
-    public void AddReticleRecoil(float amount = 0) => desiredRecoilSize += amount;
+    public void AddReticleRecoil(float amount = 0) => desiredRecoilSize += amount * 0.6f;
 
     private void UpdateRecoilSize()
     {

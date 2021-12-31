@@ -1,14 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using System;
+﻿using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
     public Vector2 InputVector { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
     public Vector2 MouseInputVector { get { return new Vector2(Input.GetAxisRaw("Mouse Y"), Input.GetAxisRaw("Mouse X")); } }
 
+    public bool Pause { get { return Input.GetKeyDown(pauseKey); } }
     public bool SprintTap { get { return Input.GetKeyDown(doubleTapSpringKey); } }
     public bool Jumping { get { return Input.GetKeyDown(jumpKey); } }
     public bool Crouching { get { return Input.GetKey(crouchKey); } }
@@ -23,15 +20,11 @@ public class PlayerInput : MonoBehaviour
     public bool LeftReleaseClick { get { return Input.GetMouseButtonUp(0); } }
 
     [Header("KeyBinds")]
+    public KeyCode pauseKey = KeyCode.Escape;
     public KeyCode doubleTapSpringKey = KeyCode.W;
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode crouchKey = KeyCode.LeftControl;
     public KeyCode interactKey = KeyCode.E;
     public KeyCode dropKey = KeyCode.Q;
     public KeyCode reloadKey = KeyCode.R;
-
-    [Header("Assignables")]
-    private ScriptManager s;
-
-    void Awake() => s = GetComponent<ScriptManager>();
 }

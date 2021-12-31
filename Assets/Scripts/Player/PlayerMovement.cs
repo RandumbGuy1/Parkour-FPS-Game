@@ -403,7 +403,7 @@ public class PlayerMovement : MonoBehaviour
         float distance = Vector3.Distance(lastPos, vaultPoint);
         float duration = distance / Magnitude;
 
-        if (verticalDistance < 3.7f)
+        if (verticalDistance < 4f)
         {
             StepUpDesyncSmoothing(vaultPoint, lastPos, duration);
             rb.velocity = vel * (Sprinting ? 1f : 0.5f);
@@ -434,7 +434,7 @@ public class PlayerMovement : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.None;
         Vaulting = true;
 
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSeconds(duration * 0.9f);
 
         Vaulting = false;
         rb.isKinematic = false;
@@ -652,6 +652,10 @@ public class PlayerMovement : MonoBehaviour
 
         enabled = false;
 
+        WallRunning = false;
+        Vaulting = false;
+
+        rb.useGravity = true;
         rb.freezeRotation = false;
         rb.AddExplosionForce(25f, s.BottomCapsuleSphereOrigin + Vector3.down + s.orientation.forward, 5f, 1f, ForceMode.VelocityChange);
         rb.drag = 2f;

@@ -14,6 +14,10 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     private float regenTimer = 0f;
     private float regenCooldownTimer = 0f;
 
+    [Header("Void Settings")]
+    [SerializeField] private float killHeight;
+    [SerializeField] private float killSpeed;
+
     public PlayerState State { get; private set; }
 
     public delegate void ChangePlayerState(PlayerState state);
@@ -30,7 +34,16 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     public float CurrentHealth { get { return currentHealth; } }
 
     void Awake() => currentHealth = maxHealth;
-    void Update() => HandleRegen();
+    void Update()
+    {
+        if (transform.position.y < killHeight)
+        {
+            OnDamage(killSpeed * Time.deltaTime * 15f);
+            return;
+        }
+
+        HandleRegen();
+    }
 
     public void OnDamage(float damage)
     {
@@ -47,6 +60,8 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     public void OnDeath() 
     {
+        if (State == PlayerState.Dead) return;
+
         SetState(PlayerState.Dead);
 
         if (playerGraphics != null & playerRagdoll != null)

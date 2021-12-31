@@ -60,8 +60,7 @@ public class CameraFollow : MonoBehaviour
 		cam = GetComponentInChildren<Camera>();
 		setFov = fov;
 
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = false;
+		SetCursorState(true);
 
 		cam.fieldOfView = setFov;
 		targetFov = setFov;
@@ -178,7 +177,7 @@ public class CameraFollow : MonoBehaviour
 
 	private void SpeedLines()
 	{
-		if (s.PlayerMovement.Magnitude >= 10f)
+		if (s.PlayerMovement.Magnitude >= 10f && state != CameraState.Spectate)
 		{
 			if (!sprintEffect.isPlaying) sprintEffect.Play();
 
@@ -200,17 +199,23 @@ public class CameraFollow : MonoBehaviour
 		if (newState != PlayerState.Dead) return;
 
 		state = CameraState.Spectate;
-		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f;
+		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f - s.rb.velocity.normalized * 10f;
 		specateOffset = Vector3.zero;
+		wallRunRotation.z = 0f;
 
 		s.CameraShaker.ShakeOnce(35f, 6f, 1.5f, 10f, ShakeData.ShakeType.Perlin);
 		s.CameraShaker.DisableShakes();
 
 		s.CameraHeadBob.enabled = false;
 
-		Cursor.lockState = CursorLockMode.None;
-		Cursor.visible = true;
+		SetCursorState(false);
 	}	
+
+	public void SetCursorState(bool locked)
+    {
+		Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+		Cursor.visible = !locked;
+	}
 
 	private void ResetDeathEffects(bool reset)
     {

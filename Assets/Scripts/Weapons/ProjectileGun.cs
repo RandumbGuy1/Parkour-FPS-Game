@@ -184,6 +184,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     private void Flash() => desiredIntensity += lightIntensity;
     private void ResetShot() => readyToShoot = true;
-    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=25>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
+    public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=10>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
     public string ReadName() => transform.name;
 }
