@@ -5,6 +5,9 @@ public class PlayerInput : MonoBehaviour
     public Vector2 InputVector { get { return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); } }
     public Vector2 MouseInputVector { get { return new Vector2(Input.GetAxisRaw("Mouse Y"), Input.GetAxisRaw("Mouse X")); } }
 
+    public bool SpectateRise { get { return Input.GetKey(spectateRiseKey); } }
+    public bool SpectateFall { get { return Input.GetKey(spectateFallKey); } }
+
     public bool Pause { get { return Input.GetKeyDown(pauseKey); } }
     public bool SprintTap { get { return Input.GetKeyDown(doubleTapSpringKey); } }
     public bool Jumping { get { return Input.GetKeyDown(jumpKey); } }
@@ -20,6 +23,8 @@ public class PlayerInput : MonoBehaviour
     public bool LeftReleaseClick { get { return Input.GetMouseButtonUp(0); } }
 
     [Header("KeyBinds")]
+    public KeyCode spectateRiseKey = KeyCode.Space;
+    public KeyCode spectateFallKey = KeyCode.LeftShift;
     public KeyCode pauseKey = KeyCode.Escape;
     public KeyCode doubleTapSpringKey = KeyCode.W;
     public KeyCode jumpKey = KeyCode.Space;

@@ -91,6 +91,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
+    [SerializeField] private Transform playerPieces;
     [SerializeField] private LayerMask GroundSnapLayer;
     [SerializeField] private LayerMask Ground;
     [SerializeField] private LayerMask Environment;
@@ -655,9 +656,20 @@ public class PlayerMovement : MonoBehaviour
         WallRunning = false;
         Vaulting = false;
 
-        rb.useGravity = true;
-        rb.freezeRotation = false;
-        rb.AddExplosionForce(25f, s.BottomCapsuleSphereOrigin + Vector3.down + s.orientation.forward, 5f, 1f, ForceMode.VelocityChange);
-        rb.drag = 2f;
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        rb.isKinematic = true;
+        rb.detectCollisions = false;
+
+        if (playerPieces == null) return;
+
+        playerPieces.gameObject.SetActive(true);
+
+        for (int i = 0; i < playerPieces.childCount; i++)
+        {
+            Rigidbody rb = playerPieces.GetChild(i).GetComponent<Rigidbody>();
+            if (rb == null) return;
+
+            rb.AddExplosionForce(12f, s.BottomCapsuleSphereOrigin - Velocity.normalized * 3f, 10f, 0.3f, ForceMode.Impulse);
+        }
     }
 }

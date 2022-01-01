@@ -103,6 +103,9 @@ public class CameraFollow : MonoBehaviour
 			case CameraState.Spectate:
 				Vector2 input = s.PlayerInput.InputVector.normalized;
 				specateOffset += cam.transform.TransformDirection(new Vector3(input.x, 0f, input.y));
+				specateOffset += 0.75f * Convert.ToInt32(s.PlayerInput.SpectateRise) * Vector3.up;
+				specateOffset += 0.75f * Convert.ToInt32(s.PlayerInput.SpectateFall) * Vector3.down;
+
 				transform.position = Vector3.Lerp(transform.position, lastHeadPos + specateOffset, 3f * Time.deltaTime);
 
 				ResetDeathEffects(specateOffset.sqrMagnitude > 9f || RotationDelta.sqrMagnitude > 9f);

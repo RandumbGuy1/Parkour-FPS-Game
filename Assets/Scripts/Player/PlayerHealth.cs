@@ -28,7 +28,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     [Header("Assignables")]
     [SerializeField] private GameObject playerGraphics;
-    [SerializeField] private GameObject playerRagdoll;
 
     public float MaxHealth { get { return maxHealth; } }
     public float CurrentHealth { get { return currentHealth; } }
@@ -61,14 +60,9 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     public void OnDeath() 
     {
         if (State == PlayerState.Dead) return;
+        if (playerGraphics != null) playerGraphics.SetActive(false);
 
         SetState(PlayerState.Dead);
-
-        if (playerGraphics != null & playerRagdoll != null)
-        {
-            playerGraphics.SetActive(false);
-            playerRagdoll.SetActive(true);
-        }
     }
 
     private void SetState(PlayerState newState)

@@ -22,15 +22,19 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
     [SerializeField] private Rigidbody enemyRb;
+    private ScriptManager s;
 
-    private void Start()
+    void Awake()
     {
         agent.speed = 0;
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
+
+        s = player.GetComponent<ScriptManager>();
+        if (s != null) s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
@@ -41,7 +45,7 @@ public class FollowPlayer : MonoBehaviour
         FollowThePlayer();
     }
 
-    void FollowThePlayer()
+    private void FollowThePlayer()
     {
         HandleRotation();
         enemyRb.AddForce(80f * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
@@ -78,7 +82,7 @@ public class FollowPlayer : MonoBehaviour
         {
             if (shooting != null) shooting.OnAttack();
             return;
-        } 
+        }
 
         enemyRb.AddForce(5f * speed * pathDir.normalized, ForceMode.Acceleration);
     }
@@ -95,7 +99,7 @@ public class FollowPlayer : MonoBehaviour
     }
 
     void OnDrawGizmos()
-    { 
+    {
         Gizmos.DrawWireCube(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents * 2f);
     }
 
@@ -104,6 +108,8 @@ public class FollowPlayer : MonoBehaviour
         Quaternion orientation = Quaternion.LookRotation(enemyRb.transform.up);
         grounded = Physics.CheckBox(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents, orientation, Ground);
 
-        Invoke("SetGroundCheckInterval", groundCheckInterval);
+        Invoke(nameof(SetGroundCheckInterval), groundCheckInterval);
     }
+
+    private void OnPlayerStateChanged(PlayerState newState) => enabled = newState == PlayerState.Alive;
 }
