@@ -143,14 +143,15 @@ public class WeaponController : MonoBehaviour
         {
             case WeaponClass.Ranged:
                 s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f))));
+                s.CameraShaker.ShakeOnce(4.5f * aimMulti, 8f, 0.4f, 8f, ShakeData.ShakeType.Perlin);
 
                 desiredRecoilPos = recoilPosOffset * (Aiming ? aimMulti : Random.Range(0.9f, 1.15f));
                 desiredRecoilRot = recoilRotOffset * (Aiming ? aimMulti - 0.15f : Random.Range(0.9f, 1.15f));
 
-                s.rb.AddForce(-s.cam.forward * amount * 0.25f, ForceMode.Impulse);
+                s.rb.AddForce(0.25f * amount * -s.cam.forward, ForceMode.Impulse);
 
-                if (Aiming) break;
-                reticleEffects.AddReticleRecoil(amount * 3f);
+                if (!Aiming) reticleEffects.AddReticleRecoil(amount * 3f);
+
                 break;
 
             case WeaponClass.Melee:
@@ -215,6 +216,8 @@ public class WeaponController : MonoBehaviour
         CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
 
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
+
+        reticleEffects.ResetReticle();
     }
 
     private void Drop(bool pickupDrop = false, bool all = false)

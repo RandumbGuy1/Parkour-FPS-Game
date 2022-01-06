@@ -42,10 +42,10 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.06f, 0.9f, 5f);
+        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.058f, 0.95f, 6f);
 
-        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime * Mathf.Clamp(1 / speedAmp, 0.9f, 1.03f) : 0f;
-        viewBobOffset = Vector3.SmoothDamp(viewBobOffset, HeadBob(), ref bobVel, viewBobSmoothTime * speedAmp * (BobTimer <= 0 ? 3f : 1f));
+        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
+        viewBobOffset = Vector3.SmoothDamp(viewBobOffset, HeadBob(), ref bobVel, viewBobSmoothTime * speedAmp * (BobTimer <= 0 ? 5f : 1f));
        
         CalculateLandOffset();
         SmoothPlayerBackToCollider();
@@ -98,7 +98,7 @@ public class CameraBobbing : MonoBehaviour
         if (BobTimer <= 0) return Vector3.zero;
 
         float amp = s.PlayerMovement.Magnitude * 0.057f * (s.PlayerMovement.WallRunning ? 2f : 1f);
-        amp = Mathf.Clamp(amp, 1f, 1.4f) * Mathf.Max(1f + landBobOffset * 1f, 0f);
+        amp = Mathf.Clamp(amp, 0.8f, 1.4f) * Mathf.Max(1f + landBobOffset * 1f, 0f);
 
         float scroller = BobTimer * viewBobSpeed;
         return (viewBobAmountHoriz * Mathf.Cos(scroller) * s.orientation.right + viewBobAmountVert * Math.Abs(Mathf.Sin(scroller)) * Vector3.up) * amp;

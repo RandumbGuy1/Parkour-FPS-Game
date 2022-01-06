@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class BulletProjectile : MonoBehaviour, IProjectile
 {
     [Header("Projectile Settings")]
+    [SerializeField] private new GameObject light;
     [SerializeField] private LayerMask CollidesWith;
     [SerializeField] private float explosionRadius;
     [SerializeField] private float explosionForce;
@@ -13,6 +15,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     private bool exploded = false;
     private float damage = 0;
 
+    [Header("Assignables")]
     [SerializeField] private List<TrailRenderer> trails = new List<TrailRenderer>();
     private Rigidbody rb;
 
@@ -28,6 +31,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     public void OnShoot(ScriptManager shooter, RaycastHit target, Vector3 velocity, float shootForce, float bulletDamage)
     {
         foreach (TrailRenderer trail in trails) trail.Clear();
+        light.SetActive(true);
 
         rb.isKinematic = false;
 
@@ -68,7 +72,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
             Vector3 fixedVelocity = rb.velocity * Time.fixedDeltaTime;
             if (Physics.SphereCast(rb.position - fixedVelocity, 0.1f, fixedVelocity.normalized, out var hit, fixedVelocity.magnitude, CollidesWith))
             {
-                Explode(hit.point, hit.normal, true);
+                Explode(hit, true);
                 break;
             }
 
@@ -77,20 +81,24 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         }
     }
 
-    void Explode(Vector3 point = default, Vector3 normal = default, bool collided = false)
+    void Explode(RaycastHit hit = default, bool collided = false)
     {
         if (exploded) return;
 
         rb.velocity = Vector3.zero;
         rb.isKinematic = true;
 
-        exploded = true;
-        Invoke(nameof(DeactivateBullet), 0.15f);
+        exploded = true;;
+
+        Invoke(nameof(DeacivateLight), 0.03f);
+        Invoke(nameof(DeactivateBullet), 0.2f);
 
         if (!collided) return;
 
-        ObjectPooler.Instance.SpawnParticle(impactEffect, point + normal * 0.4f, normal != Vector3.zero ? Quaternion.LookRotation(normal) : Quaternion.identity);
-        Collider[] enemiesInRadius = Physics.OverlapSphere(point, explosionRadius, CollidesWith);
+        transform.position = hit.point + hit.normal * 0.1f;
+
+        ObjectPooler.Instance.SpawnParticle(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
+        Collider[] enemiesInRadius = Physics.OverlapSphere(hit.point, explosionRadius, CollidesWith);
 
         for (int i = 0; i < enemiesInRadius.Length; i++)
         {
@@ -109,9 +117,10 @@ public class BulletProjectile : MonoBehaviour, IProjectile
             if (rb == null) continue;
 
             rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.5f, rb.velocity.z);
-            rb.AddExplosionForce(explosionForce, point, explosionRadius * 1.5f, 0f, ForceMode.Impulse);
+            rb.AddExplosionForce(explosionForce, hit.point, explosionRadius * 1.5f, 0f, ForceMode.Impulse);
         }
     }
 
     void DeactivateBullet() => gameObject.SetActive(false);
+    void DeacivateLight() => light.SetActive(false);
 }
