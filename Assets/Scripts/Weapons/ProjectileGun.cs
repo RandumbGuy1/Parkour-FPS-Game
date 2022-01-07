@@ -75,9 +75,12 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private Light muzzleLight;
     [SerializeField] private ShakeData recoilShake;
     private ScriptManager s;
+    private BoxCollider col;
 
     void Start()
     {
+        col = GetComponent<BoxCollider>();
+
         bulletsLeft = magazineSize;
         ResetIntensity();
     }
@@ -103,20 +106,20 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
         Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
-        Vector3 dir = (targetPoint - attackPoint.position);
+        Vector3 bulletDir = targetPoint - attackPoint.position;
 
         for (int i = 0; i < bulletsPerTap; i++)
         {
             bulletsLeft--;
 
-            Vector2 rand = Vector2.zero;
-            rand.x = (Random.Range(-1f, 1f)) * spread * 0.003f;
-            rand.y = (Random.Range(-1f, 1f)) * spread * 0.003f;
+            Vector3 rand = Vector3.zero;
+            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.right;
+            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.up;
 
-            Vector3 spreadDir = dir.normalized + (Vector3)rand;
+            Vector3 spreadDir = bulletDir.normalized + rand * (s.WeaponControls.Aiming ? 0.3f : 1f);
 
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
-            bullet.OnShoot(s, hit, spreadDir, shootForce, damagePerShot);
+            bullet.OnShoot(s.cam, hit, spreadDir * shootForce, Environment, damagePerShot, s, hit.collider != null && col.bounds.Intersects(hit.collider.bounds));
         }
 
         if (readyToShoot)

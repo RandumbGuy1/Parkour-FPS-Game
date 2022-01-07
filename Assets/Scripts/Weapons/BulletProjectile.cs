@@ -6,16 +6,15 @@ using UnityEngine.Rendering;
 public class BulletProjectile : MonoBehaviour, IProjectile
 {
     [Header("Projectile Settings")]
-    [SerializeField] private new GameObject light;
-    [SerializeField] private LayerMask CollidesWith;
     [SerializeField] private float explosionRadius;
     [SerializeField] private float explosionForce;
     [SerializeField] private float bulletLifeTime;
     [SerializeField] private string impactEffect;
     private bool exploded = false;
-    private float damage = 0;
 
     [Header("Assignables")]
+    [SerializeField] private GameObject bulletGfx;
+    [SerializeField] private new GameObject light;
     [SerializeField] private List<TrailRenderer> trails = new List<TrailRenderer>();
     private Rigidbody rb;
 
@@ -28,36 +27,40 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         rb.detectCollisions = false;
     }
 
-    public void OnShoot(ScriptManager shooter, RaycastHit target, Vector3 velocity, float shootForce, float bulletDamage)
+    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, LayerMask CollidesWith, float bulletDamage, ScriptManager s = null, bool bulletClip = false)
     {
         foreach (TrailRenderer trail in trails) trail.Clear();
         light.SetActive(true);
 
         rb.isKinematic = false;
-
         exploded = false;
-        damage = bulletDamage;
 
-        float playerVelocity = 1f;
-
-        if (shooter != null)
+        if (bulletClip)
         {
-            playerVelocity = shooter.PlayerMovement.Magnitude * 0.1f;
-            playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.1f);
-
-            if (Vector3.Dot(shooter.PlayerMovement.Velocity, transform.up) < -0.1f) playerVelocity = 1f;
+            Explode(CollidesWith, target, true, bulletDamage, 0f);
+            return;
         }
 
         transform.up = velocity;
         rb.velocity = Vector3.zero;
 
-        rb.AddForce(40f * playerVelocity * shootForce * transform.up, ForceMode.Impulse);
+        if (s != null)
+        {
+            float playerVelocity = s.PlayerMovement.Magnitude * 0.1f;
+            playerVelocity = Mathf.Clamp(playerVelocity, 1f, 1.1f);
+
+            if (Vector3.Dot(s.PlayerMovement.Velocity, transform.up) < -0.1f) playerVelocity = 1f;
+
+            velocity *= playerVelocity;
+        }
+
+        rb.AddForce(40f * velocity, ForceMode.Impulse);
 
         StopAllCoroutines();
-        StartCoroutine(CheckForBulletCollisions());
+        StartCoroutine(CheckForBulletCollisions(bulletDamage, CollidesWith));
     }
 
-    private IEnumerator CheckForBulletCollisions()
+    private IEnumerator CheckForBulletCollisions(float damage, LayerMask CollidesWith)
     {
         float bulletElapsed = 0f;
 
@@ -65,14 +68,14 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         {
             if (bulletElapsed > bulletLifeTime)
             {
-                Explode();
+                Explode(CollidesWith);
                 break;
             }
 
             Vector3 fixedVelocity = rb.velocity * Time.fixedDeltaTime;
             if (Physics.SphereCast(rb.position - fixedVelocity, 0.1f, fixedVelocity.normalized, out var hit, fixedVelocity.magnitude, CollidesWith))
             {
-                Explode(hit, true);
+                Explode(CollidesWith, hit, true, damage);
                 break;
             }
 
@@ -81,7 +84,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         }
     }
 
-    void Explode(RaycastHit hit = default, bool collided = false)
+    void Explode(LayerMask CollidesWith, RaycastHit hit = default, bool collided = false, float damage = 0f, float destroyDelay = 0.2f)
     {
         if (exploded) return;
 
@@ -91,7 +94,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         exploded = true;;
 
         Invoke(nameof(DeacivateLight), 0.03f);
-        Invoke(nameof(DeactivateBullet), 0.2f);
+        Invoke(nameof(DeactivateBullet), destroyDelay);
 
         if (!collided) return;
 

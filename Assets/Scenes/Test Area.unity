@@ -1779,7 +1779,7 @@ MonoBehaviour:
   damagePerShot: 6
   shootForce: 28
   attackRange: 120
-  spread: 2
+  spread: 15
   fireRate: 10
   lightIntensity: 40
   lightReturnSpeed: 30
@@ -1794,7 +1794,7 @@ MonoBehaviour:
   weaponReloadRotOffset: {x: 1080, y: 0, z: 0}
   Environment:
     serializedVersion: 2
-    m_Bits: 1792
+    m_Bits: 12032
   attackPoint: {fileID: 1440964998}
   muzzleFlash: {fileID: 525132390}
   muzzleLight: {fileID: 571904774}
@@ -11012,7 +11012,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.8867924, g: 0.7816077, b: 0.6567283, a: 1}
+  m_Color: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 1}
   m_Intensity: 0.5
   m_Range: 10
   m_SpotAngle: 30
@@ -11907,7 +11907,7 @@ GameObject:
   - component: {fileID: 891183086}
   - component: {fileID: 891183085}
   - component: {fileID: 891183084}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15747,7 +15747,7 @@ GameObject:
   - component: {fileID: 1379377760}
   - component: {fileID: 1379377759}
   - component: {fileID: 1379377762}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Target
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16218,7 +16218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16869,7 +16869,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 15.41
+  m_Name: Save 15.52
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20919,7 +20919,7 @@ MonoBehaviour:
   weaponReloadRotOffset: {x: 1080, y: 0, z: 0}
   Environment:
     serializedVersion: 2
-    m_Bits: 1792
+    m_Bits: 12032
   attackPoint: {fileID: 523022549}
   muzzleFlash: {fileID: 523022550}
   muzzleLight: {fileID: 1001262825}

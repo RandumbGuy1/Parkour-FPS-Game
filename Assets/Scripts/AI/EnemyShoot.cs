@@ -32,7 +32,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
 
         Vector3 dir = (target.position - enemyPos.position);
         Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f;
-        dir = (target.position - attackPoint);
+        dir = target.position - attackPoint;
 
         for (int i = 0; i < bulletsPerTap; i++)
         {
@@ -44,7 +44,9 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint, Quaternion.identity).GetComponent<IProjectile>();
 
             Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
-            bullet.OnShoot(null, hit, spreadDir + targetRb.velocity * 0.001f, shootForce, damagePerShot);
+
+            Vector3 finalVel = (spreadDir + targetRb.velocity * 0.001f) * shootForce;
+            bullet.OnShoot(enemyPos, hit, finalVel, CollideAttack, damagePerShot);
         }
 
         if (readyToShoot)
