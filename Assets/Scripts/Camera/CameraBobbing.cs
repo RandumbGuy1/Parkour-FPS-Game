@@ -42,7 +42,7 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.058f, 0.95f, 6f);
+        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.058f, 0.9f, 6f);
 
         BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
         viewBobOffset = Vector3.SmoothDamp(viewBobOffset, HeadBob(), ref bobVel, viewBobSmoothTime * speedAmp * (BobTimer <= 0 ? 5f : 1f));
@@ -118,7 +118,7 @@ public class CameraBobbing : MonoBehaviour
 
         bool crouched = s.PlayerInput.Crouching;
         float newMag = -impactForce * (crouched ? 0.7f : 0.3f);
-        float newSmooth = Mathf.Clamp(newMag * 0.7f, 0.1f, 14f);
+        float newSmooth = Mathf.Clamp(newMag * 0.725f, 0.1f, 13f);
 
         landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
         s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);

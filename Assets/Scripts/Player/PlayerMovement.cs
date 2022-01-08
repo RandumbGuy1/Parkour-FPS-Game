@@ -349,7 +349,6 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    #region Jumping
     private void Jump(bool normalJump = true)
     {
         if (normalJump)
@@ -374,8 +373,11 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(0.75f * jumpForce * GroundNormal, ForceMode.Impulse);
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
+
+        if (crouched) return;
+
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.1f, 1f, 7f), 4.5f, 0.8f, 5f, ShakeData.ShakeType.Perlin);
     }
-    #endregion
 
     #region Vaulting And Stepping
     private void CheckForVault(Vector3 normal)
