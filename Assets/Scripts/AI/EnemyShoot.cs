@@ -46,7 +46,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             Physics.Raycast(attackPoint, dir, out var hit, dir.magnitude, CollideAttack);
 
             Vector3 finalVel = (spreadDir + targetRb.velocity * 0.001f) * shootForce;
-            bullet.OnShoot(enemyPos, hit, finalVel, CollideAttack, damagePerShot);
+            bullet.OnShoot(enemyPos, hit, finalVel, damagePerShot);
         }
 
         if (readyToShoot)

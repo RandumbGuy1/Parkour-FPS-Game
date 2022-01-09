@@ -197,6 +197,13 @@ public class CameraFollow : MonoBehaviour
 
 	public void SetGrapplingGun(GrapplingGun gp) => this.gp = gp;
 
+	public void OnPlayerDamage(float damage)
+    {
+		if (damage < 0) return;
+
+		s.CameraShaker.ShakeOnce(damage * 150f, 6f, 1.5f, 8f, ShakeData.ShakeType.Perlin);
+	}
+
 	public void OnPlayerStateChanged(PlayerState newState)
 	{
 		if (newState != PlayerState.Dead) return;

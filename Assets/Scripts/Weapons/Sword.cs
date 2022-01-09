@@ -42,6 +42,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private float weaponWeight;
 
     [Header("Attack Settings")]
+    [SerializeField] private float damage;
     [SerializeField] private float swingForce;
     [SerializeField] private float hitboxActive;
     [SerializeField] private LayerMask AttackLayer;
@@ -109,14 +110,17 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         int layer = col.gameObject.layer;
         if (AttackLayer != (AttackLayer | 1 << layer)) return;
 
+        if (s == null) return;
+        if (col.gameObject == s.gameObject) return;
+
         Rigidbody rb = col.GetComponent<Rigidbody>();
+        col.gameObject.GetComponent<IDamagable>()?.OnDamage(damage);
 
         if (rb != null)
         {
-            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + Vector3.up * 2f * 0.3f + s.cam.forward;
-
+            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + 0.3f * 2f * Vector3.up + this.s.cam.forward;
             rb.AddForce(dirToLaunch * swingForce, ForceMode.VelocityChange);
-            rb.AddTorque(dirToLaunch * swingForce, ForceMode.VelocityChange);
+            if (!rb.freezeRotation) rb.AddTorque(dirToLaunch * swingForce, ForceMode.VelocityChange);
         }
     }
 

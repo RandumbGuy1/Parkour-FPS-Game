@@ -105,7 +105,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
         Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
-        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) ? hit.point : ray.GetPoint(attackRange));
+        Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) && hit.collider.gameObject != s.gameObject ? hit.point : ray.GetPoint(attackRange));
         Vector3 bulletDir = targetPoint - attackPoint.position;
 
         for (int i = 0; i < bulletsPerTap; i++)
@@ -119,7 +119,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
             Vector3 spreadDir = bulletDir.normalized + rand * (s.WeaponControls.Aiming ? 0.3f : 1f);
 
             IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
-            bullet.OnShoot(s.cam, hit, spreadDir * shootForce, Environment, damagePerShot, s, hit.collider != null && col.bounds.Intersects(hit.collider.bounds));
+            bullet.OnShoot(s.transform, hit, spreadDir * shootForce, damagePerShot, s, hit.collider != null && col.bounds.Intersects(hit.collider.bounds));
         }
 
         if (readyToShoot)

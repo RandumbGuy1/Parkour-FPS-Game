@@ -93,12 +93,12 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
     void OnDisable()
     {
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.Euler(Vector3.zero);
+
         StopAllCoroutines();
         ResetGun();
         rope.ResetRope();
-
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.Euler(Vector3.zero);
     }
 
     public bool OnAttack()
@@ -214,6 +214,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     }
 
     public bool SecondaryAction() => true;
+
     public void OnPickup(ScriptManager s)
     {
         timesGrappled = 0;
@@ -235,7 +236,33 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     {
         if (s == null || timesGrappled <= 0) return;
 
-        /*
+        if (!grappling) grapplePoint.SetParent(transform);
+
+        Vector3 gunToGrapple = s.WeaponControls.WeaponPos.InverseTransformDirection(grapplePoint.position - transform.position);      
+        Vector2 desiredPos = grappling ? (Vector2) gunToGrapple.normalized : Vector2.zero;
+        Quaternion desiredRot = grappling ? Quaternion.LookRotation(gunToGrapple) : Quaternion.Euler(Vector3.zero);
+        
+        transform.localRotation = Quaternion.Slerp(transform.localRotation, desiredRot, 7f * Time.deltaTime);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, 7f * Time.deltaTime);
+    }
+
+    public string ReadData() => " ";
+    public string ReadName() => transform.name;
+
+    void ResetGrapple() => readyToGrapple = true;
+
+    void ResetGun()
+    {
+        grappling = false;
+        rope.OnStopDraw();
+
+        Destroy(grappledToSpringJoint);
+
+        if (grappledToRigidbody != null) grappledToRigidbody.AddForce(grappledToRigidbody.velocity * 0.2f, ForceMode.Impulse);
+        grappledToRigidbody = null;
+    }
+
+    /*
         grappleHits = Physics.SphereCastAll(transform.position, 15f, s.cam.forward, grappleRange / 2f, Grappleable); 
         idk = FindNearestPoint(new List<RaycastHit>(grappleHits));
 
@@ -255,29 +282,4 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             return result;
         }
         */
-
-        Vector3 gunToGrapple = s.WeaponControls.WeaponPos.InverseTransformDirection(grapplePoint.position - transform.position);      
-        Vector2 desiredPos = grappling ? (Vector2) gunToGrapple.normalized : Vector2.zero;
-        Quaternion desiredRot = grappling ? Quaternion.LookRotation(gunToGrapple) : Quaternion.Euler(Vector3.zero);
-        
-        transform.localRotation = Quaternion.Slerp(transform.localRotation, desiredRot, 7f * Time.deltaTime);
-        transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, 7f * Time.deltaTime);
-    }
-
-    public string ReadData() => " ";
-    public string ReadName() => transform.name;
-
-    void ResetGrapple() => readyToGrapple = true;
-
-    void ResetGun()
-    {
-        grapplePoint.SetParent(transform);
-        grappling = false;
-        rope.OnStopDraw();
-
-        Destroy(grappledToSpringJoint);
-
-        if (grappledToRigidbody != null) grappledToRigidbody.AddForce(grappledToRigidbody.velocity * 0.2f, ForceMode.Impulse);
-        grappledToRigidbody = null;
-    }
 }

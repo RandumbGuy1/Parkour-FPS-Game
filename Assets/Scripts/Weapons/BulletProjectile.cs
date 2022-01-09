@@ -6,14 +6,18 @@ using UnityEngine.Rendering;
 public class BulletProjectile : MonoBehaviour, IProjectile
 {
     [Header("Projectile Settings")]
+    [SerializeField] private LayerMask CollidesWith;
     [SerializeField] private float explosionRadius;
     [SerializeField] private float explosionForce;
     [SerializeField] private float bulletLifeTime;
     [SerializeField] private string impactEffect;
     private bool exploded = false;
 
+    private float bulletDamage;
+    private Transform shooter;
+
     [Header("Assignables")]
-    [SerializeField] private GameObject bulletGfx;
+    [SerializeField] private MeshRenderer bulletGfx;
     [SerializeField] private new GameObject light;
     [SerializeField] private List<TrailRenderer> trails = new List<TrailRenderer>();
     private Rigidbody rb;
@@ -27,17 +31,22 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         rb.detectCollisions = false;
     }
 
-    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, LayerMask CollidesWith, float bulletDamage, ScriptManager s = null, bool bulletClip = false)
+    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, ScriptManager s = null, bool bulletClip = false)
     {
         foreach (TrailRenderer trail in trails) trail.Clear();
+
+        bulletGfx.enabled = true;
         light.SetActive(true);
 
         rb.isKinematic = false;
         exploded = false;
 
+        this.shooter = shooter;
+        this.bulletDamage = bulletDamage;
+
         if (bulletClip)
         {
-            Explode(CollidesWith, target, true, bulletDamage, 0f);
+            Explode(target, true);
             return;
         }
 
@@ -57,10 +66,10 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         rb.AddForce(40f * velocity, ForceMode.Impulse);
 
         StopAllCoroutines();
-        StartCoroutine(CheckForBulletCollisions(bulletDamage, CollidesWith));
+        StartCoroutine(CheckForBulletCollisions());
     }
 
-    private IEnumerator CheckForBulletCollisions(float damage, LayerMask CollidesWith)
+    private IEnumerator CheckForBulletCollisions()
     {
         float bulletElapsed = 0f;
 
@@ -68,14 +77,14 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         {
             if (bulletElapsed > bulletLifeTime)
             {
-                Explode(CollidesWith);
+                Explode();
                 break;
             }
 
             Vector3 fixedVelocity = rb.velocity * Time.fixedDeltaTime;
             if (Physics.SphereCast(rb.position - fixedVelocity, 0.1f, fixedVelocity.normalized, out var hit, fixedVelocity.magnitude, CollidesWith))
             {
-                Explode(CollidesWith, hit, true, damage);
+                Explode(hit, true);
                 break;
             }
 
@@ -84,38 +93,34 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         }
     }
 
-    void Explode(LayerMask CollidesWith, RaycastHit hit = default, bool collided = false, float damage = 0f, float destroyDelay = 0.2f)
+    void Explode(RaycastHit hit = default, bool collided = false)
     {
         if (exploded) return;
 
         rb.velocity = Vector3.zero;
         rb.isKinematic = true;
 
-        exploded = true;;
+        exploded = true;
+        bulletGfx.enabled = false;
 
         Invoke(nameof(DeacivateLight), 0.03f);
-        Invoke(nameof(DeactivateBullet), destroyDelay);
+        Invoke(nameof(DeactivateBullet), 0.3f);
 
         if (!collided) return;
 
-        transform.position = hit.point + hit.normal * 0.1f;
+        transform.position = hit.point + hit.normal * 0.2f;
 
         ObjectPooler.Instance.SpawnParticle(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
         Collider[] enemiesInRadius = Physics.OverlapSphere(hit.point, explosionRadius, CollidesWith);
 
         for (int i = 0; i < enemiesInRadius.Length; i++)
         {
-            ScriptManager s = enemiesInRadius[i].gameObject.GetComponent<ScriptManager>();
+            if (enemiesInRadius[i].transform == shooter.transform) continue;
+
             Rigidbody rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
-            IDamagable damageable = enemiesInRadius[i].gameObject.GetComponent<IDamagable>();
 
-            if (damageable != null) damageable.OnDamage(damage);
-
-            if (s != null)
-            {
-                s.PlayerMovement.ResetJumpSteps();
-                s.CameraShaker.ShakeOnce(10f, 4f, 1.5f, 4f, ShakeData.ShakeType.Perlin);
-            }
+            enemiesInRadius[i].GetComponent<IDamagable>()?.OnDamage(bulletDamage);
+            enemiesInRadius[i].GetComponent<ScriptManager>()?.PlayerMovement.ResetJumpSteps();
 
             if (rb == null) continue;
 

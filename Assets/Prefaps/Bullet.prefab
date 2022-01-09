@@ -43,7 +43,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.4575472, g: 0.73108006, b: 1, a: 1}
-  m_Intensity: 10
+  m_Intensity: 7
   m_Range: 70
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -177,7 +177,7 @@ MonoBehaviour:
   explosionForce: 20
   bulletLifeTime: 1.5
   impactEffect: LaserImpactFX
-  bulletGfx: {fileID: 8659643016041422200}
+  bulletGfx: {fileID: 5255651453703687724}
   light: {fileID: 965735096676895342}
   trails:
   - {fileID: -4907684775474906716}

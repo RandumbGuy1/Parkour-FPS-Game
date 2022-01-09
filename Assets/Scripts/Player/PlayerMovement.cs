@@ -91,7 +91,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector2Int readyToCounter = Vector2Int.zero;
 
     [Header("Collision")]
-    [SerializeField] private Transform playerPieces;
     [SerializeField] private LayerMask GroundSnapLayer;
     [SerializeField] private LayerMask Ground;
     [SerializeField] private LayerMask Environment;
@@ -662,16 +661,6 @@ public class PlayerMovement : MonoBehaviour
         rb.isKinematic = true;
         rb.detectCollisions = false;
 
-        if (playerPieces == null) return;
-
-        playerPieces.gameObject.SetActive(true);
-
-        for (int i = 0; i < playerPieces.childCount; i++)
-        {
-            Rigidbody rb = playerPieces.GetChild(i).GetComponent<Rigidbody>();
-            if (rb == null) return;
-
-            rb.AddExplosionForce(12f, s.BottomCapsuleSphereOrigin - Velocity.normalized * 3f, 10f, 0.3f, ForceMode.Impulse);
-        }
+        ObjectPooler.Instance.Spawn("ShatteredPlayer", transform.position, transform.rotation);
     }
 }

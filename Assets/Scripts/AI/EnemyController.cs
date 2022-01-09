@@ -6,7 +6,6 @@ public class EnemyController : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private PlayerHealth enemyHealth;
-    [SerializeField] private Transform shatteredEnemy;
 
     void Awake() => enemyHealth.OnPlayerStateChanged += OnPlayerStateChanged;
     void OnDestroy() => enemyHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
@@ -17,15 +16,6 @@ public class EnemyController : MonoBehaviour
 
         enabled = false;
 
-        shatteredEnemy.position = enemyHealth.transform.position;
-        shatteredEnemy.gameObject.SetActive(true);
-
-        for (int i = 0; i < shatteredEnemy.childCount; i++)
-        {
-            Rigidbody rb = shatteredEnemy.GetChild(i).GetComponent<Rigidbody>();
-            if (rb == null) return;
-
-            rb.AddExplosionForce(12f, enemyHealth.transform.position, 10f, 0.3f, ForceMode.Impulse);
-        }
+        ObjectPooler.Instance.Spawn("ShatteredBarry", enemyHealth.transform.position, enemyHealth.transform.rotation);
     }
 }

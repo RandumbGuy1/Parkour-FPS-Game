@@ -14,6 +14,10 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     private float regenTimer = 0f;
     private float regenCooldownTimer = 0f;
 
+    [Header("Invincibility Settings")]
+    [SerializeField] private float invincibilityTime;
+    private float currentInvincibility = 0;
+
     [Header("Void Settings")]
     [SerializeField] private float killHeight;
     [SerializeField] private float killSpeed;
@@ -37,17 +41,26 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     {
         if (transform.position.y < killHeight)
         {
+            currentInvincibility = 0;
             OnDamage(killSpeed * Time.deltaTime * 15f);
             return;
         }
 
         HandleRegen();
+        HandleInvincibility();
     }
 
     public void OnDamage(float damage)
     {
         if (State == PlayerState.Dead) return;
-        if (damage > 0f) regenCooldownTimer = regenCooldown;
+
+        if (damage > 0f)
+        {
+            if (currentInvincibility > 0) return;
+
+            regenCooldownTimer = regenCooldown;
+            currentInvincibility = invincibilityTime;
+        }
 
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, MaxHealth);
@@ -71,6 +84,17 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
         State = newState;
         OnPlayerStateChanged?.Invoke(newState);
+    }
+
+    private void HandleInvincibility()
+    {
+        if (currentInvincibility <= 0)
+        {
+            currentInvincibility = 0f;
+            return;
+        }
+
+        currentInvincibility -= Time.deltaTime;
     }
 
     private void HandleRegen()
