@@ -108,7 +108,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (impactForce < -30f)
         {
-            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.SpawnParticle("LandFX", s.transform.position, Quaternion.Euler(0, 0, 0)).velocityOverLifetime;
+            ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = ObjectPooler.Instance.Spawn("LandFX", s.transform.position, Quaternion.Euler(0, 0, 0)).GetComponent<ParticleSystem>().velocityOverLifetime;
 
             Vector3 magnitude = s.rb.velocity;
 

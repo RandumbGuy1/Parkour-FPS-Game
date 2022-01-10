@@ -40,44 +40,26 @@ public class FollowPlayer : MonoBehaviour
         SetGroundCheckInterval();
     }
 
-    void FixedUpdate()
-    {
-        FollowThePlayer();
-    }
+    void FixedUpdate() => FollowThePlayer();
 
     private void FollowThePlayer()
     {
         HandleRotation();
-        enemyRb.AddForce(80f * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
+        enemyRb.AddForce(80f * enemyRb.drag * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
 
-        if (enemyRb.transform.parent != transform) enemyRb.transform.SetParent(transform);
-
-        if (agent.path.corners.Length > 0 && agent.isOnOffMeshLink)
+        if (!grounded && !agent.isOnOffMeshLink)
         {
-            agent.nextPosition = agent.currentOffMeshLinkData.endPos;
-            enemyRb.AddForce(5f * speed * (agent.transform.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
-            agent.gameObject.SetActive(false);
-        }
-
-        agent.transform.localPosition = Vector3.zero;
-        agent.transform.localRotation = Quaternion.Euler(Vector3.zero);
-        agent.nextPosition = enemyRb.transform.position;
-
-        if (!grounded)
-        {
-            agent.gameObject.SetActive(false);
+            agent.enabled = false;
             enemyRb.AddForce(0.5f * speed * (player.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
             return;
         }
 
-        Vector3 enemyToPlayer = (player.position - enemyRb.transform.position);
+        Vector3 enemyToPlayer = player.position - enemyRb.transform.position;
         enemyToPlayer.y *= 0.5f;
 
         float sqrEnemyToPlayer = enemyToPlayer.sqrMagnitude;
-        agent.gameObject.SetActive(true);
-        agent.SetDestination(player.position);
+        Vector3 pathDir = GetNextPathPos() - enemyRb.transform.position;
 
-        Vector3 pathDir = (agent.path.corners.Length > 1 ? agent.path.corners[1] : player.transform.position) - enemyRb.transform.position;
         if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.1f && !Physics.Linecast(enemyRb.transform.position, player.position, Ground))
         {
             if (shooting != null) shooting.OnAttack();
@@ -85,6 +67,21 @@ public class FollowPlayer : MonoBehaviour
         }
 
         enemyRb.AddForce(5f * speed * pathDir.normalized, ForceMode.Acceleration);
+    }
+
+    private Vector3 GetNextPathPos()
+    {
+        agent.enabled = true;
+
+        bool offNavmesh = agent.isOnOffMeshLink;
+
+        agent.nextPosition = offNavmesh ? agent.currentOffMeshLinkData.endPos : enemyRb.position;
+        agent.SetDestination(player.position);
+        Vector3 pos = agent.steeringTarget;
+
+        if (offNavmesh) agent.enabled = false;
+
+        return pos;
     }
 
     private void HandleRotation()

@@ -10,7 +10,9 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     [SerializeField] private float explosionRadius;
     [SerializeField] private float explosionForce;
     [SerializeField] private float bulletLifeTime;
+    [Space(10)]
     [SerializeField] private string impactEffect;
+    [SerializeField] private float impactDestroyTime;
     private bool exploded = false;
 
     private float bulletDamage;
@@ -104,13 +106,13 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         bulletGfx.enabled = false;
 
         Invoke(nameof(DeacivateLight), 0.03f);
-        Invoke(nameof(DeactivateBullet), 0.3f);
+        Invoke(nameof(DeactivateBullet), impactDestroyTime);
 
         if (!collided) return;
 
         transform.position = hit.point + hit.normal * 0.2f;
 
-        ObjectPooler.Instance.SpawnParticle(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
+        ObjectPooler.Instance.Spawn(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
         Collider[] enemiesInRadius = Physics.OverlapSphere(hit.point, explosionRadius, CollidesWith);
 
         for (int i = 0; i < enemiesInRadius.Length; i++)

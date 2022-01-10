@@ -12,9 +12,9 @@ public class ObjectPooler : MonoBehaviour
         public int size;
     }
 
-    public static ObjectPooler Instance;
+    public static ObjectPooler Instance { get; private set; }
     [SerializeField] private List<Pool> pools;
-    public Dictionary<string, Queue<GameObject>> poolDictionary;
+    [SerializeField] private Dictionary<string, Queue<GameObject>> poolDictionary;
 
     void Awake()
     {
@@ -53,33 +53,13 @@ public class ObjectPooler : MonoBehaviour
         if (!poolDictionary.ContainsKey(tag)) return null;
 
         GameObject spawnedObject = poolDictionary[tag].Dequeue();
+        spawnedObject.SetActive(false);
 
-        spawnedObject.transform.position = position;
-        spawnedObject.transform.rotation = rotation;
+        spawnedObject.transform.SetPositionAndRotation(position, rotation);
         spawnedObject.SetActive(true);
 
         poolDictionary[tag].Enqueue(spawnedObject);
 
         return spawnedObject;
-    }
-
-    public ParticleSystem SpawnParticle(string tag, Vector3 position, Quaternion rotation)
-    {
-        if (!poolDictionary.ContainsKey(tag)) return null;
-
-        GameObject spawnedObject = poolDictionary[tag].Dequeue();
-
-        spawnedObject.SetActive(true);
-        spawnedObject.transform.position = position;
-        spawnedObject.transform.rotation = rotation;
-
-        poolDictionary[tag].Enqueue(spawnedObject);
-
-        ParticleSystem particle = spawnedObject.GetComponent<ParticleSystem>();
-        if (particle == null) return null;
-
-        particle.Play();
-
-        return particle;
     }
 }

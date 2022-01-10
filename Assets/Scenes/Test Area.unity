@@ -7378,7 +7378,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1645547701}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &364252378
 GameObject:
@@ -9248,7 +9248,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 16129
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -9829,12 +9829,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 629229930}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.4999998, y: 5.3333335, z: 2.4999998}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.4190636, y: -10.33, z: 1.8700027}
+  m_LocalScale: {x: 5, y: 8, z: 5}
   m_Children: []
-  m_Father: {fileID: 1645547701}
-  m_RootOrder: 1
+  m_Father: {fileID: 1422129528}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &642207234
 GameObject:
@@ -13031,7 +13031,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 16129
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -16251,9 +16251,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1422129526}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 28.8, y: 11.6, z: -115.4}
+  m_LocalPosition: {x: 28.8, y: 11.6, z: -116.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 629229932}
   - {fileID: 1645547701}
   m_Father: {fileID: 1630573897}
   m_RootOrder: 2
@@ -16881,7 +16882,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 15.71
+  m_Name: Save 15.82
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17106,13 +17107,13 @@ MonoBehaviour:
   - tag: LandFX
     prefab: {fileID: 7033661556393784197, guid: 8f388829c0f7cc941acb5a3e4e764f31,
       type: 3}
-    size: 5
+    size: 1
   - tag: Bullet
     prefab: {fileID: 6567576493705845590, guid: 97139677807489945915346852cfa990,
       type: 3}
     size: 100
   - tag: ExplosionImpactFX
-    prefab: {fileID: 4017060328263011555, guid: 521e6e798307ace4486a5591f0713d70,
+    prefab: {fileID: 5284798083642731522, guid: ba479f971d4ccc84b8919956cf354759,
       type: 3}
     size: 20
   - tag: LaserImpactFX
@@ -17926,10 +17927,9 @@ Transform:
   m_LocalScale: {x: 2, y: 1.5, z: 2}
   m_Children:
   - {fileID: 1901357497}
-  - {fileID: 629229932}
   - {fileID: 340886757}
   m_Father: {fileID: 1422129528}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1645547702
 MonoBehaviour:
@@ -18017,7 +18017,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011273a5fe2bbc546b8954423bee2ba2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 100000
   regenFactor: 1
   regenFrequency: 12.5
   regenCooldown: 5
