@@ -6,6 +6,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 {
     [Header("Health Settings")]
     [SerializeField] private float maxHealth;
+    [SerializeField] private bool invincible = false;
     [Space(10)]
     [SerializeField] private float regenFactor;
     [SerializeField] private float regenFrequency;
@@ -50,7 +51,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         HandleInvincibility();
     }
 
-    public void OnDamage(float damage)
+    public void OnDamage(float damage, ScriptManager player = null)
     {
         if (State == PlayerState.Dead) return;
 
@@ -62,12 +63,24 @@ public class PlayerHealth : MonoBehaviour, IDamagable
             currentInvincibility = invincibilityTime;
         }
 
-        currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, MaxHealth);
+        if (!invincible)
+        {
+            currentHealth -= damage;
+            currentHealth = Mathf.Clamp(currentHealth, 0, MaxHealth);
+
+            EvaluateHitMarker(player);
+        }
 
         OnPlayerDamage?.Invoke(damage / maxHealth);
 
         if (currentHealth <= 0f) OnDeath();
+    }
+
+    private void EvaluateHitMarker(ScriptManager player)
+    {
+        if (player == null) return;
+
+        player.WeaponControls.FlashHitMarker(currentHealth <= 0);
     }
 
     public void OnDeath() 
@@ -78,7 +91,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         SetState(PlayerState.Dead);
     }
 
-    private void SetState(PlayerState newState)
+    public void SetState(PlayerState newState)
     {
         if (State == newState) return;
 

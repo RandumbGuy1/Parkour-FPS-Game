@@ -39,6 +39,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float weaponWeight;
 
     [Header("Shooting Settings")]
+    [SerializeField] private string projectile;
     [SerializeField] private float damagePerShot;
     [SerializeField] private float shootForce;
     [SerializeField] private float attackRange;
@@ -118,7 +119,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
             Vector3 spreadDir = bulletDir.normalized + rand * (s.WeaponControls.Aiming ? 0.3f : 1f);
 
-            IProjectile bullet = ObjectPooler.Instance.Spawn("Bullet", attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
+            IProjectile bullet = ObjectPooler.Instance.Spawn(projectile, attackPoint.position, Quaternion.identity).GetComponent<IProjectile>();
             bullet.OnShoot(s.transform, hit, spreadDir * shootForce, damagePerShot, s, hit.collider != null && col.bounds.Intersects(hit.collider.bounds));
         }
 

@@ -156,7 +156,7 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (heldObj == null) return;
 
-        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance) Drop();
+        if (Input.GetMouseButtonUp(0) || (grabPos.position - heldObj.transform.position).sqrMagnitude > maxGrabDistance * maxGrabDistance || !heldObj.activeSelf) Drop();
     }
 
     private void Pickup(GameObject obj)

@@ -67,11 +67,18 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI weaponNameText;
     [SerializeField] private Image itemArt;
     [Space(10)]
+    [SerializeField] private Color hitMarkerDefaultColor;
+    [SerializeField] private TextMeshProUGUI hitMarker;
     [SerializeField] private GameObject weaponReticle;
     [SerializeField] private GameObject circleCursor;
     [Space(10)]
     [SerializeField] private ValueSlider slider;
     [SerializeField] private DynaimcReticle reticleEffects;
+
+    private TextMeshProUGUI[] hitMarkers;
+    private float hitMarkerSmoothTime = 0f;
+    private float hitMarkerElapsed = 0f;
+
     private ScriptManager s;
 
     public Transform WeaponPos { get { return weaponPos; } }
@@ -82,6 +89,9 @@ public class WeaponController : MonoBehaviour
 
         weaponDataText.gameObject.SetActive(false);
 
+        hitMarkers = hitMarker.GetComponentsInChildren<TextMeshProUGUI>();
+        hitMarker.gameObject.SetActive(false);
+
         weaponReticle.SetActive(false);
         circleCursor.SetActive(true);
     }
@@ -89,6 +99,8 @@ public class WeaponController : MonoBehaviour
     void Update()
     {
         float previousWeapon = selectedWeapon;
+
+        UpdateHitMarkers();
 
         if (s.PlayerInput.MiddleClick && CanAttack)
         {
@@ -169,8 +181,31 @@ public class WeaponController : MonoBehaviour
         Aiming = false;
         reloadRot = reloadRotOffset;
     }
+
+    public void FlashHitMarker(bool kill = false, float time = 0.4f)
+    {
+        hitMarker.gameObject.SetActive(true);
+        hitMarker.color = kill ? Color.red : Color.white;
+        hitMarkerSmoothTime = time;
+        hitMarkerElapsed = 0f;
+    }
+
+    private void UpdateHitMarkers()
+    {
+        if (hitMarkerElapsed >= hitMarkerSmoothTime)
+        {
+            hitMarkerElapsed = hitMarkerSmoothTime;
+            hitMarker.gameObject.SetActive(false);
+            return;
+        }
+
+        hitMarker.color = Color.Lerp(hitMarker.color, hitMarkerDefaultColor, Mathf.SmoothStep(0, 1, hitMarkerElapsed / hitMarkerSmoothTime));
+        foreach (TextMeshProUGUI childHitMarker in hitMarkers) childHitMarker.color = hitMarker.color;
+
+        hitMarkerElapsed += Time.deltaTime;
+    }
     #endregion
-    
+
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {

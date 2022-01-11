@@ -38,21 +38,30 @@ public class RotatingTarget : MonoBehaviour, IDamagable
     void Awake() => currentHealth = maxHealth;
     void OnEnable() => StartCoroutine(SineFloating(transform.position));
 
-    public void OnDamage(float damage) 
+    public void OnDamage(float damage, ScriptManager player = null) 
     {
         if (!targetActive) return;
+
+        currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Infinity);
+
+        EvaluateHitMarker(player);
+
+        desiredIntensity = targetDamageIntensity;
+        targetColor = targetDamageColor;
 
         if (currentHealth <= 0)
         {
             StartCoroutine(TargetRotateReset());
             return;
         }
+    }
 
-        currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, Mathf.Infinity);
+    private void EvaluateHitMarker(ScriptManager player)
+    {
+        if (player == null) return;
 
-        desiredIntensity = targetDamageIntensity;
-        targetColor = targetDamageColor;
+        player.WeaponControls.FlashHitMarker(currentHealth <= 0);
     }
 
     private IEnumerator TargetRotateReset()

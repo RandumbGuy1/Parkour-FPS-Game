@@ -6,6 +6,7 @@ public class EnemyController : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private PlayerHealth enemyHealth;
+    [SerializeField] private FollowPlayer enemyPathFinding;
 
     void Awake() => enemyHealth.OnPlayerStateChanged += OnPlayerStateChanged;
     void OnDestroy() => enemyHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
@@ -15,6 +16,8 @@ public class EnemyController : MonoBehaviour
         if (newState != PlayerState.Dead) return;
 
         enabled = false;
+        enemyPathFinding.Agent.enabled = false;
+        enemyPathFinding.enabled = false;
 
         ObjectPooler.Instance.Spawn("ShatteredBarry", enemyHealth.transform.position, enemyHealth.transform.rotation);
     }

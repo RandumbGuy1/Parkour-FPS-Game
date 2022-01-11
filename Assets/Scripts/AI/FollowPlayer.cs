@@ -9,6 +9,7 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float angularSpeed;
     [SerializeField] private float standingDistance;
+    [SerializeField] private float gravityForce;
 
     [Header("Ground Check Settings")]
     [SerializeField] private LayerMask Ground;
@@ -23,6 +24,8 @@ public class FollowPlayer : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private Rigidbody enemyRb;
     private ScriptManager s;
+
+    public NavMeshAgent Agent { get { return agent; } }
 
     void Awake()
     {
@@ -45,12 +48,17 @@ public class FollowPlayer : MonoBehaviour
     private void FollowThePlayer()
     {
         HandleRotation();
-        enemyRb.AddForce(80f * enemyRb.drag * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
 
-        if (!grounded && !agent.isOnOffMeshLink)
+        if (!grounded)
         {
-            agent.enabled = false;
-            enemyRb.AddForce(0.5f * speed * (player.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
+            enemyRb.AddForce(gravityForce * enemyRb.drag * enemyRb.mass * Vector3.down, ForceMode.Acceleration);
+
+            if (!agent.isOnOffMeshLink)
+            {
+                agent.enabled = false;
+                enemyRb.AddForce(0.5f * speed * (player.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
+            }
+
             return;
         }
 

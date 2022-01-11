@@ -120,9 +120,8 @@ public class BulletProjectile : MonoBehaviour, IProjectile
             if (enemiesInRadius[i].transform == shooter.transform) continue;
 
             Rigidbody rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
-
-            enemiesInRadius[i].GetComponent<IDamagable>()?.OnDamage(bulletDamage);
             enemiesInRadius[i].GetComponent<ScriptManager>()?.PlayerMovement.ResetJumpSteps();
+            enemiesInRadius[i].GetComponent<IDamagable>()?.OnDamage(bulletDamage, shooter.GetComponent<ScriptManager>());
 
             if (rb == null) continue;
 
