@@ -76,12 +76,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         if (currentHealth <= 0f) OnDeath();
     }
 
-    private void EvaluateHitMarker(ScriptManager player)
-    {
-        if (player == null) return;
-
-        player.WeaponControls.FlashHitMarker(currentHealth <= 0);
-    }
+    private void EvaluateHitMarker(ScriptManager player) => player?.WeaponControls.HitMarker.Flash(transform.position, currentHealth <= 0);
 
     public void OnDeath() 
     {

@@ -195,7 +195,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             if (grappleToPlayer.sqrMagnitude > (grappleRange + 5f) * (grappleRange + 5f)) break;
 
             s.rb.AddForce(Vector3.ClampMagnitude(grappleToPlayer * 0.1f, 1.55f) * grapplePullForce, ForceMode.Acceleration);
-            s.rb.AddForce(0.5f * grappleCameraPullForce * (s.cam.forward.normalized + Vector3.up * 0.3f), ForceMode.Acceleration);
+            s.rb.AddForce(0.5f * grappleCameraPullForce * (s.cam.transform.forward.normalized + Vector3.up * 0.3f), ForceMode.Acceleration);
             
             s.rb.AddForce(grappleFallSpeedClamp * Mathf.Clamp(-s.rb.velocity.y * 0.08f, 0.5f, 1.5f) * Vector3.up, ForceMode.Acceleration);
 

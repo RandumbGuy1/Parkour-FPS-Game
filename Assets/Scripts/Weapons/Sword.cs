@@ -114,11 +114,11 @@ public class Sword : MonoBehaviour, IItem, IWeapon
         if (col.gameObject == s.gameObject) return;
 
         Rigidbody rb = col.GetComponent<Rigidbody>();
-        col.gameObject.GetComponent<IDamagable>()?.OnDamage(damage);
+        col.gameObject.GetComponent<IDamagable>()?.OnDamage(damage, s);
 
         if (rb != null)
         {
-            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + 0.3f * 2f * Vector3.up + this.s.cam.forward;
+            Vector3 dirToLaunch = (col.transform.position - transform.position).normalized * 0.3f + 0.3f * 2f * Vector3.up + s.cam.transform.forward;
             rb.AddForce(dirToLaunch * swingForce, ForceMode.VelocityChange);
             if (!rb.freezeRotation) rb.AddTorque(dirToLaunch * swingForce, ForceMode.VelocityChange);
         }

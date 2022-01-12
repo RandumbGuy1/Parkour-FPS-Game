@@ -19,7 +19,7 @@ public class ScriptManager : MonoBehaviour
     [Header("Assignables")]
     public Transform orientation;
     public Transform playerHead;
-    public Transform cam;
+    public Camera cam;
     public Rigidbody rb;
     public CapsuleCollider cc;
 

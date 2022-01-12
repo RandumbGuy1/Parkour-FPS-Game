@@ -54,7 +54,7 @@ public class PlayerInteraction : MonoBehaviour
     #region Interaction Detection
     private void CheckForInteractable()
     {
-        if (Physics.SphereCast(s.cam.position, interactionRadius, s.cam.forward, out var hit, interactionRange, Interactables, QueryTriggerInteraction.Ignore))
+        if (Physics.SphereCast(s.cam.transform.position, interactionRadius, s.cam.transform.forward, out var hit, interactionRange, Interactables, QueryTriggerInteraction.Ignore))
         {
             GameObject currentleyLookingAt = hit.transform.gameObject;
 

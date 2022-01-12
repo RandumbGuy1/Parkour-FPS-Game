@@ -201,7 +201,7 @@ public class CameraFollow : MonoBehaviour
     {
 		if (damage < 0) return;
 
-		s.CameraShaker.ShakeOnce(damage * 150f, 6f, 1.5f, 8f, ShakeData.ShakeType.Perlin);
+		s.CameraShaker.ShakeOnce(damage * 150f, 6f, 1.3f, 8f, ShakeData.ShakeType.Perlin);
 	}
 
 	public void OnPlayerStateChanged(PlayerState newState)

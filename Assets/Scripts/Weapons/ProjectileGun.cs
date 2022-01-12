@@ -104,7 +104,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
         s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
-        Ray ray = s.cam.GetComponent<Camera>().ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        Ray ray = s.cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
         Vector3 targetPoint = (Physics.Raycast(ray, out var hit, attackRange, Environment) && hit.collider.gameObject != s.gameObject ? hit.point : ray.GetPoint(attackRange));
         Vector3 bulletDir = targetPoint - attackPoint.position;
@@ -114,8 +114,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
             bulletsLeft--;
 
             Vector3 rand = Vector3.zero;
-            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.right;
-            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.up;
+            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.transform.right;
+            rand += Random.Range(-1f, 1f) * 0.003f * spread * s.cam.transform.up;
 
             Vector3 spreadDir = bulletDir.normalized + rand * (s.WeaponControls.Aiming ? 0.3f : 1f);
 

@@ -104,8 +104,8 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
         exploded = true;
         bulletGfx.enabled = false;
+        light.SetActive(false);
 
-        Invoke(nameof(DeacivateLight), 0.03f);
         Invoke(nameof(DeactivateBullet), impactDestroyTime);
 
         if (!collided) return;
@@ -131,5 +131,4 @@ public class BulletProjectile : MonoBehaviour, IProjectile
     }
 
     void DeactivateBullet() => gameObject.SetActive(false);
-    void DeacivateLight() => light.SetActive(false);
 }
