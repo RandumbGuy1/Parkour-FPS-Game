@@ -21,7 +21,7 @@ RenderSettings:
   m_FogDensity: 0.003
   m_LinearFogStart: 250
   m_LinearFogEnd: 800
-  m_AmbientSkyColor: {r: 0.38474548, g: 0.42065433, b: 0.6226415, a: 1}
+  m_AmbientSkyColor: {r: 0.24230155, g: 0.24230155, b: 0.31132078, a: 1}
   m_AmbientEquatorColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_AmbientGroundColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
   m_AmbientIntensity: 3
@@ -11970,7 +11970,7 @@ MonoBehaviour:
   upClampAngle: 80
   downClampAngle: 80
   swayAmount: 12
-  swayFrequency: 0.5
+  swayFrequency: 0.8
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078167
@@ -17483,7 +17483,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 16.03
+  m_Name: Save 16.12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18938,7 +18938,7 @@ MonoBehaviour:
   bobAmountHoriz: 0.1
   bobAmountVert: 0.2
   bobSpeed: 10
-  bobSmoothTime: 0.12
+  bobSmoothTime: 0.15
   swayAmount: 9
   swaySmoothTime: 0.4
   switchPosOffset: {x: 0.6, y: -1.2, z: -0.2}
@@ -19188,12 +19188,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lr: {fileID: 1665305110}
-  vertexCount: 100
+  vertexCount: 150
   strength: 10
-  damper: 15
-  waveHeight: 8
+  damper: 14
+  waveHeight: 5
   waveCount: 8
-  velocity: 6
+  velocity: 10
   grapplePoint: {fileID: 18135526}
 --- !u!120 &1665305110
 LineRenderer:
@@ -19237,7 +19237,7 @@ LineRenderer:
   m_Positions: []
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.09
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:

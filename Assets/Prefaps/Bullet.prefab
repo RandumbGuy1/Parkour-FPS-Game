@@ -42,7 +42,7 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.4575472, g: 0.73108006, b: 1, a: 1}
+  m_Color: {r: 0.45882356, g: 0.60386705, b: 1, a: 1}
   m_Intensity: 25
   m_Range: 80
   m_SpotAngle: 30
@@ -176,9 +176,9 @@ MonoBehaviour:
     m_Bits: 12033
   explosionRadius: 0.08
   explosionForce: 20
-  bulletLifeTime: 1.5
+  bulletLifeTime: 3
   impactEffect: LaserImpactFX
-  impactDestroyTime: 0.8
+  impactDestroyTime: 0.6
   bulletGfx: {fileID: 5255651453703687724}
   light: {fileID: 965735096676895342}
   trails:
@@ -223,7 +223,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 0.03
+  m_Time: 0.035
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.5
@@ -404,7 +404,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.7
+      scalar: 0.8
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -514,7 +514,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.22241011, g: 0.22709319, b: 0.3207547, a: 0.039215688}
+        key0: {r: 1, g: 1, b: 1, a: 0.050980393}
         key1: {r: 0, g: 0, b: 0, a: 0}
         key2: {r: 0.4339623, g: 0.4339623, b: 0.4339623, a: 0}
         key3: {r: 0.4339623, g: 0.4339623, b: 0.4339623, a: 0}
@@ -1593,7 +1593,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxes: 0
   ColorModule:
-    enabled: 0
+    enabled: 1
     gradient:
       serializedVersion: 2
       minMaxState: 1

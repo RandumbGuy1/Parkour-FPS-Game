@@ -14,6 +14,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private int aimFovOffset;
     public bool HoldingWeapon { get; private set; } = false;
     public bool CanAttack { get; private set; } = true;
+    public bool Firing { get; private set; } = false;
 
     public float AimFovOffset { get { return Aiming ? -aimFovOffset : 0; } }
     public bool Aiming { get; private set; } = false;
@@ -132,10 +133,11 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentWeapon == null) return;
 
-        CanAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.WeaponType == WeaponClass.Melee ? recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f : true);
+        CanAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.WeaponType != WeaponClass.Melee || recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f);
+        Firing = CurrentWeapon.Automatic ? s.PlayerInput.LeftHoldClick : s.PlayerInput.LeftClick;
 
-        if (CurrentWeapon.Automatic ? s.PlayerInput.LeftHoldClick && CanAttack : s.PlayerInput.LeftClick && CanAttack) CurrentWeapon.OnAttack();
-        if ((CurrentWeapon.WeaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick)) CurrentWeapon.SecondaryAction();
+        if (Firing && CanAttack) CurrentWeapon.OnAttack();
+        if (CurrentWeapon.WeaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick) CurrentWeapon.SecondaryAction();
     }
 
     #region Weapon Actions
@@ -302,8 +304,8 @@ public class WeaponController : MonoBehaviour
         camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
         camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
 
-        float fallSpeed = s.PlayerMovement.Velocity.y * 0.023f;
-        fallSpeed = Mathf.Clamp(fallSpeed, -0.5f, 0.5f);
+        float fallSpeed = s.PlayerMovement.Velocity.y * 0.03f;
+        fallSpeed = Mathf.Clamp(fallSpeed, -0.8f, 0.8f);
 
         float strafeOffset = s.PlayerMovement.RelativeVel.x * 0.03f;
         strafeOffset = Mathf.Clamp(strafeOffset, -0.2f, 0.2f);
@@ -315,12 +317,12 @@ public class WeaponController : MonoBehaviour
     {
          float amp = (CurrentItem != null ? 1f / CurrentItem.Weight : 1f) * (Aiming ? 0.25f : 1f);
 
-         Vector2 camDelta = (s.CameraLook.RotationDelta * swayAmount) * 0.5f;
-         camDelta.y -= (s.PlayerInput.InputVector.x * swayAmount) * 1.5f;
-         camDelta.y = Mathf.Clamp(camDelta.y, -100, 100);
-         camDelta.x = Mathf.Clamp(camDelta.x, -60, 60);
+         Vector2 camDelta = 0.5f * swayAmount * s.CameraLook.RotationDelta;
+         camDelta.y -= 1.5f * swayAmount * s.PlayerInput.InputVector.x;
+         camDelta.y = Mathf.Clamp(camDelta.y, -65f, 65f);
+         camDelta.x = Mathf.Clamp(camDelta.x, -45f, 45f);
 
-         return (Vector3.up * camDelta.y + Vector3.right * camDelta.x * -1.4f) * amp;
+         return (-1.4f * camDelta.y * Vector3.up + Vector3.right * camDelta.x) * -amp;
     }
 
     private void CalculateSwitchOffset()
@@ -371,8 +373,8 @@ public class WeaponController : MonoBehaviour
 
         if (smoothDefaultPos == targetDesiredPos && smoothDefaultRot == targetDesiredRot) return;
 
-        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.3f);
-        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.3f);
+        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.25f);
+        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.25f);
 
         if ((smoothDefaultPos - targetDesiredPos).sqrMagnitude < 0.00001f && (smoothDefaultRot - targetDesiredRot).sqrMagnitude < 0.00001f)
         {
@@ -388,8 +390,8 @@ public class WeaponController : MonoBehaviour
         float swayAimMulti = Aiming ? 0.03f : 1f;
         float bobAimMulti = Aiming ? 0.08f : 1f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob(s.CameraHeadBob.BobTimer) - s.CameraLook.HeadSwayOffset * 0.2f) * bobAimMulti, ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() - s.CameraLook.HeadSwayOffset * swayAimMulti + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward), ref swayVel, swaySmoothTime);
+        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob(s.CameraHeadBob.BobTimer) - s.CameraLook.HeadSwayOffset * 0.1f) * bobAimMulti, ref bobVel, bobSmoothTime);
+        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() - (s.CameraLook.HeadSwayOffset * 25f) * swayAimMulti + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward), ref swayVel, swaySmoothTime);
         smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * swayAimMulti, ref lookVel, 0.21f);
 
         CalculateDefaultValues();

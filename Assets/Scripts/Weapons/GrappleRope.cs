@@ -48,6 +48,7 @@ public class GrappleRope : MonoBehaviour
         if (lr.positionCount <= 0)
         {
             reachedGrapplePoint = transform.position;
+            returnVel = Vector3.zero;
             return;
         }
 
@@ -58,9 +59,8 @@ public class GrappleRope : MonoBehaviour
             return;
         }
 
-        bool closeToGrapplePoint = (targetPoint - reachedGrapplePoint).sqrMagnitude < 10f;
-
-        reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, grappling ? (closeToGrapplePoint ? 0.01f : 0.15f) : (closeToGrapplePoint ? 0.005f : 0.02f));
+        float time = Mathf.Clamp(Vector3.Distance(reachedGrapplePoint, targetPoint), 0f, 20f) * 0.01f;
+        reachedGrapplePoint = Vector3.SmoothDamp(reachedGrapplePoint, targetPoint, ref returnVel, time * (grappling ? 1.05f : 0.2f));
 
         UpdateSpring(Time.smoothDeltaTime);
         Vector3 up = Quaternion.LookRotation((grapplePoint.position - transform.position).normalized) * Vector3.up;
@@ -68,7 +68,7 @@ public class GrappleRope : MonoBehaviour
         for (int i = 0; i < vertexCount; i++)
         {
             var delta = i / (float) vertexCount;
-            var offset = up * waveHeight * Mathf.Sin(delta * waveCount * Mathf.PI) * springValue;
+            var offset = Mathf.Sin(delta * waveCount * Mathf.PI) * springValue * waveHeight * up;
             lr.SetPosition(i, Vector3.Lerp(transform.position, reachedGrapplePoint, delta) + offset);
         }
     }

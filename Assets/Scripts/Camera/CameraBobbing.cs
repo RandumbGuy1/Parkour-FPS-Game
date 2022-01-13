@@ -26,7 +26,7 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 bobVel = Vector3.zero;
   
     private Vector3 viewBobOffset = Vector3.zero;
-    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z); } }
+    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z * 0.6f); } }
 
     [Header("Footstep Settings")]
     [SerializeField] private ShakeData shakeData; 
@@ -42,9 +42,7 @@ public class CameraBobbing : MonoBehaviour
 
     void LateUpdate()
 	{
-        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.058f, 0.9f, 6f);
-
-        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
+        float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.06f, 1f, 5f);
         viewBobOffset = Vector3.SmoothDamp(viewBobOffset, HeadBob(), ref bobVel, viewBobSmoothTime * speedAmp * (BobTimer <= 0 ? 5f : 1f));
        
         CalculateLandOffset();
@@ -52,6 +50,8 @@ public class CameraBobbing : MonoBehaviour
 
         Vector3 newPos = (Vector3.up * landBobOffset) + viewBobOffset * 0.6f + s.PlayerMovement.CrouchOffset + vaultDesync;
 		transform.localPosition = newPos;
+
+        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
     }
 
     void FixedUpdate()
