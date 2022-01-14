@@ -22,8 +22,8 @@ public class WeaponController : MonoBehaviour
     private IWeapon CurrentWeapon;
     private IItem CurrentItem; 
 
-    private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero, lookVel = Vector3.zero;
-    private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero, smoothLookOffset = Vector3.zero;
+    private Vector3 bobVel = Vector3.zero, swayVel = Vector3.zero, idleVel = Vector3.zero;
+    private Vector3 smoothBob = Vector3.zero, smoothSway = Vector3.zero, idleLookOffset = Vector3.zero;
 
     private Vector3 desiredRecoilRot = Vector3.zero, desiredRecoilPos = Vector3.zero;
     private Vector3 recoilRot = Vector3.zero, recoilPos = Vector3.zero;
@@ -41,6 +41,11 @@ public class WeaponController : MonoBehaviour
     [Header("Sway Settings")]
     [SerializeField] private float swayAmount;
     [SerializeField] private float swaySmoothTime;
+    [Space(10)]
+    [SerializeField] private float idleSwayAmount;
+    [SerializeField] private float idleSwayFrequency;
+    [SerializeField] private float idleSwaySmoothTime;
+    private float idleSwayTimer = 0;
 
     [Header("Weapon Switching Settings")]
     [SerializeField] private Vector3 switchPosOffset;
@@ -120,8 +125,8 @@ public class WeaponController : MonoBehaviour
             }
         }
 
-        Vector3 newPos = smoothDefaultPos + smoothBob + smoothLookOffset + switchOffsetPos + recoilPos; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f);
+        Vector3 newPos = smoothDefaultPos + smoothBob + idleLookOffset * 0.02f + switchOffsetPos + recoilPos; 
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -290,39 +295,51 @@ public class WeaponController : MonoBehaviour
         recoilRotVel = Vector3.zero;
     }
 
-    private Vector3 CalculateBob(float timer)
+    private Vector3 CalculateBob(float timer, float amp)
     {
-        float amp = CurrentItem != null ? 1f / CurrentItem.Weight : 1f;
         return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed) * Vector3.right) + ((Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert * Vector3.up)) * amp;
     }
 
-    private Vector3 CalculateLookOffset()
+    private Vector3 CalculateMoveOffset(float amp)
     {
-        float amp = CurrentItem != null ? 1f / CurrentItem.Weight : 1f;
+        Vector3 moveOffset = s.PlayerMovement.RelativeVel * 0.02f;
+        moveOffset.x = Mathf.Clamp(moveOffset.x, -0.25f, 0.25f);
+        moveOffset.y = Mathf.Clamp(moveOffset.y, -0.6f, 0.6f);
+        moveOffset.z = Mathf.Clamp(moveOffset.z, -0.1f, 0.1f);
 
-        Vector2 camDelta = s.CameraLook.RotationDelta * 0.3f;
-        camDelta.y = Mathf.Clamp(camDelta.y, -3f, 3f);
-        camDelta.x = Mathf.Clamp(camDelta.x, -3f, 3f);
-
-        float fallSpeed = s.PlayerMovement.Velocity.y * 0.03f;
-        fallSpeed = Mathf.Clamp(fallSpeed, -0.8f, 0.8f);
-
-        float strafeOffset = s.PlayerMovement.RelativeVel.x * 0.03f;
-        strafeOffset = Mathf.Clamp(strafeOffset, -0.2f, 0.2f);
-
-        return -new Vector3(camDelta.y + strafeOffset, camDelta.x + fallSpeed, 0f) * amp;
+        return -moveOffset * amp;
     }
 
-    private Vector3 CalculateSway()
+    private Vector3 CalculateSway(float amp)
     {
-         float amp = (CurrentItem != null ? 1f / CurrentItem.Weight : 1f) * (Aiming ? 0.25f : 1f);
+        Vector2 swayOffset = 0.3f * swayAmount * s.CameraLook.RotationDelta;
+        swayOffset = Vector3.ClampMagnitude(swayOffset, 45f);
+        swayOffset.x *= -1f;
 
-         Vector2 camDelta = 0.5f * swayAmount * s.CameraLook.RotationDelta;
-         camDelta.y -= 1.5f * swayAmount * s.PlayerInput.InputVector.x;
-         camDelta.y = Mathf.Clamp(camDelta.y, -65f, 65f);
-         camDelta.x = Mathf.Clamp(camDelta.x, -45f, 45f);
+        return (Aiming ? 0.25f : 1f) * amp * swayOffset;
+    }
 
-         return (-1.4f * camDelta.y * Vector3.up + Vector3.right * camDelta.x) * -amp;
+    private Vector3 CalculateIdleSway(float amp)
+    {
+        Vector3 idleSwayOffset = Vector3.zero;
+        idleSwayOffset.x = Mathf.PerlinNoise(idleSwayTimer, 0f);
+        idleSwayOffset.y = Mathf.PerlinNoise(idleSwayTimer, 1f);
+        idleSwayOffset.z = Mathf.PerlinNoise(idleSwayTimer, 2f);
+        idleSwayOffset = (idleSwayOffset - Vector3.one * 0.5f) * 2f;
+
+        idleSwayOffset.x *= 0.8f;
+        idleSwayOffset.y *= 1.2f;
+        idleSwayOffset.z *= 0.4f;
+
+        return (Aiming ? 0.15f : 1f) * amp * idleSwayAmount * idleSwayOffset;
+    }
+
+    private Vector3 CalculateIdlePosSway(float amp)
+    {
+        Vector2 idleSwayOffset = Vector3.zero;
+        idleSwayOffset.y = Mathf.Sin(idleSwayTimer) * 0.0005f;
+
+        return (Aiming ? 0.15f : 1f) * amp * idleSwayAmount * idleSwayOffset;
     }
 
     private void CalculateSwitchOffset()
@@ -387,12 +404,19 @@ public class WeaponController : MonoBehaviour
     {
         if (CurrentItem == null) return;
 
-        float swayAimMulti = Aiming ? 0.03f : 1f;
+        idleSwayTimer += Time.deltaTime * idleSwayFrequency;
+
+        float timer = s.CameraHeadBob.BobTimer;
+        float amp = 1f / CurrentItem.Weight;
         float bobAimMulti = Aiming ? 0.08f : 1f;
 
-        smoothBob = Vector3.SmoothDamp(smoothBob,(CalculateBob(s.CameraHeadBob.BobTimer) - s.CameraLook.HeadSwayOffset * 0.1f) * bobAimMulti, ref bobVel, bobSmoothTime);
-        smoothSway = Vector3.SmoothDamp(smoothSway, CalculateSway() - (s.CameraLook.HeadSwayOffset * 25f) * swayAimMulti + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward), ref swayVel, swaySmoothTime);
-        smoothLookOffset = Vector3.SmoothDamp(smoothLookOffset, CalculateLookOffset() * swayAimMulti, ref lookVel, 0.21f);
+        Vector3 targetPos = CalculateBob(timer, amp) + CalculateMoveOffset(amp);
+        smoothBob = Vector3.SmoothDamp(smoothBob,targetPos * bobAimMulti, ref bobVel, bobSmoothTime);
+        smoothBob += CalculateIdlePosSway(amp);
+
+        Vector3 targetSway = CalculateSway(amp) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
+        smoothSway = Vector3.SmoothDamp(smoothSway, targetSway, ref swayVel, swaySmoothTime);
+        idleLookOffset = Vector3.SmoothDamp(idleLookOffset, CalculateIdleSway(amp), ref idleVel, idleSwaySmoothTime);
 
         CalculateDefaultValues();
         CalculateRecoilOffset();
