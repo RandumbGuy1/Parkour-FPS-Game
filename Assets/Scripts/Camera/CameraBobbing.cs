@@ -26,7 +26,7 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 bobVel = Vector3.zero;
   
     private Vector3 viewBobOffset = Vector3.zero;
-    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z * 0.6f); } }
+    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z * 0.4f); } }
 
     [Header("Footstep Settings")]
     [SerializeField] private ShakeData shakeData; 

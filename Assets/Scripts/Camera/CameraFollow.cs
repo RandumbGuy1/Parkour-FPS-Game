@@ -47,7 +47,6 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private float swayFrequency;
 
 	public Vector3 HeadSwayOffset { get; private set; } = Vector3.zero;
-	private Vector3 finalSwayOffset = Vector3.zero;
 	private float headSwayScroller = 0;
 
 	[Header("Assignables")]
@@ -133,7 +132,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + finalSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.ViewBobOffset * 4f);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + HeadSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.ViewBobOffset * 4f);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
@@ -143,21 +142,15 @@ public class CameraFollow : MonoBehaviour
 	#region Camera Effects
 	private void IdleCameraSway()
     {
-		if (s.PlayerMovement.Grounded && s.PlayerMovement.Magnitude < 5f)
-		{
-			float multi = (s.WeaponControls.Aiming ? 0.3f : 1f) * (s.WeaponControls.Firing ? 0.1f : 1f);
-			Vector3 noiseOffset = Vector3.zero;
+		if (!s.PlayerMovement.Grounded || s.PlayerMovement.Magnitude > 5f || s.WeaponControls.Aiming || s.WeaponControls.Firing) return;
 
-			headSwayScroller += Time.deltaTime * swayFrequency;
+		headSwayScroller += Time.deltaTime * swayFrequency;
+		HeadSwayOffset = Vector3.Lerp(HeadSwayOffset, LissajousCurve(headSwayScroller) * swayAmount, 5f * Time.deltaTime);
+	}
 
-			noiseOffset.x = Mathf.PerlinNoise(headSwayScroller, 0f);
-			noiseOffset.y = Mathf.PerlinNoise(headSwayScroller, 2f) * 0.8f;
-
-			noiseOffset -= (Vector3)Vector2.one * 0.5f;
-			HeadSwayOffset = Vector3.Slerp(HeadSwayOffset, noiseOffset * multi, 10f * Time.deltaTime * multi);
-		}
-
-		finalSwayOffset = HeadSwayOffset * swayAmount;
+	private Vector3 LissajousCurve(float Time)
+	{
+		return new Vector3(Mathf.Sin(Time), 1f * Mathf.Sin(2f * Time + Mathf.PI));
 	}
 
 	private void ChangeTilt()

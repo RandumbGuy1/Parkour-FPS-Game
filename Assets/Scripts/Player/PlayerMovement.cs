@@ -373,9 +373,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        if (crouched) return;
-
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.1f, 1f, 7f), 4.5f, 0.8f, 5f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.3f, 3f, 7f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
     }
 
     #region Vaulting And Stepping

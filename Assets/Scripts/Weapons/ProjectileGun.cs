@@ -102,7 +102,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         if (muzzleFlash != null) muzzleFlash.Play();
         if (muzzleLight != null) Flash();
 
-        s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
+        if (s != null) s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
         Ray ray = s.cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 

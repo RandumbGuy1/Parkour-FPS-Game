@@ -34,7 +34,7 @@ public class WeaponPickup : Interactable
 
     public override string GetDescription() 
     {
-        return (rb.isKinematic ? null: description);
+        return rb.isKinematic ? null : description;
     }
 
     public override void OnInteract()

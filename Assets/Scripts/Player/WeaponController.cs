@@ -103,7 +103,7 @@ public class WeaponController : MonoBehaviour
             Aiming = !Aiming;
             s.CameraLook.SetFovSmoothing(0.2f);
         }
-        
+
         if (weapons.Count > 0)
         {
             if (s.PlayerInput.Dropping) Drop();
@@ -124,6 +124,7 @@ public class WeaponController : MonoBehaviour
                 CurrentItem.ItemUpdate();
             }
         }
+        else Firing = false;   
 
         Vector3 newPos = smoothDefaultPos + smoothBob + idleLookOffset * 0.02f + switchOffsetPos + recoilPos; 
         Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f);
@@ -139,9 +140,9 @@ public class WeaponController : MonoBehaviour
         if (CurrentWeapon == null) return;
 
         CanAttack = !s.PlayerMovement.Vaulting && switchOffsetPos.sqrMagnitude < 40f && switchOffsetRot.sqrMagnitude < 40f && reloadRot.sqrMagnitude < 40f && (CurrentWeapon.WeaponType != WeaponClass.Melee || recoilPos.sqrMagnitude < 50f && recoilRot.sqrMagnitude < 50f);
-        Firing = CurrentWeapon.Automatic ? s.PlayerInput.LeftHoldClick : s.PlayerInput.LeftClick;
+        Firing = (CurrentWeapon.Automatic ? s.PlayerInput.LeftHoldClick : s.PlayerInput.LeftClick) && CanAttack;
 
-        if (Firing && CanAttack) CurrentWeapon.OnAttack();
+        if (Firing) CurrentWeapon.OnAttack();
         if (CurrentWeapon.WeaponType == WeaponClass.Ranged ? s.PlayerInput.Reloading : s.PlayerInput.RightClick) CurrentWeapon.SecondaryAction();
     }
 
@@ -187,9 +188,6 @@ public class WeaponController : MonoBehaviour
         weaponReticle.SetActive(true);
         circleCursor.SetActive(false);
 
-        CurrentWeapon = obj.GetComponent<IWeapon>();
-        CurrentItem = obj.GetComponent<IItem>();
-
         obj.transform.SetParent(weaponPos, true);
         obj.transform.localScale = Vector3.one;
 
@@ -206,23 +204,25 @@ public class WeaponController : MonoBehaviour
 
         SelectWeapon(false);
 
+        CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
+        CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
+
         if (CurrentItem != null) CurrentItem.OnPickup(s);
     }
 
     private void SelectWeapon(bool switching = true)
     {
+        ResetMovementValues();
+
         if (switching)
         {
             switchOffsetPos = switchPosOffset;
             switchOffsetRot = switchRotOffset;
+
+            CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
+            CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
         }
         else Aiming = false;
-
-        reloadRot = Vector3.zero;
-        reloadRotVel = Vector3.zero;
-
-        CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
-        CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
 
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
 
@@ -253,6 +253,8 @@ public class WeaponController : MonoBehaviour
         rand.z = Random.Range(-1f, 1f);
 
         rb.AddTorque(3f * throwForce * rand.normalized, ForceMode.Impulse);
+        if (all) rb.AddExplosionForce(15f, s.BottomCapsuleSphereOrigin + (Vector3.down * 0.5f) + Random.insideUnitSphere, 15f, 1f, ForceMode.Impulse);
+        
         weapons.RemoveAt(selectedWeapon);
 
         ResetMovementValues();
@@ -262,11 +264,7 @@ public class WeaponController : MonoBehaviour
             selectedWeapon = (selectedWeapon + 1 < weapons.Count ? selectedWeapon : weapons.Count - 1);
             SelectWeapon();
 
-            if (all)
-            {
-                rb.AddExplosionForce(15f, s.BottomCapsuleSphereOrigin + (Vector3.down * 0.5f) + Random.insideUnitSphere, 15f, 1f, ForceMode.Impulse);
-                Drop(false, true);
-            }
+            if (all) Drop(false, true);
         }
         else if (weapons.Count == 0)
         {
@@ -295,10 +293,7 @@ public class WeaponController : MonoBehaviour
         recoilRotVel = Vector3.zero;
     }
 
-    private Vector3 CalculateBob(float timer, float amp)
-    {
-        return (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed) * Vector3.right) + ((Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert * Vector3.up)) * amp;
-    }
+    private Vector3 CalculateBob(float timer, float amp) => (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed) * Vector3.right) + ((Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert * Vector3.up)) * amp;
 
     private Vector3 CalculateMoveOffset(float amp)
     {
@@ -321,28 +316,8 @@ public class WeaponController : MonoBehaviour
         return (Aiming ? 0.25f : 1f) * amp * swayOffset;
     }
 
-    private Vector3 CalculateIdleSway(float amp)
-    {
-        Vector3 idleSwayOffset = Vector3.zero;
-        idleSwayOffset.x = Mathf.PerlinNoise(idleSwayTimer, 0f);
-        idleSwayOffset.y = Mathf.PerlinNoise(idleSwayTimer, 1f);
-        idleSwayOffset.z = Mathf.PerlinNoise(idleSwayTimer, 2f);
-        idleSwayOffset = (idleSwayOffset - Vector3.one * 0.5f) * 2f;
-
-        idleSwayOffset.x *= 0.8f;
-        idleSwayOffset.y *= 1.2f;
-        idleSwayOffset.z *= 0.4f;
-
-        return (Aiming ? 0.15f : 1f) * amp * idleSwayAmount * idleSwayOffset;
-    }
-
-    private Vector3 CalculateIdlePosSway(float amp)
-    {
-        Vector2 idleSwayOffset = Vector3.zero;
-        idleSwayOffset.y = Mathf.Sin(idleSwayTimer) * 0.0005f;
-
-        return (Aiming ? 0.15f : 1f) * amp * idleSwayAmount * idleSwayOffset;
-    }
+    private Vector3 CalculateIdleSway(float amp) => (Aiming ? 0.15f : 1f) * amp * idleSwayAmount * (0.5f * idleSwayAmount * LissajousCurve(idleSwayTimer));
+    private Vector3 LissajousCurve(float Time) => new Vector3(Mathf.Sin(Time), 1f * Mathf.Sin(2f * Time + Mathf.PI));
 
     private void CalculateSwitchOffset()
     {
@@ -414,7 +389,6 @@ public class WeaponController : MonoBehaviour
 
         Vector3 targetPos = CalculateBob(timer, amp) + CalculateMoveOffset(amp);
         smoothBob = Vector3.SmoothDamp(smoothBob,targetPos * bobAimMulti, ref bobVel, bobSmoothTime);
-        smoothBob += CalculateIdlePosSway(amp);
 
         Vector3 targetSway = CalculateSway(amp) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
         smoothSway = Vector3.SmoothDamp(smoothSway, targetSway, ref swayVel, swaySmoothTime);

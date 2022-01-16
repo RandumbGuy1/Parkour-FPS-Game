@@ -12789,8 +12789,8 @@ MonoBehaviour:
   rotateSmoothTime: {x: 20, y: 20}
   upClampAngle: 80
   downClampAngle: 80
-  swayAmount: 12
-  swayFrequency: 0.7
+  swayAmount: 3
+  swayFrequency: 1.5
   s: {fileID: 1650519438}
   sprintEffect: {fileID: 2080955619}
 --- !u!114 &838078167
@@ -18815,7 +18815,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 16.3
+  m_Name: Save 16.32
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20288,8 +20288,8 @@ MonoBehaviour:
   bobSmoothTime: 0.17
   swayAmount: 15
   swaySmoothTime: 0.2
-  idleSwayAmount: 6.5
-  idleSwayFrequency: 1
+  idleSwayAmount: 2.5
+  idleSwayFrequency: 3.5
   idleSwaySmoothTime: 0.2
   switchPosOffset: {x: 0.6, y: -1.2, z: -0.2}
   switchRotOffset: {x: 270, y: -30, z: 90}
