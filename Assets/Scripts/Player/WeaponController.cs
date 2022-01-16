@@ -66,6 +66,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private List<GameObject> weapons = new List<GameObject>();
 
     [Header("Assignables")]
+    [SerializeField] private CameraShaker weaponShaker;
     [SerializeField] private Transform weaponPos;
     [SerializeField] private Transform weaponEmptyGameObject;
     [Space(10)]
@@ -124,10 +125,9 @@ public class WeaponController : MonoBehaviour
                 CurrentItem.ItemUpdate();
             }
         }
-        else Firing = false;   
 
-        Vector3 newPos = smoothDefaultPos + smoothBob + idleLookOffset * 0.02f + switchOffsetPos + recoilPos; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f);
+        Vector3 newPos = smoothDefaultPos + smoothBob + idleLookOffset * 0.01f + switchOffsetPos + recoilPos; 
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f + weaponShaker.Offset);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -153,7 +153,7 @@ public class WeaponController : MonoBehaviour
         {
             case WeaponClass.Ranged:
                 s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f))));
-                s.CameraShaker.ShakeOnce(4.5f * aimMulti, 8f, 0.4f, 8f, ShakeData.ShakeType.Perlin);
+                s.CameraShaker.ShakeOnce(4.5f * aimMulti, 9.5f, 0.6f, 8f, ShakeData.ShakeType.Perlin);
 
                 desiredRecoilPos = recoilPosOffset * (Aiming ? aimMulti : Random.Range(0.9f, 1.15f));
                 desiredRecoilRot = recoilRotOffset * (Aiming ? aimMulti - 0.15f : Random.Range(0.9f, 1.15f));
@@ -184,6 +184,8 @@ public class WeaponController : MonoBehaviour
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
+        weaponShaker.enabled = true;
+
         weaponDataText.gameObject.SetActive(true);
         weaponReticle.SetActive(true);
         circleCursor.SetActive(false);
@@ -270,8 +272,11 @@ public class WeaponController : MonoBehaviour
         {
             weaponReticle.SetActive(false);
             circleCursor.SetActive(true);
-
             weaponDataText.gameObject.SetActive(false);
+
+            weaponShaker.enabled = false;
+
+            Firing = false;
         }
     }
     #endregion
@@ -367,10 +372,12 @@ public class WeaponController : MonoBehaviour
 
         if (smoothDefaultPos == targetDesiredPos && smoothDefaultRot == targetDesiredRot) return;
 
-        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.25f);
-        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.25f);
+        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.15f);
+        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.15f);
 
-        if ((smoothDefaultPos - targetDesiredPos).sqrMagnitude < 0.00001f && (smoothDefaultRot - targetDesiredRot).sqrMagnitude < 0.00001f)
+        float mag = (smoothDefaultPos - targetDesiredPos).sqrMagnitude + (smoothDefaultRot - targetDesiredRot).sqrMagnitude;
+
+        if (mag < 0.00002f)
         {
             smoothDefaultPos = targetDesiredPos;
             smoothDefaultRot = targetDesiredRot;
@@ -400,6 +407,8 @@ public class WeaponController : MonoBehaviour
         CalculateReloadOffset();
     }
     #endregion
+
+    public void BobGun(float mag) => weaponShaker.ShakeOnce(mag * (Aiming ? 0.2f : 1f), 4f, 0.3f, 4f, ShakeData.ShakeType.KickBack, Vector3.right);
 
     public void OnPlayerStateChanged(PlayerState newState)
     {

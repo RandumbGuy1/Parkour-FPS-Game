@@ -23,6 +23,7 @@ public class CameraBobbing : MonoBehaviour
     [Range(0f, 0.5f)] [SerializeField] private float viewBobSmoothTime;
 
     public float BobTimer { get; private set; }
+    private float lastBobTimer = 0f;
     private Vector3 bobVel = Vector3.zero;
   
     private Vector3 viewBobOffset = Vector3.zero;
@@ -40,6 +41,9 @@ public class CameraBobbing : MonoBehaviour
     [SerializeField] private ScriptManager s;
     [SerializeField] private Transform playerGraphics;
 
+    public delegate void StopBob();
+    public event StopBob OnStopBobbing;
+
     void LateUpdate()
 	{
         float speedAmp = 1 / Mathf.Clamp(s.PlayerMovement.Magnitude * 0.06f, 1f, 5f);
@@ -52,11 +56,26 @@ public class CameraBobbing : MonoBehaviour
 		transform.localPosition = newPos;
 
         BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
+
+        CheckForStopBobbing();  
     }
 
     void FixedUpdate()
     {
         CalculateFootsteps();
+    }
+
+    private void CheckForStopBobbing()
+    {
+        if (BobTimer == 0f && lastBobTimer != 0f && s.PlayerMovement.Grounded && !s.PlayerMovement.JustJumped)
+        {
+            s.CameraShaker.ShakeOnce(2.5f, 4f, 0.6f, 5f, ShakeData.ShakeType.Perlin);
+            s.CameraShaker.ShakeOnce(shakeData);
+
+            OnStopBobbing?.Invoke();
+        }
+
+        lastBobTimer = BobTimer;
     }
 
     private void CalculateLandOffset()

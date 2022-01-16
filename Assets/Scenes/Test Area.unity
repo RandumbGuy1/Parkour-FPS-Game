@@ -2166,8 +2166,8 @@ MonoBehaviour:
   weaponSprite: {fileID: 0}
   weaponDefaultPos: {x: 0.9, y: -0.65, z: 1.7}
   weaponDefaultRot: {x: -0.45, y: 5, z: 8}
-  weaponAimPos: {x: -0.71, y: 0.2, z: -1.65}
-  weaponAimRot: {x: -2, y: -5, z: 15}
+  weaponAimPos: {x: -0.71, y: 0.22, z: -1.6}
+  weaponAimRot: {x: 1, y: -5, z: 15}
   weaponWeight: 1.5
   projectile: Bullet
   damagePerShot: 6
@@ -2184,7 +2184,7 @@ MonoBehaviour:
   weaponRecoilAimMulti: 0.3
   magazineSize: 90
   bulletsPerTap: 1
-  reloadTime: 0.8
+  reloadTime: 0.6
   weaponReloadRotOffset: {x: 1080, y: 0, z: 0}
   Environment:
     serializedVersion: 2
@@ -18815,7 +18815,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 16.32
+  m_Name: Save 16.42
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20297,6 +20297,7 @@ MonoBehaviour:
   switchRotTime: 0.2
   slideTilt: 25
   weapons: []
+  weaponShaker: {fileID: 2126912940}
   weaponPos: {fileID: 2126912939}
   weaponEmptyGameObject: {fileID: 766557913}
   weaponDataText: {fileID: 1486455897}
@@ -23251,7 +23252,7 @@ MonoBehaviour:
   weaponRecoilAimMulti: 0.5
   magazineSize: 12
   bulletsPerTap: 1
-  reloadTime: 0.8
+  reloadTime: 0.5
   weaponReloadRotOffset: {x: 1080, y: 0, z: 0}
   Environment:
     serializedVersion: 2
@@ -30638,6 +30639,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2126912939}
+  - component: {fileID: 2126912940}
   m_Layer: 0
   m_Name: Weapon Position
   m_TagString: Untagged
@@ -30659,6 +30661,18 @@ Transform:
   m_Father: {fileID: 963194228}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2126912940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126912938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39d572476ad42843b5ab94208d1dd7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2131811174
 GameObject:
   m_ObjectHideFlags: 0

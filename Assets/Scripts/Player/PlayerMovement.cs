@@ -373,7 +373,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.3f, 3f, 7f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.3f, 3f, 6.5f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
+        s.WeaponControls.BobGun(Mathf.Clamp(Magnitude, 5f, 15f) * (crouched ? 0.5f : 1f));
     }
 
     #region Vaulting And Stepping
