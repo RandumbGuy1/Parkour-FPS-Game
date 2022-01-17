@@ -158,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
     #region Movement
     private void Movement()
     {
-        float movementMultiplier = Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier * (crouched ? 0.5f : 1f);
+        float movementMultiplier = Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier * (crouched ? 0.5f : 1f) * (Sprinting ? 1f : 0.7f);
 
         ReachedMaxSlope = (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
@@ -207,10 +207,11 @@ public class PlayerMovement : MonoBehaviour
         if (WallRunning || Vaulting) return;
 
         Vector2 inputTemp = input;
-        if (crouched) if (Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
+        float speedCap = Sprinting ? 25f : 18f;
 
-        if (inputTemp.x > 0 && RelativeVel.x > 25f || inputTemp.x < 0 && RelativeVel.x < -25f) inputTemp.x = 0f;
-        if (inputTemp.y > 0 && RelativeVel.z > 25f || inputTemp.y < 0 && RelativeVel.z < -25f) inputTemp.y = 0f;
+        if (crouched && Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
+        if (inputTemp.x > 0 && RelativeVel.x > speedCap || inputTemp.x < 0 && RelativeVel.x < -speedCap) inputTemp.x = 0f;
+        if (inputTemp.y > 0 && RelativeVel.z > speedCap || inputTemp.y < 0 && RelativeVel.z < -speedCap) inputTemp.y = 0f;
 
         rb.AddForce(8.5f * movementMultiplier * acceleration * CalculateInputDir(inputTemp), ForceMode.Force);
     }
@@ -314,8 +315,6 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y));
         }
 
-        //Vector3 dir = (contact.point - Vector3.up * 0.05f) - transform.position;
-        //if (!Physics.Raycast(transform.position, dir, out var hit, dir.magnitude * 1.1f, Environment)) return;
         if (IsWall(contact.normal, 0.35f)) CheckForVault(contact.normal);
     }
 
@@ -379,7 +378,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.25f, 1.5f, 4f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.27f, 1.5f, 4.5f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
     }
 
     #region Vaulting And Stepping
@@ -411,14 +410,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 1.2f, 0.05f, 0.1f));
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.5f, 0.05f, 0.1f));
             rb.velocity = vel * (Sprinting ? 1f : 0.5f);
             return;
         }
 
         if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
-        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 3f, 0.06f, 0.25f));
+        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.8f, 0.06f, 0.15f));
         StartCoroutine(Vault(duration * 1.3f, -vaultDir));
 
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
@@ -430,7 +429,7 @@ public class PlayerMovement : MonoBehaviour
         transform.position = point;
         Vector3 offsetDir = lastPos - point;
 
-        s.CameraHeadBob.PlayerDesyncFromCollider(offsetDir, Mathf.Clamp(duration * 0.2f, 0.03f, 0.15f));
+        s.CameraHeadBob.PlayerDesyncFromCollider(offsetDir, duration);
     }
 
     private IEnumerator Vault(float duration, Vector3 normal)
