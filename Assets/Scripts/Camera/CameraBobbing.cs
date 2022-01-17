@@ -68,7 +68,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (!s.PlayerMovement.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(mag * 0.15f, 0.4f, 3.5f), 3f, 0.45f, 6f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f, ShakeData.ShakeType.Perlin);
     }
 
     private void CalculateLandOffset()

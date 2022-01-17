@@ -410,14 +410,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.5f, 0.05f, 0.1f));
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.55f, 0.05f, 0.1f));
             rb.velocity = vel * (Sprinting ? 1f : 0.5f);
             return;
         }
 
         if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
-        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.8f, 0.06f, 0.15f));
+        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.8f, 0.07f, 0.15f));
         StartCoroutine(Vault(duration * 1.3f, -vaultDir));
 
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
@@ -439,7 +439,7 @@ public class PlayerMovement : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.None;
         Vaulting = true;
 
-        yield return new WaitForSeconds(duration * 0.9f);
+        yield return new WaitForSeconds(duration * 0.8f);
 
         Vaulting = false;
         rb.isKinematic = false;
