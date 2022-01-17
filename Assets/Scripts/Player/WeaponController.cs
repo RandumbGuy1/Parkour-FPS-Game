@@ -127,7 +127,7 @@ public class WeaponController : MonoBehaviour
         }
 
         Vector3 newPos = smoothDefaultPos + smoothBob + idleLookOffset * 0.01f + switchOffsetPos + recoilPos; 
-        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f + weaponShaker.Offset);
+        Quaternion newRot = Quaternion.Euler(smoothDefaultRot + ConverToEuler(smoothBob * 15f) + smoothSway + idleLookOffset + switchOffsetRot + recoilRot + reloadRot - s.CameraShaker.Offset * 0.8f);
 
         weaponPos.localPosition = newPos;
         weaponPos.localRotation = newRot;
@@ -184,8 +184,6 @@ public class WeaponController : MonoBehaviour
     #region Inventory Management
     public void AddWeapon(GameObject obj)
     {
-        weaponShaker.enabled = true;
-
         weaponDataText.gameObject.SetActive(true);
         weaponReticle.SetActive(true);
         circleCursor.SetActive(false);
@@ -274,8 +272,6 @@ public class WeaponController : MonoBehaviour
             circleCursor.SetActive(true);
             weaponDataText.gameObject.SetActive(false);
 
-            weaponShaker.enabled = false;
-
             Firing = false;
         }
     }
@@ -299,13 +295,14 @@ public class WeaponController : MonoBehaviour
     }
 
     private Vector3 CalculateBob(float timer, float amp) => (timer <= 0 ? Vector3.zero : (bobAmountHoriz * Mathf.Cos(timer * bobSpeed) * Vector3.right) + ((Mathf.Sin(timer * bobSpeed * 2f)) * bobAmountVert * Vector3.up)) * amp;
+    private Vector3 ConverToEuler(Vector3 rotation) => new Vector3(-rotation.y, -rotation.x, rotation.z);
 
     private Vector3 CalculateMoveOffset(float amp)
     {
         Vector3 moveOffset = s.PlayerMovement.RelativeVel * 0.02f;
-        moveOffset.x += s.CameraLook.RotationDelta.x * 0.1f;
+        moveOffset.x += s.CameraLook.RotationDelta.x * 0.08f;
         moveOffset.x = Mathf.Clamp(moveOffset.x, -0.25f, 0.25f);
-        moveOffset.y = Mathf.Clamp(moveOffset.y, -0.6f, 0.6f);
+        moveOffset.y = Mathf.Clamp(moveOffset.y, -0.8f, 0.8f);
         moveOffset.z = Mathf.Clamp(moveOffset.z, -0.05f, 0.05f);
 
         return -moveOffset * amp;
@@ -314,9 +311,9 @@ public class WeaponController : MonoBehaviour
     private Vector3 CalculateSway(float amp)
     {
         Vector2 swayOffset = 0.35f * swayAmount * s.CameraLook.RotationDelta;
-        swayOffset.y += s.PlayerMovement.RelativeVel.x * 0.4f;
+        swayOffset.y += s.PlayerMovement.RelativeVel.x * 0.25f;
         swayOffset.x *= -1f;
-        swayOffset = Vector3.ClampMagnitude(swayOffset, 50f);
+        swayOffset = Vector3.ClampMagnitude(swayOffset, 60f);
 
         return (Aiming ? 0.25f : 1f) * amp * swayOffset;
     }

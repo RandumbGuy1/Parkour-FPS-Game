@@ -125,6 +125,10 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector3 InputDir { get { return CalculateInputDir(input).normalized; } }
     public bool Moving { get; private set; }
+    private bool movingLastFrame = false;
+
+    public delegate void StopMove(float mag);
+    public event StopMove OnStopMoving;
 
     public float Magnitude { get; private set; }
     public Vector3 RelativeVel { get; private set; }
@@ -310,7 +314,9 @@ public class PlayerMovement : MonoBehaviour
             s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y));
         }
 
-        if (IsWall(contact.normal, 0.3f) && Environment == (Environment | 1 << layer)) CheckForVault(contact.normal);
+        //Vector3 dir = (contact.point - Vector3.up * 0.05f) - transform.position;
+        //if (!Physics.Raycast(transform.position, dir, out var hit, dir.magnitude * 1.1f, Environment)) return;
+        if (IsWall(contact.normal, 0.35f)) CheckForVault(contact.normal);
     }
 
     void OnCollisionStay(Collision col)
@@ -373,8 +379,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.3f, 3f, 6.5f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
-        s.WeaponControls.BobGun(Mathf.Clamp(Magnitude, 5f, 15f) * (crouched ? 0.5f : 1f));
+        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.25f, 1.5f, 4f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
     }
 
     #region Vaulting And Stepping
@@ -406,14 +411,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, duration);
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 1.2f, 0.05f, 0.1f));
             rb.velocity = vel * (Sprinting ? 1f : 0.5f);
             return;
         }
 
         if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
-        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, duration * 3f);
+        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 3f, 0.06f, 0.25f));
         StartCoroutine(Vault(duration * 1.3f, -vaultDir));
 
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
@@ -597,7 +602,6 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
-    #region Input
     public void SetInput(Vector2 input, bool jumping, bool crouching)
     {
         this.input = input;
@@ -608,12 +612,12 @@ public class PlayerMovement : MonoBehaviour
 
         Moving = input != Vector2.zero;
 
-        UpdateCrouchScale();
-        if (!autoSprint) HandleSprinting();
-    }
+        if (!Moving && movingLastFrame) OnStopMoving?.Invoke(Magnitude);
+        movingLastFrame = Moving;
 
-    private Vector3 CalculateInputDir(Vector2 input) => 1.05f * input.y * s.orientation.forward + s.orientation.right * input.x;
-    #endregion
+        UpdateCrouchScale();
+        HandleSprinting();
+    }
 
     private void ClampSpeed(float movementMultiplier)
     {
@@ -635,8 +639,11 @@ public class PlayerMovement : MonoBehaviour
         return maxGroundSpeed;
     }
 
+    private Vector3 CalculateInputDir(Vector2 input) => 1.05f * input.y * s.orientation.forward + s.orientation.right * input.x;
+
     private void HandleSprinting()
     {
+        if (autoSprint) return;
         if (!Moving) Sprinting = false;
         if (!Grounded) return;
 
