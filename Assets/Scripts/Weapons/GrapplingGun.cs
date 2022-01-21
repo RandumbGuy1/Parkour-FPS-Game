@@ -111,7 +111,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         if (Mathf.Abs(Vector3.Dot(Vector3.up, hit.normal)) > 0.5f && grappledToRigidbody == null || !readyToGrapple) return false;
         
         s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
-        s.CameraShaker.ShakeOnce(3.5f, 5f, 1f, 9f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(3.5f, 5f, 1f, 9f)));
 
         grapplePoint.position = hit.point;
         grapplePoint.SetParent(hit.collider.transform);

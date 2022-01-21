@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51a9a8a8608fe314687f63c813b71a21, type: 3}
   m_Name: FootStepShake 1
   m_EditorClassIdentifier: 
-  type: 0
   magnitude: 1
   frequency: 1
-  duration: 0.25
-  smoothSpeed: 20
+  duration: 0.3
+  smoothSpeed: 15
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:

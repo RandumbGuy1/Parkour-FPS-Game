@@ -4,49 +4,41 @@ using UnityEngine;
 
 public class CameraShaker : MonoBehaviour
 {
+    [Header("Active Shakes")]
+    [SerializeField] private List<IShakeEvent> shakeEvents = new List<IShakeEvent>();
+
     public Vector3 Offset { get; private set; }
-
     private bool canAddShakes = true;
-    private List<ShakeEvent> shakeEvents = new List<ShakeEvent>();
 
-    public void ShakeOnce(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 initialKickback = default(Vector3))
+    public void ShakeOnce(IShakeEvent shakeEvent)
     {
-        if (!canAddShakes) return;
-
-        ShakeData shakeData = ScriptableObject.CreateInstance<ShakeData>();
-        shakeData.Intialize(magnitude, frequency, duration, smoothness, type);
-
-        shakeEvents.Add(new ShakeEvent(shakeData, initialKickback));
-    }
-
-    public void ShakeOnce(ShakeData shakeData, Vector3 initialKickback = default(Vector3))
-    {
-        if (!canAddShakes) return;
-
-        shakeEvents.Add(new ShakeEvent(shakeData, initialKickback));
+        if (canAddShakes) shakeEvents.Add(shakeEvent);
     }
 
     public void DisableShakes() => canAddShakes = false;
 
     void LateUpdate()
     {
+        if (shakeEvents.Count <= 0)
+        {
+            Offset = Vector3.zero;
+            return;
+        }
+
         Vector3 rotationOffset = Vector3.zero;
 
-        if (shakeEvents.Count > 0)
+        for (int i = shakeEvents.Count - 1; i != -1; i--)
         {
-            for (int i = shakeEvents.Count - 1; i != -1; i--)
+            IShakeEvent shake = shakeEvents[i];
+
+            if (shake.Finished)
             {
-                ShakeEvent shake = shakeEvents[i];
-
-                if (shake.Finished)
-                {
-                    shakeEvents.RemoveAt(i);
-                    continue;
-                }
-
-                shake.UpdateShake();
-                rotationOffset += shake.Displacement;
+                shakeEvents.RemoveAt(i);
+                continue;
             }
+
+            shake.UpdateShake(Time.deltaTime);
+            rotationOffset += shake.ShakeOffset;
         }
 
         Offset = rotationOffset;

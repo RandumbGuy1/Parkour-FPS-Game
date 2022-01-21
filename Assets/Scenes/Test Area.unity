@@ -10627,44 +10627,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac831f6c892e0f47bb53cd6c850e255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
-  magnitude: 40
-  frequency: 6
+  magnitude: 35
+  frequency: 8
   duration: 3
-  smoothness: 6.5
-  blendOverLifetime:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 12.759434
-      outSlope: 12.759434
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.055452865
-    - serializedVersion: 3
-      time: 0.2
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -0.25752994
-      outSlope: -0.25752994
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.1259242
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  smoothness: 5
 --- !u!65 &649301888
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13984,7 +13950,7 @@ MonoBehaviour:
   viewBobSpeed: 10.3
   viewBobAmountHoriz: 0.3
   viewBobAmountVert: 0.5
-  viewBobSmoothTime: 0.1
+  viewBobSmoothTime: 0.115
   shakeData: {fileID: 11400000, guid: 915b73c15e711e94f8d19869af90b586, type: 2}
   s: {fileID: 1650519438}
   playerGraphics: {fileID: 2015820421}
@@ -18815,7 +18781,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 16.5
+  m_Name: Save 16.61
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20183,7 +20149,7 @@ MonoBehaviour:
   maxSlideSpeed: 100
   sprintMultiplier: 1.6
   sprintDoubleTapTime: 0.25
-  autoSprint: 0
+  autoSprint: 1
   jumpForce: 48
   maxJumpSteps: 10
   crouchScale: 1.3

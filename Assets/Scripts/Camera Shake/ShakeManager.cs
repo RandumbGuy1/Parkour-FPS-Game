@@ -6,7 +6,7 @@ public class ShakeManager : MonoBehaviour
 {
     [Header("Receivers")]
     [SerializeField] private List<CameraShaker> shakeRecievers = new List<CameraShaker>();
-    public static ShakeManager Instance;
+    public static ShakeManager Instance { get; private set; }
 
     void Awake()
     {
@@ -19,31 +19,25 @@ public class ShakeManager : MonoBehaviour
         Instance = this;
     }
 
-    public void ShakeAll(float magnitude, float frequency, float duration, float smoothness, ShakeData.ShakeType type, Vector3 shakeSource = default)
-    {
-        for (int i = 0; i < shakeRecievers.Count; i++)
-        {
-            if (shakeSource != default) magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
-            shakeRecievers[i].ShakeOnce(magnitude, frequency, duration, smoothness, type);
-        }
-    }
-
-    public void ShakeAll(ShakeData sd, Vector3 shakeSource = default)
+    public void ShakeAll(IShakeEvent shakeEvent, Vector3 shakeSource)
     {
         for (int i = 0; i < shakeRecievers.Count; i++)
         { 
-            if (shakeSource != default) sd.Intialize(CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource), sd.Frequency, sd.Duration, sd.SmoothSpeed, sd.Type);
-            shakeRecievers[i].ShakeOnce(sd);
+            shakeEvent.ShakeData.Magnitude *= CalculateDistanceBasedMagnitude(shakeRecievers[i].transform.position, shakeSource);
+            shakeRecievers[i].ShakeOnce(shakeEvent);
         }
+    }
+
+    public void ShakeAll(IShakeEvent shakeEvent)
+    {
+        for (int i = 0; i < shakeRecievers.Count; i++) shakeRecievers[i].ShakeOnce(shakeEvent);
     }
 
     private float CalculateDistanceBasedMagnitude(Vector3 a, Vector3 b)
     {
-        float distance = Vector3.Distance(a, b) * 0.5f;
-
-        distance = Mathf.Clamp(distance, 0f, 20f);
-        distance = 1f - (distance / 20f);
-        distance = Mathf.Clamp(distance, 0.35f, 1f);
+        float distance = (Vector3.Distance(a, b) * 0.5f) - 5f;
+        distance = Mathf.Clamp(distance, 1f, 15f);
+        distance = Mathf.Clamp(1f / distance, 0.3f, 1.25f);
 
         return distance;
     }

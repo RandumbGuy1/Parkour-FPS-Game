@@ -132,7 +132,7 @@ public class CameraFollow : MonoBehaviour
 
 	void ApplyRotation()
 	{
-		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + HeadSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.ViewBobOffset * 4f);
+		Quaternion newCamRot = Quaternion.Euler((Vector3) smoothRotation + wallRunRotation + HeadSwayOffset + s.CameraShaker.Offset + s.CameraHeadBob.ViewBobOffset * 3.75f);
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
@@ -195,7 +195,7 @@ public class CameraFollow : MonoBehaviour
     {
 		if (damage < 0) return;
 
-		s.CameraShaker.ShakeOnce(damage * 150f, 6f, 1.3f, 8f, ShakeData.ShakeType.Perlin);
+		s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(damage * 150f, 6f, 1.3f, 8f)));
 	}
 
 	public void OnPlayerStateChanged(PlayerState newState)
@@ -207,7 +207,7 @@ public class CameraFollow : MonoBehaviour
 		specateOffset = Vector3.zero;
 		wallRunRotation.z = 0f;
 
-		s.CameraShaker.ShakeOnce(35f, 6f, 1.5f, 10f, ShakeData.ShakeType.Perlin);
+		s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(35f, 6f, 1.5f, 10f)));
 		s.CameraShaker.DisableShakes();
 
 		s.CameraHeadBob.enabled = false;

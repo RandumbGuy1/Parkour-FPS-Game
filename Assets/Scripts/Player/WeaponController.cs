@@ -152,8 +152,8 @@ public class WeaponController : MonoBehaviour
         switch (CurrentWeapon.WeaponType)
         {
             case WeaponClass.Ranged:
-                s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f))));
-                s.CameraShaker.ShakeOnce(4.5f * aimMulti, 9.5f, 0.6f, 8f, ShakeData.ShakeType.Perlin);
+                s.CameraShaker.ShakeOnce(new KickbackShake(CurrentWeapon.RecoilShakeData, new Vector3(-0.9f, Random.Range(-0.1f, 0.1f), Random.Range(-0.3f, 0.3f)) * (amount * (0.1f * (Aiming ? aimMulti : 1f)))));
+                s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(4.5f * aimMulti, 9.5f, 0.6f, 8f)));
 
                 desiredRecoilPos = recoilPosOffset * (Aiming ? aimMulti : Random.Range(0.9f, 1.15f));
                 desiredRecoilRot = recoilRotOffset * (Aiming ? aimMulti - 0.15f : Random.Range(0.9f, 1.15f));
@@ -168,7 +168,7 @@ public class WeaponController : MonoBehaviour
                 desiredRecoilPos = recoilPosOffset;
                 desiredRecoilRot = recoilRotOffset;
 
-                s.CameraShaker.ShakeOnce(CurrentWeapon.RecoilShakeData, Vector3.left);
+                s.CameraShaker.ShakeOnce(new KickbackShake(CurrentWeapon.RecoilShakeData, Vector3.left));
                 slider.SetSliderCooldown(1f, 0.05f);
                 break;
         }
@@ -404,8 +404,6 @@ public class WeaponController : MonoBehaviour
         CalculateReloadOffset();
     }
     #endregion
-
-    public void BobGun(float mag) => weaponShaker.ShakeOnce(mag * (Aiming ? 0.2f : 1f), 4f, 0.3f, 4f, ShakeData.ShakeType.KickBack, Vector3.right);
 
     public void OnPlayerStateChanged(PlayerState newState)
     {

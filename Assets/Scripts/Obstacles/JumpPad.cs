@@ -24,6 +24,6 @@ public class JumpPad : MonoBehaviour
 
         if (s == null) return;
 
-        s.CameraShaker.ShakeOnce(col.relativeVelocity.magnitude * 0.2f, 4f, 1.5f, 4f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(col.relativeVelocity.magnitude * 0.35f, 3f, 20f), 3f, 1.5f, 3.5f)));
     }
 }

@@ -26,7 +26,7 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 bobVel = Vector3.zero;
   
     private Vector3 viewBobOffset = Vector3.zero;
-    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y, viewBobOffset.x * 0.8f, viewBobOffset.z * 0.4f); } }
+    public Vector3 ViewBobOffset { get { return new Vector3(viewBobOffset.y * 1.1f, viewBobOffset.x * 1.35f, viewBobOffset.z * 0.3f); } }
 
     [Header("Footstep Settings")]
     [SerializeField] private ShakeData shakeData; 
@@ -68,7 +68,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (!s.PlayerMovement.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f)));
     }
 
     private void CalculateLandOffset()
@@ -100,7 +100,7 @@ public class CameraBobbing : MonoBehaviour
 
         if (footstepDistance > 450f)
         {
-            s.CameraShaker.ShakeOnce(shakeData);
+            s.CameraShaker.ShakeOnce(new KickbackShake(shakeData));
             footstepDistance = 0f;
         }    
     }
@@ -132,8 +132,10 @@ public class CameraBobbing : MonoBehaviour
         float newMag = -impactForce * (crouched ? 0.6f : 0.3f);
         float newSmooth = Mathf.Clamp(newMag * 0.725f, 0.1f, 13f);
 
-        landbobShakeData.Intialize(newMag, landbobShakeData.Frequency, landbobShakeData.Duration, newSmooth, landbobShakeData.Type);
-        s.CameraShaker.ShakeOnce(landbobShakeData, Vector3.right);
+        landbobShakeData.Magnitude = newMag;
+        landbobShakeData.SmoothSpeed = newSmooth;
+
+        s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

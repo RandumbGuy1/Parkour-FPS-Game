@@ -378,7 +378,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(Mathf.Clamp(Magnitude * 0.27f, 1.5f, 4.5f), 4f, 0.8f, 9f, ShakeData.ShakeType.KickBack, Vector3.right);
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.27f, 1.5f, 4.5f), 4f, 0.8f, 9f), Vector3.right));
     }
 
     #region Vaulting And Stepping
@@ -410,18 +410,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.55f, 0.05f, 0.1f));
-            rb.velocity = vel * (Sprinting ? 1f : 0.5f);
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.55f, 0.04f, 0.1f));
+            rb.velocity = vel * (Sprinting ? 1f : 0.6f);
             return;
         }
 
         if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
-        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.8f, 0.07f, 0.15f));
-        StartCoroutine(Vault(duration * 1.3f, -vaultDir));
+        StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.75f, 0.06f, 0.15f));
+        StartCoroutine(Vault(duration * 0.9f, -vaultDir));
 
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
-        s.CameraShaker.ShakeOnce(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f, ShakeData.ShakeType.Perlin);
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
     }
 
     private void StepUpDesyncSmoothing(Vector3 point, Vector3 lastPos, float duration)
