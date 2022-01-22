@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class FollowPlayer : MonoBehaviour
+public class FollowPlayer : MonoBehaviour, IPathFinding
 {
     [Header("Follow Settings")]
     [SerializeField] private float speed;
-    [SerializeField] private float angularSpeed;
     [SerializeField] private float standingDistance;
+    [SerializeField] private float shootingDistance;
     [SerializeField] private float gravityForce;
 
     [Header("Ground Check Settings")]
@@ -21,10 +21,10 @@ public class FollowPlayer : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private EnemyShoot shooting;
     [SerializeField] private NavMeshAgent agent;
-    [SerializeField] private Transform player;
+    [SerializeField] private Transform target;
     [SerializeField] private Rigidbody enemyRb;
-    private ScriptManager s;
 
+    public Transform Target { get { return target; } }
     public NavMeshAgent Agent { get { return agent; } }
 
     void Awake()
@@ -32,9 +32,6 @@ public class FollowPlayer : MonoBehaviour
         agent.speed = 0;
         CancelInvoke("SetGroundCheckInterval");
         SetGroundCheckInterval();
-
-        s = player.GetComponent<ScriptManager>();
-        if (s != null) s.PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
     }
 
     void OnEnable()
@@ -43,9 +40,7 @@ public class FollowPlayer : MonoBehaviour
         SetGroundCheckInterval();
     }
 
-    void FixedUpdate() => FollowThePlayer();
-
-    private void FollowThePlayer()
+    public void MoveToTarget()
     {
         HandleRotation();
 
@@ -56,23 +51,21 @@ public class FollowPlayer : MonoBehaviour
             if (!agent.isOnOffMeshLink)
             {
                 agent.enabled = false;
-                enemyRb.AddForce(0.5f * speed * (player.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
+                enemyRb.AddForce(0.5f * speed * (target.position - enemyRb.transform.position).normalized, ForceMode.Acceleration);
             }
 
             return;
         }
 
-        Vector3 enemyToPlayer = player.position - enemyRb.transform.position;
+        Vector3 enemyToPlayer = target.position - enemyRb.transform.position;
         enemyToPlayer.y *= 0.5f;
 
         float sqrEnemyToPlayer = enemyToPlayer.sqrMagnitude;
         Vector3 pathDir = GetNextPathPos() - enemyRb.transform.position;
 
-        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (player.position - enemyRb.transform.position).normalized) > 0.1f && !Physics.Linecast(enemyRb.transform.position, player.position, Ground))
-        {
-            if (shooting != null) shooting.OnAttack();
+        if (sqrEnemyToPlayer < shootingDistance * shootingDistance && shooting != null) shooting.OnAttack(Target);
+        if (sqrEnemyToPlayer < standingDistance * standingDistance && Vector3.Dot(pathDir.normalized, (target.position - enemyRb.transform.position).normalized) > 0.1f && !Physics.Linecast(enemyRb.transform.position, target.position, Ground))         
             return;
-        }
 
         enemyRb.AddForce(5f * speed * pathDir.normalized, ForceMode.Acceleration);
     }
@@ -84,7 +77,7 @@ public class FollowPlayer : MonoBehaviour
         bool offNavmesh = agent.isOnOffMeshLink;
 
         agent.nextPosition = offNavmesh ? agent.currentOffMeshLinkData.endPos : enemyRb.position;
-        agent.SetDestination(player.position);
+        agent.SetDestination(target.position);
         Vector3 pos = agent.steeringTarget;
 
         if (offNavmesh) agent.enabled = false;
@@ -103,11 +96,6 @@ public class FollowPlayer : MonoBehaviour
         }
     }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.DrawWireCube(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents * 2f);
-    }
-
     private void SetGroundCheckInterval()
     {
         Quaternion orientation = Quaternion.LookRotation(enemyRb.transform.up);
@@ -116,5 +104,8 @@ public class FollowPlayer : MonoBehaviour
         Invoke(nameof(SetGroundCheckInterval), groundCheckInterval);
     }
 
-    private void OnPlayerStateChanged(PlayerState newState) => enabled = newState == PlayerState.Alive;
+    void OnDrawGizmos()
+    {
+        Gizmos.DrawWireCube(enemyRb.position + enemyRb.transform.TransformDirection(groundCheckOffset), groundCheckHalfExtents * 2f);
+    }
 }

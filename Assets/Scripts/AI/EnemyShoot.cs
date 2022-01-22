@@ -1,17 +1,10 @@
 ﻿using UnityEngine;
 
-public class EnemyShoot : MonoBehaviour, IWeapon
+public class EnemyShoot : MonoBehaviour
 {
-    public WeaponClass WeaponType { get { return WeaponClass.Ranged; } }
-
-    public bool Automatic { get { return true; } }
-
-    public float RecoilSmoothTime { get { return 0f; } }
-    public float ReloadSmoothTime { get { return 0f; } }
-    public ShakeData RecoilShakeData { get { return null; } }
-
     [Header("Shooting Settings")]
     [SerializeField] private LayerMask CollideAttack;
+    [SerializeField] private LayerMask Obstruction;
     [SerializeField] private float damagePerShot;
     [SerializeField] private float shootForce;
     [SerializeField] private float spread;
@@ -21,14 +14,13 @@ public class EnemyShoot : MonoBehaviour, IWeapon
 
     [Header("Assignables")]
     [SerializeField] private Transform enemyPos;
-    [SerializeField] private Transform target;
-    private Rigidbody targetRb;
 
-    void Awake() => targetRb = target.GetComponent<Rigidbody>();
-
-    public bool OnAttack()
+    public void OnAttack(Transform target)
     {
-        if (!readyToShoot) return false;
+        if (!readyToShoot) return;
+        if (Physics.Linecast(enemyPos.transform.position, target.position, Obstruction)) return;
+
+        Rigidbody targetRb = target.GetComponent<Rigidbody>();
 
         Vector3 dir = (target.position - enemyPos.position);
         Vector3 attackPoint = enemyPos.position + dir.normalized * 2.5f;
@@ -54,10 +46,7 @@ public class EnemyShoot : MonoBehaviour, IWeapon
             readyToShoot = false;
             Invoke(nameof(ResetShot), 1 / fireRate);
         }
-
-        return true;
     }
 
-    public bool SecondaryAction() => true;
     private void ResetShot() => readyToShoot = true;
 }

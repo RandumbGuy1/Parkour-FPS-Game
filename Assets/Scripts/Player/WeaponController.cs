@@ -410,6 +410,8 @@ public class WeaponController : MonoBehaviour
         if (newState != PlayerState.Dead) return;
 
         if (HoldingWeapon) Drop(false, true);
+
+        Aiming = false;
         enabled = false;
     }
 }

@@ -67,8 +67,6 @@ public class CameraFollow : MonoBehaviour
 
 	void Update()
 	{
-		if (state == CameraState.Spectate) return;
-
 		float inputX = (s.PlayerMovement.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		if (inputX != 0f && (gp != null ? gp.GrappleTilt : 0) == 0) SetTiltSmoothing(0.2f);
 
