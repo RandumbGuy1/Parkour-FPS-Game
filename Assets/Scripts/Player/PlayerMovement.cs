@@ -309,13 +309,13 @@ public class PlayerMovement : MonoBehaviour
         int layer = col.gameObject.layer;
         ContactPoint contact = col.GetContact(0);
 
-        if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded && stepsSinceGrounded < 1)
+        if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded)
         {
-            stepsSinceGrounded++;
+            Grounded = true;
             s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y));
         }
 
-        if (IsWall(contact.normal, 0.35f)) CheckForVault(contact.normal);
+        CheckForVault(contact);
     }
 
     void OnCollisionStay(Collision col)
@@ -382,17 +382,20 @@ public class PlayerMovement : MonoBehaviour
     }
 
     #region Vaulting And Stepping
-    private void CheckForVault(Vector3 normal)
+    private void CheckForVault(ContactPoint contact)
     {
-        if (Vaulting || WallRunning || crouched || ReachedMaxSlope) return;
+        if (Vaulting || WallRunning || ReachedMaxSlope) return;
 
-        Vector3 vaultDir = normal;
+        Vector3 vaultDir = contact.normal;
         vaultDir.y = 0f;
+
+        Physics.Raycast(contact.point + vaultDir * 0.01f, -vaultDir, out var checkWallHit, 1f, Environment);
+        if (!IsWall(checkWallHit.normal, 0.1f)) return;
 
         Vector3 vel = Velocity;
         vel.y = 0;
 
-        Vector3 vaultCheck = transform.position + Vector3.up * 2f;
+        Vector3 vaultCheck = transform.position + s.cc.center + Vector3.up * 2f;
         Vector3 lastPos = transform.position;
 
         if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.4f) return;
@@ -403,7 +406,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vaultPoint = vaultHit.point + Vector3.up * 2f;
         float verticalDistance = vaultPoint.y - s.BottomCapsuleSphereOrigin.y;
 
-        if (verticalDistance > vaultOffset + 0.1f || verticalDistance < 1.65f) return;
+        if (verticalDistance > vaultOffset + 0.1f) return;
 
         float distance = Vector3.Distance(lastPos, vaultPoint);
         float duration = distance / Magnitude;
@@ -415,13 +418,10 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        if (Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
+        if (crouched || Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
         StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.75f, 0.06f, 0.15f));
         StartCoroutine(Vault(duration * 0.9f, -vaultDir));
-
-        s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
-        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
     }
 
     private void StepUpDesyncSmoothing(Vector3 point, Vector3 lastPos, float duration)
@@ -434,6 +434,9 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Vault(float duration, Vector3 normal)
     {
+        s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
+
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.None;
@@ -557,7 +560,7 @@ public class PlayerMovement : MonoBehaviour
         if (!crouched) return;
 
         if (CanCrouchWalk) slideAngledTilt = 0;
-        else if (slideAngledTilt == 0 && Grounded && stepsSinceLastJumped > 5) slideAngledTilt = input.x * slideTilt;
+        else if (slideAngledTilt == 0 && Grounded && stepsSinceLastJumped > 5) slideAngledTilt = (input.x != 0f ? input.x : 1f) * slideTilt;
 
         canUnCrouch = !Physics.CheckCapsule(s.BottomCapsuleSphereOrigin, s.playerHead.position, s.cc.radius * (NearWall ? 0.95f : 1.1f), Environment);
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
