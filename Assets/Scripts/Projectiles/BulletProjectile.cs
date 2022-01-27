@@ -112,22 +112,8 @@ public class BulletProjectile : MonoBehaviour, IProjectile
 
         transform.position = hit.point + hit.normal * 0.2f;
 
-        ObjectPooler.Instance.Spawn(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
-        Collider[] enemiesInRadius = Physics.OverlapSphere(hit.point, explosionRadius, CollidesWith);
-
-        for (int i = 0; i < enemiesInRadius.Length; i++)
-        {
-            if (enemiesInRadius[i].transform == shooter.transform) continue;
-
-            Rigidbody rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
-            enemiesInRadius[i].GetComponent<ScriptManager>()?.PlayerMovement.ResetJumpSteps();
-            enemiesInRadius[i].GetComponent<IDamagable>()?.OnDamage(bulletDamage, shooter.GetComponent<ScriptManager>());
-
-            if (rb == null) continue;
-
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.5f, rb.velocity.z);
-            rb.AddExplosionForce(explosionForce, hit.point, explosionRadius * 1.5f, 0f, ForceMode.Impulse);
-        }
+        GameObject explosion = ObjectPooler.Instance.Spawn(impactEffect, hit.point + hit.normal * 0.4f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
+        explosion.GetComponent<Explosion>()?.Explode(shooter.gameObject, CollidesWith, ForceMode.Impulse, hit.point, explosionRadius, explosionForce, 0.1f, bulletDamage);
     }
 
     void DeactivateBullet() => gameObject.SetActive(false);

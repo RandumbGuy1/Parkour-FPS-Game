@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2336547672589252546}
   - component: {fileID: 2336547672589252547}
   - component: {fileID: 6977505633651403233}
+  - component: {fileID: 4153261772960586925}
   m_Layer: 0
   m_Name: Laser Impact Effect
   m_TagString: Untagged
@@ -4837,6 +4838,25 @@ MonoBehaviour:
   intensity: 60
   intensitySmoothing: 60
   light: {fileID: 9081917574279548709}
+--- !u!114 &4153261772960586925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2336547672589252544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0badf4320d441e448e08ac838fc3bbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollidesWith:
+    serializedVersion: 2
+    m_Bits: 3072
+  explosionRadius: 1
+  explosionForce: 1
+  damage: 1
+  explodeOnEnable: 0
 --- !u!1 &8392734846601473531
 GameObject:
   m_ObjectHideFlags: 0

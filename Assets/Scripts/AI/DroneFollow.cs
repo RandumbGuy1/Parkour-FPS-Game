@@ -19,6 +19,7 @@ public class DroneFollow : MonoBehaviour, IPathFinding
     private float idleSwayTick = 0f;
 
     [Header("Assignables")]
+    [SerializeField] private PlayerHealth enemyHealth;
     [SerializeField] private EnemyShoot shooting;
     [SerializeField] private Transform target;
     [SerializeField] private Rigidbody enemyRb;
@@ -26,12 +27,24 @@ public class DroneFollow : MonoBehaviour, IPathFinding
     public Transform Target { get { return target; } }
     public NavMeshAgent Agent { get { return null; } }
 
+    void Awake()
+    {
+        if (enemyHealth != null) enemyHealth.OnPlayerDamage += WeakenDrone;
+    }
+
+    private void WeakenDrone(float damage)
+    {
+        if (damage < 0) return;
+
+        hoverForce = Mathf.Clamp(hoverForce - damage * 10f, 0.1f, Mathf.Infinity);
+        angularSpeed = Mathf.Clamp(angularSpeed - damage, 0.5f, Mathf.Infinity);
+    }
+
     public void MoveToTarget()
     {
-        HandleRotation();
         idleSwayTick += Time.fixedDeltaTime * 4f;
 
-        Vector3 hoverDir = GetHoverPos() - enemyRb.transform.position;
+        Vector3 hoverDir = Vector3.ClampMagnitude(GetHoverPos() - enemyRb.transform.position, hoverForce * 1.25f);
         if (hoverDir.y < 0f) hoverDir.y *= 0.6f;
 
         enemyRb.AddForce(hoverForce * hoverDir + Vector3.down * 10f, ForceMode.Acceleration);
@@ -41,6 +54,7 @@ public class DroneFollow : MonoBehaviour, IPathFinding
         float sqrEnemyToPlayer = enemyToPlayer.sqrMagnitude;
 
         Vector3 pathDir = GetNextPathPos() - enemyRb.transform.position;
+        HandleRotation(pathDir);
         pathDir.y = 0f;
 
         if (sqrEnemyToPlayer < shootingDistance * shootingDistance && shooting != null) shooting.OnAttack(Target);
@@ -62,14 +76,12 @@ public class DroneFollow : MonoBehaviour, IPathFinding
         return target.position;
     }
 
-    private void HandleRotation()
+    private void HandleRotation(Vector3 headingDir)
     {
         float angle = Vector3.Angle(enemyRb.transform.up, Vector3.up);
         if (angle < 5f) return;
 
-        Quaternion fromTo = Quaternion.FromToRotation(enemyRb.transform.up, Vector3.up);
-        Vector3 upRight = new Vector3(fromTo.x, fromTo.y, fromTo.z);
-
-        enemyRb.AddTorque(upRight * angularSpeed, ForceMode.Impulse);            
+        Quaternion targetRot = Quaternion.LookRotation(headingDir);
+        enemyRb.MoveRotation(Quaternion.Slerp(enemyRb.rotation, targetRot, angularSpeed * Time.fixedDeltaTime * 1f));
     }
 }

@@ -99,20 +99,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
 
         Physics.SphereCast(transform.position, 1.1f, Vector3.zero, out var hit, 0f, ExplosionDetects);
 
-        ObjectPooler.Instance.Spawn(impactEffect, transform.position + hit.normal * 0.2f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
-        Collider[] enemiesInRadius = Physics.OverlapSphere(transform.position - hit.normal * 0.5f, explosionRadius, CollidesWith);
-
-        for (int i = 0; i < enemiesInRadius.Length; i++)
-        {
-            Rigidbody rb = enemiesInRadius[i].gameObject.GetComponent<Rigidbody>();
-
-            if (shooter == null || enemiesInRadius[i].transform != shooter.transform) enemiesInRadius[i].GetComponent<IDamagable>()?.OnDamage(bulletDamage, shooter.GetComponent<ScriptManager>());
-            enemiesInRadius[i].GetComponent<ScriptManager>()?.PlayerMovement.ResetJumpSteps();
-
-            if (rb == null) continue;
-
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.5f, rb.velocity.z);
-            rb.AddExplosionForce(explosionForce, transform.position - hit.normal * 0.7f, explosionRadius * 1.5f, 1.5f, ForceMode.VelocityChange);
-        }
+        GameObject explosion = ObjectPooler.Instance.Spawn(impactEffect, transform.position + hit.normal * 0.2f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
+        explosion.GetComponent<Explosion>()?.Explode(shooter != null ? shooter.gameObject : null, CollidesWith, ForceMode.VelocityChange, transform.position - hit.normal * 0.6f, explosionRadius, explosionForce, 1.5f, bulletDamage);
     }
 }

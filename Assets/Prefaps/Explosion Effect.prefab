@@ -14712,6 +14712,7 @@ GameObject:
   - component: {fileID: 5284798083642731548}
   - component: {fileID: 5284798083642731523}
   - component: {fileID: 7195450487493657990}
+  - component: {fileID: 2316425068710781817}
   m_Layer: 0
   m_Name: Explosion Effect
   m_TagString: Untagged
@@ -19589,3 +19590,22 @@ MonoBehaviour:
   intensity: 65
   intensitySmoothing: 35
   light: {fileID: 1162279402792051137}
+--- !u!114 &2316425068710781817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5284798083642731522}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0badf4320d441e448e08ac838fc3bbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollidesWith:
+    serializedVersion: 2
+    m_Bits: 3072
+  explosionRadius: 1
+  explosionForce: 1
+  damage: 1
+  explodeOnEnable: 0
