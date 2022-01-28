@@ -8853,6 +8853,7 @@ MonoBehaviour:
   angularSpeed: 2
   standingDistance: 20
   shootingDistance: 45
+  hoverDirections: []
   Ground:
     serializedVersion: 2
     m_Bits: 12032
@@ -8863,6 +8864,7 @@ MonoBehaviour:
   shooting: {fileID: 479037234}
   target: {fileID: 1650519434}
   enemyRb: {fileID: 890574416}
+  enemyCol: {fileID: 0}
 --- !u!1 &486118430
 GameObject:
   m_ObjectHideFlags: 0
@@ -18305,16 +18307,22 @@ MonoBehaviour:
   angularSpeed: 2
   standingDistance: 20
   shootingDistance: 45
+  hoverDirections:
+  - {x: 1, y: 0, z: 2}
+  - {x: -1, y: 0, z: 2}
+  - {x: 1, y: 0, z: -2}
+  - {x: -1, y: 0, z: -2}
   Ground:
     serializedVersion: 2
     m_Bits: 12032
-  hoverForce: 15
+  hoverForce: 20
   hoverRadius: 0.7
   hoverDistance: 9
   enemyHealth: {fileID: 1698997561}
   shooting: {fileID: 0}
   target: {fileID: 1650519434}
   enemyRb: {fileID: 1698997562}
+  enemyCol: {fileID: 1698997563}
 --- !u!114 &1422182173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19178,7 +19186,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 17
+  m_Name: Save 17.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21327,7 +21335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 30
-  invincible: 0
+  invincible: 1
   regenFactor: 0
   regenFrequency: 0
   regenCooldown: 0
@@ -21343,9 +21351,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1698997559}
   serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 3.6
-  m_AngularDrag: 0.05
+  m_Mass: 1.5
+  m_Drag: 3
+  m_AngularDrag: 2
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
