@@ -12,13 +12,13 @@ public class PauseController : MonoBehaviour
 
     void Update()
     {
-        if (s.PlayerHealth.State == PlayerState.Dead) return;
-        if (s.PlayerInput.Pause) HandlePause(PlayerState.Alive);
+        if (s.PlayerHealth.State == UnitState.Dead) return;
+        if (s.PlayerInput.Pause) HandlePause(UnitState.Alive);
     }
 
-    private void HandlePause(PlayerState newState)
+    private void HandlePause(UnitState newState)
     {
-        paused = newState == PlayerState.Dead || !paused;
+        paused = newState == UnitState.Dead || !paused;
 
         GameManager.Instance.SetState(paused ? GameState.Paused : GameState.Gameplay);
         s.CameraLook.SetCursorState(!paused);

@@ -6,6 +6,7 @@ public class ScriptManager : MonoBehaviour
 {
     [Header("Player Scripts")]
     public PlayerHealth PlayerHealth;
+    public PlayerController PlayerController;
     public PlayerMovement PlayerMovement;
     public PlayerInput PlayerInput;
     public PlayerInteraction PlayerInteraction;
@@ -44,7 +45,7 @@ public class ScriptManager : MonoBehaviour
         CameraLook.OnPlayerDamage(damage);
     }
 
-    public void OnPlayerStateChanged(PlayerState newState)
+    public void OnPlayerStateChanged(UnitState newState)
     {
         PlayerMovement.OnPlayerStateChanged(newState);
         WeaponControls.OnPlayerStateChanged(newState);

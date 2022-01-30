@@ -405,9 +405,9 @@ public class WeaponController : MonoBehaviour
     }
     #endregion
 
-    public void OnPlayerStateChanged(PlayerState newState)
+    public void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState != PlayerState.Dead) return;
+        if (newState != UnitState.Dead) return;
 
         if (HoldingWeapon) Drop(false, true);
 

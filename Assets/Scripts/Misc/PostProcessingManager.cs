@@ -77,9 +77,9 @@ public class PostProcessingManager : MonoBehaviour
         desiredFocusDistance = Mathf.Clamp(desiredFocusDistance, 0f, startFocusDistance);
     }
 
-    public void OnPlayerStateChanged(PlayerState newState)
+    public void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState != PlayerState.Dead) return;
+        if (newState != UnitState.Dead) return;
 
         desiredFocusDistance = playerDeathFocusDistance;
         desiredAberration = playerDeathAberration;

@@ -23,9 +23,9 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     [SerializeField] private float killHeight;
     [SerializeField] private float killSpeed;
 
-    public PlayerState State { get; private set; }
+    public UnitState State { get; private set; }
 
-    public delegate void ChangePlayerState(PlayerState state);
+    public delegate void ChangePlayerState(UnitState state);
     public event ChangePlayerState OnPlayerStateChanged;
 
     public delegate void DamageEntity(float damage);
@@ -53,7 +53,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     public void OnDamage(float damage, ScriptManager player = null)
     {
-        if (State == PlayerState.Dead) return;
+        if (State == UnitState.Dead) return;
 
         if (damage > 0f)
         {
@@ -80,13 +80,13 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     public void OnDeath() 
     {
-        if (State == PlayerState.Dead) return;
+        if (State == UnitState.Dead) return;
         if (playerGraphics != null) playerGraphics.SetActive(false);
 
-        SetState(PlayerState.Dead);
+        SetState(UnitState.Dead);
     }
 
-    public void SetState(PlayerState newState)
+    public void SetState(UnitState newState)
     {
         if (State == newState) return;
 
@@ -126,7 +126,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     }
 }
 
-public enum PlayerState
+public enum UnitState
 {
     Alive,
     Dead,

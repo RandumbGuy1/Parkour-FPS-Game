@@ -38,11 +38,11 @@ public class EnemyController : MonoBehaviour, IEnemy
         enemyPathFinding.MoveToTarget();
     }
 
-    private void DisableEnemyOnTargetDeath(PlayerState newState) => enabled = (newState == PlayerState.Alive);
+    private void DisableEnemyOnTargetDeath(UnitState newState) => enabled = (newState == UnitState.Alive);
 
-    private void OnPlayerStateChanged(PlayerState newState)
+    private void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState != PlayerState.Dead) return;
+        if (newState != UnitState.Dead) return;
 
         enabled = false;
         if (enemyPathFinding != null && enemyPathFinding.Agent != null) enemyPathFinding.Agent.enabled = false;

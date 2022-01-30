@@ -202,9 +202,9 @@ public class PlayerInteraction : MonoBehaviour
         lr.positionCount = 0;
     }
 
-    public void OnPlayerStateChanged(PlayerState newState)
+    public void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState != PlayerState.Dead) return;
+        if (newState != UnitState.Dead) return;
 
         Drop();
         enabled = false;

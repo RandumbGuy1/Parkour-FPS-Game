@@ -656,9 +656,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void OnPlayerStateChanged(PlayerState newState)
+    public void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState != PlayerState.Dead) return;
+        if (newState != UnitState.Dead) return;
 
         enabled = false;
 

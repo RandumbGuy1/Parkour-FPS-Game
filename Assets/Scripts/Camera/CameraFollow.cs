@@ -196,9 +196,9 @@ public class CameraFollow : MonoBehaviour
 		s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(damage * 150f, 6f, 1.3f, 8f)));
 	}
 
-	public void OnPlayerStateChanged(PlayerState newState)
+	public void OnPlayerStateChanged(UnitState newState)
 	{
-		if (newState != PlayerState.Dead) return;
+		if (newState != UnitState.Dead) return;
 
 		state = CameraState.Spectate;
 		lastHeadPos = s.playerHead.position - s.orientation.forward * 15f - s.rb.velocity.normalized * 10f;
