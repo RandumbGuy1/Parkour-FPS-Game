@@ -163,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
         ReachedMaxSlope = (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle);
         if (ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
 
-        if ((rb.velocity.y < 0f || rb.IsSleeping()) && !WallRunning && !Vaulting) rb.AddForce((1.7f - 1f) * Physics.gravity.y * Vector3.up, ForceMode.Acceleration);
+        if (rb.velocity.y <= 0f && !WallRunning && !Vaulting) rb.AddForce((1.7f - 1f) * Physics.gravity.y * Vector3.up, ForceMode.Acceleration);
 
         rb.useGravity = !(Vaulting || WallRunning);
         RelativeVel = s.orientation.InverseTransformDirection(rb.velocity);
@@ -378,7 +378,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(WallNormal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.27f, 3.5f, 4.5f), 4f, 0.8f, 9f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.25f, 4f, 5f), 4f, 0.8f, 9f), Vector3.right));
     }
 
     #region Vaulting And Stepping

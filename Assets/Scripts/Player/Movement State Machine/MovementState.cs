@@ -2,9 +2,13 @@
 
 public abstract class MovementState
 {
-    PlayerController controller;
+    public MovementState PreviousState { get; private set; }
+    public void SetPreviousState(MovementState prevState) => PreviousState = prevState;
 
-    public abstract void EnterState(PlayerController controller);
+    public ScriptManager S { get; private set; }
+    public void SetController(ScriptManager controller) => S = controller;
+
+    public abstract void EnterState(ScriptManager controller);
     public abstract void StateInput(PlayerInput input);
     public abstract void FixedUpdateState();
     public abstract void UpdateState();

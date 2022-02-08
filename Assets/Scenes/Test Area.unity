@@ -21,7 +21,7 @@ RenderSettings:
   m_FogDensity: 0.003
   m_LinearFogStart: 250
   m_LinearFogEnd: 800
-  m_AmbientSkyColor: {r: 0.24230155, g: 0.24230155, b: 0.31132078, a: 1}
+  m_AmbientSkyColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
   m_AmbientEquatorColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_AmbientGroundColor: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
   m_AmbientIntensity: 3
@@ -2175,7 +2175,7 @@ MonoBehaviour:
   attackRange: 120
   spread: 15
   fireRate: 10
-  lightIntensity: 40
+  lightIntensity: 45
   lightReturnSpeed: 30
   weaponRecoilForce: 13
   weaponRecoilSmoothTime: 0.02
@@ -7872,7 +7872,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &356471417
 Transform:
   m_ObjectHideFlags: 0
@@ -7935,7 +7935,7 @@ MonoBehaviour:
   Ground:
     serializedVersion: 2
     m_Bits: 12032
-  hoverMaxSpring: 20
+  hoverMaxSpring: 35
   hoverForce: 15
   hoverDampening: 5
   hoverDistance: 10
@@ -9993,9 +9993,9 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0.6943697, b: 0.23113209, a: 1}
+  m_Color: {r: 1, g: 0.8175995, b: 0.5424528, a: 1}
   m_Intensity: 0
-  m_Range: 30
+  m_Range: 55
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -10051,7 +10051,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 571904773}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.33, z: 0.21}
+  m_LocalPosition: {x: 0, y: 0.287, z: -0.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1783921602}
@@ -14077,8 +14077,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
-  landBobSmoothTime: 0.042
-  landBobMultiplier: 0.096
+  landBobSmoothTime: 0.05
+  landBobMultiplier: 0.09
   maxOffset: 3.5
   slideMaxOffset: 2
   viewBobSpeed: 10.3
@@ -18011,7 +18011,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1422129527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18148,7 +18148,7 @@ MonoBehaviour:
   Ground:
     serializedVersion: 2
     m_Bits: 12032
-  hoverMaxSpring: 20
+  hoverMaxSpring: 35
   hoverForce: 15
   hoverDampening: 5
   hoverDistance: 10
@@ -18996,7 +18996,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 17.1
+  m_Name: Save 17.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19800,7 +19800,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1630573897
 Transform:
   m_ObjectHideFlags: 0
@@ -20318,16 +20318,45 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1650519429}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a3131f4c156f7ec4c8b9481060702d43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 30
-  maxGroundSpeed: 15
   airMultiplier: 0.43
-  maxAirSpeed: 60
-  maxSlideSpeed: 100
+  jumpForce: 48
+  wallJumpForce: 45
+  standingState:
+    autoSprint: 0
+    standMaxSpeed: 22
+    airMaxSpeed: 60
+  wallRunningState:
+    Ground:
+      serializedVersion: 2
+      m_Bits: 9984
+    wallRunGravityForce: 10
+    wallJumpForce: 45
+    wallHoldForce: 50
+    wallRunForce: 20
+    wallClimbForce: 3
+    wallJumpCooldownSteps: 50
+    minimumJumpHeight: 1.5
+    wallRunTilt: 0
+    wallRunFovOffset: 0
+  slidingState:
+    CrouchObstruction:
+      serializedVersion: 2
+      m_Bits: 8960
+    maxSlideSpeed: 100
+    crouchScale: 1
+    crouchSmoothTime: 0.08
+    slideForce: 80
+    slideTilt: 8
+  friction: 5
+  frictionMultiplier: 1
+  slideFriction: 15
+  counterThresold: 1
   GroundSnapLayer:
     serializedVersion: 2
     m_Bits: 768
@@ -20384,7 +20413,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1650519429}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b5d25b2e70e51d40adef17d58bb21b8, type: 3}
   m_Name: 
@@ -20396,7 +20425,7 @@ MonoBehaviour:
   maxSlideSpeed: 100
   sprintMultiplier: 1.6
   sprintDoubleTapTime: 0.25
-  autoSprint: 1
+  autoSprint: 0
   jumpForce: 48
   maxJumpSteps: 10
   crouchScale: 1.3
