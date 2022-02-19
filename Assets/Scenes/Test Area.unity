@@ -14077,7 +14077,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
-  landBobSmoothTime: 0.045
+  landBobSmoothTime: 0.0425
   landBobMultiplier: 0.09
   maxOffset: 3.5
   slideMaxOffset: 2
@@ -18996,7 +18996,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 17.2
+  m_Name: Save 17.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20250,7 +20250,6 @@ GameObject:
   - component: {fileID: 1650519432}
   - component: {fileID: 1650519435}
   - component: {fileID: 1650519436}
-  - component: {fileID: 1650519433}
   - component: {fileID: 1650519439}
   - component: {fileID: 1650519440}
   m_Layer: 0
@@ -20311,64 +20310,6 @@ MonoBehaviour:
   killHeight: -10
   killSpeed: 6.5
   playerGraphics: {fileID: 2015820420}
---- !u!114 &1650519433
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1650519429}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3131f4c156f7ec4c8b9481060702d43, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  acceleration: 30
-  airMultiplier: 0.43
-  jumpForce: 48
-  wallJumpForce: 45
-  standingState:
-    autoSprint: 0
-    standMaxSpeed: 22
-    airMaxSpeed: 60
-  wallRunningState:
-    Ground:
-      serializedVersion: 2
-      m_Bits: 9984
-    wallRunGravityForce: 10
-    wallJumpForce: 45
-    wallHoldForce: 50
-    wallRunForce: 20
-    wallClimbForce: 3
-    wallJumpCooldownSteps: 50
-    minimumJumpHeight: 1.5
-    wallRunTilt: 0
-    wallRunFovOffset: 0
-  slidingState:
-    CrouchObstruction:
-      serializedVersion: 2
-      m_Bits: 8960
-    maxSlideSpeed: 100
-    crouchScale: 1
-    crouchSmoothTime: 0.08
-    slideForce: 80
-    slideTilt: 8
-  friction: 5
-  frictionMultiplier: 1
-  slideFriction: 15
-  counterThresold: 1
-  GroundSnapLayer:
-    serializedVersion: 2
-    m_Bits: 768
-  Ground:
-    serializedVersion: 2
-    m_Bits: 11520
-  Environment:
-    serializedVersion: 2
-    m_Bits: 256
-  groundCancelDelay: 2
-  wallCancelDelay: 2
-  maxSlopeAngle: 65
 --- !u!4 &1650519434
 Transform:
   m_ObjectHideFlags: 0
@@ -20437,7 +20378,7 @@ MonoBehaviour:
   wallHoldForce: 50
   wallRunForce: 20
   wallClimbForce: 3
-  wallJumpCooldownSteps: 50
+  wallJumpCooldownSteps: 10
   minimumJumpHeight: 1.3
   wallRunTilt: 15
   wallRunFovOffset: 18
@@ -20458,8 +20399,8 @@ MonoBehaviour:
     Environment:
       serializedVersion: 2
       m_Bits: 256
-    groundCancelDelay: 10
-    wallCancelDelay: 3
+    groundCancelDelay: 1
+    wallCancelDelay: 2
     maxSlopeAngle: 55
 --- !u!114 &1650519438
 MonoBehaviour:
@@ -20474,7 +20415,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerHealth: {fileID: 1650519432}
-  PlayerController: {fileID: 1650519433}
+  PlayerController: {fileID: 0}
   PlayerMovement: {fileID: 1650519436}
   PlayerInput: {fileID: 1650519435}
   PlayerInteraction: {fileID: 1650519439}

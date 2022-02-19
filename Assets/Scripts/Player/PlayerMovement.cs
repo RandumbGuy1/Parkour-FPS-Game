@@ -162,7 +162,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 slopeDir = Vector3.ProjectOnPlane(inputDir, collision.GroundNormal);
         float dot = Vector3.Dot(slopeDir, Vector3.up);
 
-        rb.AddForce(8.5f * movementMultiplier * acceleration * (dot > 0 ? inputDir : inputDir), ForceMode.Force);
+        rb.AddForce(8.5f * movementMultiplier * acceleration * (dot > 0 ? inputDir : slopeDir), ForceMode.Force);
     }
 
     private void AirMovement(float movementMultiplier)
@@ -217,19 +217,19 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.25f, 4.25f, 5f), 4f, 0.8f, 9f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.3f, 4.25f, 5.25f), 2f, 0.8f, 9f), Vector3.right));
     }
 
     #region Vaulting And Stepping
     public void CheckForVault(ContactPoint contact, LayerMask VaultEnvironment, float maxSlopeAngle)
     {
-        if (Vaulting || WallRunning) return;
+        if (Vaulting || WallRunning || crouched) return;
 
         Vector3 vaultDir = contact.normal;
         vaultDir.y = 0f;
 
-        Physics.Raycast(contact.point + vaultDir * 0.01f, -vaultDir, out var checkWallHit, 1f, VaultEnvironment);
-        if (!collision.IsWall(checkWallHit.normal, 0.1f)) return;
+        //Physics.Raycast(contact.point + vaultDir * 0.01f, -vaultDir, out var checkWallHit, 1f, VaultEnvironment);
+        if (!collision.IsWall(contact.normal, 0.35f)) return;
 
         Vector3 vel = Velocity;
         vel.y = 0;
@@ -365,7 +365,11 @@ public class PlayerMovement : MonoBehaviour
         if (Magnitude > 0.5f)
         {
             if (collision.Grounded) s.CameraHeadBob.BobOnce(-Magnitude * 0.65f);
-            rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
+            if (Magnitude > 5f)
+            {
+                s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(3f, 4f, 2f, 5f)));
+                rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
+            }
         }
     }
 

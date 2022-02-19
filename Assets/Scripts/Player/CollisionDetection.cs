@@ -29,8 +29,11 @@ public class CollisionDetection
     public bool IsWallLeft { get; private set; } = false;
     public bool IsWallRight { get; private set; } = false;
 
-    private int wallCancelSteps = -1;
-    private int groundCancelSteps = -1;
+    private bool cancelWall = false;
+    private bool cancelGrounded = false;
+
+    private int wallCancelSteps = 0;
+    private int groundCancelSteps = 0;
 
     public int StepsSinceGrounded { get; private set; } = 0;
     public int StepsSinceLastGrounded { get; private set; } = 0;
@@ -42,12 +45,16 @@ public class CollisionDetection
         ReachedMaxSlope = Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
 
         if (Grounded) {
-             groundCancelSteps++;
+            if (!cancelGrounded) cancelGrounded = true;
+            else {
+                groundCancelSteps++;
 
-             if (groundCancelSteps > groundCancelDelay) {
-                GroundContact = new ContactPoint();
-                Grounded = false;
-             }
+                if (groundCancelSteps > groundCancelDelay)
+                {
+                    GroundContact = new ContactPoint();
+                    Grounded = false;
+                }
+            }
         }
 
         if (NearWall) {
@@ -56,13 +63,17 @@ public class CollisionDetection
             IsWallLeft = dot > 0.8f;
             IsWallRight = dot < -0.8f;
 
-            wallCancelSteps++;
+            if (!cancelWall) cancelWall = true;
+            else {
+                wallCancelSteps++;
 
-            if (wallCancelSteps > wallCancelDelay) {
-                WallContact = new ContactPoint();
-                NearWall = false;
-                IsWallLeft = false;
-                IsWallRight = false;
+                if (wallCancelSteps > wallCancelDelay)
+                {
+                    WallContact = new ContactPoint();
+                    NearWall = false;
+                    IsWallLeft = false;
+                    IsWallRight = false;
+                }
             }
         }
     }
@@ -90,16 +101,18 @@ public class CollisionDetection
                 if (Ground != (Ground | 1 << layer)) continue;
 
                 Grounded = true;
+                cancelGrounded = false;
                 GroundContact = contact;
-                groundCancelSteps = -1;
+                groundCancelSteps = 0;
             }
 
             if (IsWall(contact.normal, 0.1f)) {
                 if (Environment != (Environment | 1 << layer)) continue;
 
                 NearWall = true;
+                cancelWall = false;
                 WallContact = contact;
-                wallCancelSteps = -1;
+                wallCancelSteps = 0;
             }
         }
     }
@@ -133,7 +146,7 @@ public class CollisionDetection
 
         if (dot > 0) rb.velocity = (rb.velocity - (snapHit.normal * dot)).normalized * speed;
         else rb.velocity = (rb.velocity - snapHit.normal).normalized * speed;
-        MonoBehaviour.print(1);
+
         return true;
     }
 
