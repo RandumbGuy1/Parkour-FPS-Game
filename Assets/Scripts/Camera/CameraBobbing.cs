@@ -56,7 +56,7 @@ public class CameraBobbing : MonoBehaviour
         Vector3 newPos = (Vector3.up * landBobOffset) + viewBobOffset * 0.6f + s.PlayerMovement.CrouchOffset + vaultDesync;
 		transform.localPosition = newPos;
 
-        BobTimer = (s.PlayerMovement.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Magnitude > 0.5f && !s.PlayerMovement.JustJumped ? BobTimer + Time.deltaTime : 0f;
+        BobTimer = (s.PlayerMovement.MovementCollision.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.MovementCollision.StepsSinceLastJumped > 4 && s.PlayerMovement.Magnitude > 0.5f && s.PlayerMovement.Moving ? BobTimer + Time.deltaTime : 0f;
     }
 
     void FixedUpdate()
@@ -66,7 +66,7 @@ public class CameraBobbing : MonoBehaviour
 
     private void LastBobStep(float mag)
     {
-        if (!s.PlayerMovement.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
+        if (!s.PlayerMovement.MovementCollision.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f)));
     }
@@ -130,13 +130,13 @@ public class CameraBobbing : MonoBehaviour
 
         bool crouched = s.PlayerInput.Crouching;
         float newMag = -impactForce * (crouched ? 0.6f : 0.35f);
-        float newSmooth = Mathf.Clamp(newMag * 0.8f, 0.1f, 13f);
+        float newSmooth = Mathf.Clamp(newMag * 1f, 0.1f, 15f);
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
 
-        //s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(newMag, 0.5f, 0.8f, newSmooth), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
+        //s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(newMag * 0.8f, 0f, 0.8f, newSmooth), Vector3.right));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

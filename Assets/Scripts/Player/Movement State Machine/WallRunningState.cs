@@ -16,7 +16,6 @@ public class WallRunningState : MovementState
     [SerializeField] private float wallRunTilt;
     [SerializeField] private float wallRunFovOffset;
     private Vector3 wallMoveDir = Vector3.zero;
-    private float camTurnVel = 0f;
 
     private bool wallRunning = false;
     public float WallRunFovOffset { get { return (wallRunning ? wallRunFovOffset : 0); } }
@@ -62,7 +61,7 @@ public class WallRunningState : MovementState
 
     private void InitialWallClimb()
     {
-        camTurnVel = 0f;
+        //camTurnVel = 0f;
 
         Vector3 wallUpCross = Vector3.Cross(-S.orientation.forward, S.PlayerController.WallNormal);
         wallMoveDir = Vector3.Cross(wallUpCross, S.PlayerController.WallNormal);
