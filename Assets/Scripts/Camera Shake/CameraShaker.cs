@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraShaker : MonoBehaviour
@@ -12,10 +11,17 @@ public class CameraShaker : MonoBehaviour
 
     public void ShakeOnce(IShakeEvent shakeEvent)
     {
-        if (canAddShakes) shakeEvents.Add(shakeEvent);
+        if (!canAddShakes) return;
+
+        shakeEvent.SetIndexAndReceiever(this, shakeEvents.Count);
+        shakeEvents.Add(shakeEvent);
     }
 
-    public void DisableShakes() => canAddShakes = false;
+    public void RemoveShakeAtIndex(int i)
+    {
+        if (i < 0 || i > shakeEvents.Count - 1) return;
+        shakeEvents.RemoveAt(i);
+    }
 
     void LateUpdate()
     {
@@ -33,14 +39,17 @@ public class CameraShaker : MonoBehaviour
 
             if (shake.Finished)
             {
-                shakeEvents.RemoveAt(i);
+                shake.RemoveShake();
                 continue;
             }
 
+            shake.SetIndexAndReceiever(this, i);
             shake.UpdateShake(Time.deltaTime);
             rotationOffset += shake.ShakeOffset;
         }
 
         Offset = rotationOffset;
     }
+
+    public void DisableShakes() => canAddShakes = false;
 }

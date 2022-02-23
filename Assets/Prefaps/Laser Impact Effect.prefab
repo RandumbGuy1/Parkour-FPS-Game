@@ -4835,6 +4835,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62fb1645dddcf784289b2ec84f96e963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playOnEnable: 1
   intensity: 50
   intensitySmoothing: 65
   light: {fileID: 9081917574279548709}

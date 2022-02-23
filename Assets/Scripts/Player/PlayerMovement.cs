@@ -367,7 +367,7 @@ public class PlayerMovement : MonoBehaviour
             if (collision.Grounded) s.CameraHeadBob.BobOnce(-Magnitude * 0.65f);
             if (Magnitude > 5f)
             {
-                s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(3f, 4f, 2f, 5f)));
+                s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(3f, 4f, 1.5f, 5f)));
                 rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
             }
         }

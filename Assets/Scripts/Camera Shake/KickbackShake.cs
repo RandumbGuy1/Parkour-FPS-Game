@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class KickbackShake : IShakeEvent
 {
@@ -9,6 +7,9 @@ public class KickbackShake : IShakeEvent
 
     public Vector3 ShakeOffset { get; private set; }
     public bool Finished { get; }
+
+    public CameraShaker Receiever { get; private set; }
+    private int index = -1;
 
     private float timeRemaining;
     private float trama = 0f;
@@ -75,4 +76,16 @@ public class KickbackShake : IShakeEvent
     }
 
     bool InBounds(float amount, float max, float min) => amount >= min && amount <= max;
+
+    public void RemoveShake()
+    {
+        Receiever.RemoveShakeAtIndex(index);
+        SetIndexAndReceiever(null, -1);
+    }
+
+    public void SetIndexAndReceiever(CameraShaker shaker, int i)
+    {
+        Receiever = shaker;
+        index = i;
+    }
 }

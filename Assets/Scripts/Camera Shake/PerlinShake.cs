@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PerlinShake : IShakeEvent
 {
@@ -9,6 +7,9 @@ public class PerlinShake : IShakeEvent
 
     public Vector3 ShakeOffset { get; private set; }
     public bool Finished { get; }
+
+    public CameraShaker Receiever { get; private set; }
+    private int index = -1;
 
     private float timeRemaining;
     private float trama = 0f;
@@ -48,5 +49,13 @@ public class PerlinShake : IShakeEvent
         float agePercent = 1f - (timeRemaining / shakeData.Duration);
         trama = shakeData.BlendOverLifetime.Evaluate(agePercent);
         trama = Mathf.Clamp01(trama);
+    }
+
+    public void RemoveShake() => Receiever.RemoveShakeAtIndex(index);
+
+    public void SetIndexAndReceiever(CameraShaker shaker, int i)
+    {
+        Receiever = shaker;
+        index = i;
     }
 }

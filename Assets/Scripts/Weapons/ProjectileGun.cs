@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileGun : MonoBehaviour, IWeapon, IItem
@@ -45,10 +44,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private float attackRange;
     [SerializeField] private float spread;
     [SerializeField] private float fireRate;
-    [Space(10)]
-    [SerializeField] private float lightIntensity;
-    [SerializeField] private float lightReturnSpeed;
-    private float desiredIntensity = 0f;
 
     [Header("Recoil Settings")]
     [SerializeField] private float weaponRecoilForce;
@@ -72,8 +67,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     [Header("Assignables")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private ParticleSystem muzzleFlash;
-    [SerializeField] private Light muzzleLight;
+    [SerializeField] private PlayParticleOnEnable muzzleFlash;
     [SerializeField] private ShakeData recoilShake;
     private ScriptManager s;
     private BoxCollider col;
@@ -83,11 +77,9 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         col = GetComponent<BoxCollider>();
 
         bulletsLeft = magazineSize;
-        ResetIntensity();
     }
 
     void OnEnable() => reloading = false;
-    void OnDisable() => ResetIntensity();
 
     public bool OnAttack()
     {
@@ -99,8 +91,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
             return false;
         }
 
-        if (muzzleFlash != null) muzzleFlash.Play();
-        if (muzzleLight != null) Flash();
+        if (muzzleFlash != null) muzzleFlash.PlayParticle();
 
         if (s != null) s.WeaponControls.AddRecoil(weaponRecoilPosOffset, weaponRecoilRotOffset, weaponRecoilForce, weaponRecoilAimMulti);
 
@@ -151,42 +142,17 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
         reloading = false;
     }
 
-    private void ResetIntensity()
-    {
-        desiredIntensity = 0f;
-        if (muzzleLight != null) muzzleLight.intensity = 0f;
-    }
+    public void ItemUpdate() { }
 
-    public void ItemUpdate()
-    {
-        if (desiredIntensity == 0f && muzzleLight.intensity == 0f) return;
-
-        desiredIntensity = Mathf.Lerp(desiredIntensity, 0f, lightReturnSpeed * 0.5f * Time.deltaTime);
-        muzzleLight.intensity = Mathf.Lerp(muzzleLight.intensity, desiredIntensity, lightReturnSpeed * Time.deltaTime);
-
-        if (desiredIntensity < 0.01f)
-        {
-            desiredIntensity = 0f;
-            muzzleLight.intensity = 0f;
-        }
-    }
-
-    public void OnPickup(ScriptManager s)
-    {
-        this.s = s;
-        ResetIntensity();
-    }
+    public void OnPickup(ScriptManager s) => this.s = s;
 
     public void OnDrop()
     {
         StopAllCoroutines();
         reloading = false;
-
-        ResetIntensity();
         s = null;
     }
 
-    private void Flash() => desiredIntensity += lightIntensity;
     private void ResetShot() => readyToShoot = true;
     public string ReadData() => "<b> <color=white>" + (bulletsLeft / bulletsPerTap).ToString() + "</color></b>\n<color=grey> <size=10>" + (magazineSize / bulletsPerTap).ToString() + "</color> </size>";
     public string ReadName() => transform.name;
