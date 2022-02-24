@@ -129,8 +129,8 @@ public class CameraBobbing : MonoBehaviour
         }
 
         bool crouched = s.PlayerInput.Crouching;
-        float newMag = -impactForce * (crouched ? 0.6f : 0.35f);
-        float newSmooth = Mathf.Clamp(newMag * 1f, 0.1f, 15f);
+        float newMag = -impactForce * (crouched ? 0.6f : 0.4f);
+        float newSmooth = Mathf.Clamp(newMag * 5f, 5f, 15f);
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;

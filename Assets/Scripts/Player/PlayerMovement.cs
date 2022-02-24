@@ -217,7 +217,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.3f, 4.25f, 5.25f), 2f, 0.8f, 9f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 4.25f, 5.5f), 2f, 0.8f, 9f), Vector3.right));
     }
 
     #region Vaulting And Stepping
@@ -275,6 +275,7 @@ public class PlayerMovement : MonoBehaviour
     {
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 5f, 12f), 4f, 0.6f, 9f), Vector3.forward));
 
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
@@ -307,6 +308,7 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = false;
         rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
 
+        float horizontalImpact = RelativeVel.x;
         float wallUpSpeed = Velocity.y;
         float wallMagnitude = Magnitude;
 
@@ -317,6 +319,10 @@ public class PlayerMovement : MonoBehaviour
 
         rb.AddForce(Vector3.up * wallClimb);
         rb.AddForce(0.25f * wallMagnitude * wallMoveDir, ForceMode.VelocityChange);
+
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(4.5f, 5f, 1.25f, 7f)));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(12f, 3f, 0.9f, 6.5f), Vector3.left));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(14f, 0f, 0.4f, 8f), Vector3.forward));
     }
 
     private void WallRun()
@@ -361,16 +367,9 @@ public class PlayerMovement : MonoBehaviour
             if (collision.Grounded) rb.velocity *= 0.65f;
             return;
         }
-
-        if (Magnitude > 0.5f)
-        {
-            if (collision.Grounded) s.CameraHeadBob.BobOnce(-Magnitude * 0.65f);
-            if (Magnitude > 5f)
-            {
-                s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(3f, 4f, 1.5f, 5f)));
-                rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
-            }
-        }
+            
+        if (collision.Grounded) s.CameraHeadBob.BobOnce(-Magnitude * 0.65f);
+        if (Magnitude > 5f) rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
     }
 
     private void UpdateCrouchScale()
@@ -396,7 +395,12 @@ public class PlayerMovement : MonoBehaviour
         if (!crouched) return;
 
         if (CanCrouchWalk) slideAngledTilt = 0;
-        else if (slideAngledTilt == 0 && collision.Grounded && collision.StepsSinceLastJumped > 5) slideAngledTilt = (input.x != 0f ? input.x : 1f) * slideTilt;
+        else if (slideAngledTilt == 0 && collision.Grounded && collision.StepsSinceLastJumped > 5)
+        {
+            s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.45f, 3f, 10f), 4f, 0.6f, 9f), Vector3.forward));
+            s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(2f, 6f, 1.5f, 9f)));
+            slideAngledTilt = (input.x != 0f ? input.x : 1f) * slideTilt;
+        }
 
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     }

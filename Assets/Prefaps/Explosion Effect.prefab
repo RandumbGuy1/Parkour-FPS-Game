@@ -19588,6 +19588,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playOnEnable: 1
+  addative: 0
   intensity: 65
   intensitySmoothing: 35
   light: {fileID: 1162279402792051137}
