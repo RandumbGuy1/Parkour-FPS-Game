@@ -275,7 +275,7 @@ public class PlayerMovement : MonoBehaviour
     {
         s.CameraHeadBob.BobOnce(Mathf.Min(0, Velocity.y) * 0.6f);
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 5f, 12f), 4f, 0.6f, 9f), Vector3.forward));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 5f, 20f), 4f, 0.6f, 9f), Vector3.forward));
 
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.isKinematic = true;
@@ -397,9 +397,11 @@ public class PlayerMovement : MonoBehaviour
         if (CanCrouchWalk) slideAngledTilt = 0;
         else if (slideAngledTilt == 0 && collision.Grounded && collision.StepsSinceLastJumped > 5)
         {
-            s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.45f, 3f, 10f), 4f, 0.6f, 9f), Vector3.forward));
-            s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(2f, 6f, 1.5f, 9f)));
-            slideAngledTilt = (input.x != 0f ? input.x : 1f) * slideTilt;
+            float tiltDir = input.x != 0f ? input.x : 1f;
+            s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.9f, 5f, 20f), 1f, 0.4f, 9f), Vector3.left));
+            s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.7f, 5f, 17.5f), 2f, 0.6f, 8f), Vector3.forward * tiltDir));
+            s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(1f, 8f, 1.5f, 9f)));
+            slideAngledTilt = tiltDir * slideTilt;
         }
 
         rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);

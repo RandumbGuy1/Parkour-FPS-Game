@@ -3,6 +3,7 @@
 public class Explosion : MonoBehaviour
 {
     [Header("Explosion Settings")]
+    [SerializeField] private LayerMask EnvironmentObstruction;
     [SerializeField] private LayerMask CollidesWith;
     [SerializeField] private float explosionRadius;
     [SerializeField] private float explosionForce;
@@ -22,6 +23,8 @@ public class Explosion : MonoBehaviour
         for (int i = 0; i < enemiesInRadius.Length; i++)
         {
             Transform enemy = enemiesInRadius[i].transform;
+
+            if (Physics.Linecast(transform.position, enemy.position, EnvironmentObstruction)) return;
             if (applyForceToShooter && shooter != null && enemy == shooter.transform) continue;
 
             Rigidbody rb = enemy.gameObject.GetComponent<Rigidbody>();

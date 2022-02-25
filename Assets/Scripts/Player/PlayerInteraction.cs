@@ -6,6 +6,7 @@ using TMPro;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Interaction Settings")]
+    [SerializeField] private LayerMask InteractionObstruction;
     [SerializeField] private LayerMask Interactables;
     [SerializeField] private float interactionRange;
     [SerializeField] private float interactionRadius;
@@ -51,12 +52,17 @@ public class PlayerInteraction : MonoBehaviour
 
     void LateUpdate() => DrawGrabLine();
 
-    #region Interaction Detection
     private void CheckForInteractable()
     {
         if (Physics.SphereCast(s.cam.transform.position, interactionRadius, s.cam.transform.forward, out var hit, interactionRange, Interactables, QueryTriggerInteraction.Ignore))
         {
             GameObject currentleyLookingAt = hit.transform.gameObject;
+
+            if (Physics.Linecast(s.cam.transform.position, currentleyLookingAt.transform.position, InteractionObstruction))
+            {
+                ResetInteraction();
+                return;
+            }
 
             if (interactable == null)
             {
@@ -75,10 +81,7 @@ public class PlayerInteraction : MonoBehaviour
             else if (currentleyLookingAt != interactable.gameObject)
             {
                 interactable.OnEndHover();
-                interactable = null;
-
-                textDisplay.SetActive(false);
-                interactionText.text = " ";
+                ResetInteraction();
                 return;
             }
 
@@ -97,18 +100,19 @@ public class PlayerInteraction : MonoBehaviour
             if (s.PlayerInput.Interacting) Interact(interactable);
 
         }
-        else if (interactionText.text != " ")
-        {
-            textDisplay.SetActive(false);
-            interactionText.text = " ";
-
-            if (interactable == null) return;
-
-            interactable.OnEndHover();
-            interactable = null;
-        }
+        else if (interactionText.text != " ") ResetInteraction();
     }
-    #endregion
+
+    private void ResetInteraction()
+    {
+        textDisplay.SetActive(false);
+        interactionText.text = " ";
+
+        if (interactable == null) return;
+
+        interactable.OnEndHover();
+        interactable = null;
+    }
 
     #region Interaction Handling
     private void Interact(Interactable interactable)
@@ -152,7 +156,7 @@ public class PlayerInteraction : MonoBehaviour
     }
     #endregion
 
-    void GrabInput()
+    private void GrabInput()
     {
         if (heldObj == null) return;
 

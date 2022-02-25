@@ -19490,7 +19490,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 17.5
+  m_Name: Save 17.51
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21010,6 +21010,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dcfd2813246f9c49ac8d4eb73b415d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InteractionObstruction:
+    serializedVersion: 2
+    m_Bits: 8960
   Interactables:
     serializedVersion: 2
     m_Bits: 3072
