@@ -34,7 +34,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         grenadeHealth.OnPlayerDamage += HandleDamage;
     }
 
-    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, ScriptManager s = null, bool bulletClip = false)
+    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, PlayerManager s = null, bool bulletClip = false)
     {
         if (trails.Count > 0) foreach (TrailRenderer trail in trails) trail.Clear();
 

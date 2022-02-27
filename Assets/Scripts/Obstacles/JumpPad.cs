@@ -9,7 +9,7 @@ public class JumpPad : MonoBehaviour
 
     private void OnCollisionEnter(Collision col)
     {
-        ScriptManager s = col.gameObject.GetComponent<ScriptManager>();
+        PlayerManager s = col.gameObject.GetComponent<PlayerManager>();
         Rigidbody rb;
 
         if (s == null) rb = col.gameObject.GetComponent<Rigidbody>();

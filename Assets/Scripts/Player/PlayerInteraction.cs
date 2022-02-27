@@ -27,13 +27,13 @@ public class PlayerInteraction : MonoBehaviour
 
     private GameObject heldObj;
     private Rigidbody objRb;
-    private ScriptManager s;
+    private PlayerManager s;
 
     private Interactable interactable;
 
     void Awake()
     {
-        s = GetComponent<ScriptManager>();
+        s = GetComponent<PlayerManager>();
         lr = grabPos.GetComponent<LineRenderer>();
 
         lr.positionCount = 0;

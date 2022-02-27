@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScriptManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
     [Header("Player Scripts")]
     public PlayerHealth PlayerHealth;
@@ -30,12 +30,16 @@ public class ScriptManager : MonoBehaviour
     
     void OnEnable()
     {
+        GameManager.Instance.OnGameStateChanged += OnGameStateChanged;
+
         PlayerHealth.OnPlayerStateChanged += OnPlayerStateChanged;
         PlayerHealth.OnPlayerDamage += OnPlayerDamage;
     }
 
     void OnDisable()
     {
+        GameManager.Instance.OnGameStateChanged -= OnGameStateChanged;
+
         PlayerHealth.OnPlayerStateChanged -= OnPlayerStateChanged;
         PlayerHealth.OnPlayerDamage -= OnPlayerDamage;
     }
@@ -45,8 +49,16 @@ public class ScriptManager : MonoBehaviour
         CameraLook.OnPlayerDamage(damage);
     }
 
+    public void OnGameStateChanged(GameState newState)
+    {
+        RigidbodyManager.Instance.FreezeAll(newState == GameState.Paused);
+        //PlayerMovement.OnGameStateChanged(newState);
+    }
+
     public void OnPlayerStateChanged(UnitState newState)
     {
+        if (newState == UnitState.Dead) GameManager.Instance.SetState(GameState.Paused);
+
         PlayerMovement.OnPlayerStateChanged(newState);
         WeaponControls.OnPlayerStateChanged(newState);
         PlayerInteraction.OnPlayerStateChanged(newState);

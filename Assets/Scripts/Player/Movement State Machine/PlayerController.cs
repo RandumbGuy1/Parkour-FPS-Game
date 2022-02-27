@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 RelativeVel { get; private set; }
     public Vector3 Velocity { get; private set; }
 
-    private ScriptManager s;
+    private PlayerManager s;
     private Rigidbody rb;
 
     public MovementState CurrentState { get; private set; }
@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
-        s = GetComponent<ScriptManager>();
+        s = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
 
         PlayerHeight = s.cc.height;

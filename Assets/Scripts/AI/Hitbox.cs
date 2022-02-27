@@ -12,7 +12,7 @@ public class Hitbox : MonoBehaviour, IDamagable
     public float MaxHealth => 0f;
     public float CurrentHealth => 0f;
 
-    public void OnDamage(float damage, ScriptManager player = null)
+    public void OnDamage(float damage, PlayerManager player = null)
     {
         health.OnDamage(damage * EvaluateMultiplier() * zoneMultiplier, player);
     }

@@ -33,7 +33,7 @@ public class BulletProjectile : MonoBehaviour, IProjectile
         rb.detectCollisions = false;
     }
 
-    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, ScriptManager s = null, bool bulletClip = false)
+    public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, PlayerManager s = null, bool bulletClip = false)
     {
         foreach (TrailRenderer trail in trails) trail.Clear();
 

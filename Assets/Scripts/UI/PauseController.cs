@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class PauseController : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenu;
-    [SerializeField] private ScriptManager s;
+    [SerializeField] private PlayerManager s;
     private bool paused = false;
 
     void Awake() => s.PlayerHealth.OnPlayerStateChanged += HandlePause;

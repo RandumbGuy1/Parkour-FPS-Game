@@ -10,7 +10,7 @@ public class IcePlane : MonoBehaviour
 
     private void OnCollisionEnter(Collision col)
     {
-        ScriptManager s = col.gameObject.GetComponent<ScriptManager>();
+        PlayerManager s = col.gameObject.GetComponent<PlayerManager>();
         if (s == null) 
         {
             Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();
@@ -28,7 +28,7 @@ public class IcePlane : MonoBehaviour
 
     private void OnCollisionExit(Collision col)
     {
-        ScriptManager s = col.gameObject.GetComponent<ScriptManager>();
+        PlayerManager s = col.gameObject.GetComponent<PlayerManager>();
         if (s == null)
         {
             Rigidbody rb = col.gameObject.GetComponent<Rigidbody>();

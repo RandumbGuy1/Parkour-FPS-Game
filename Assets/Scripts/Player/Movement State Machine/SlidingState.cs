@@ -22,7 +22,7 @@ public class SlidingState : MovementState
 
     }
 
-    public override void EnterState(ScriptManager controller)
+    public override void EnterState(PlayerManager controller)
     {
         SetController(controller);
         S.CameraLook.SetTiltSmoothing(0.15f);

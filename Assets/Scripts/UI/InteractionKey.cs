@@ -5,7 +5,7 @@ using TMPro;
 
 public class InteractionKey : MonoBehaviour
 {
-    [SerializeField] private ScriptManager s;
+    [SerializeField] private PlayerManager s;
     private TextMeshProUGUI key;
 
     private void Awake()

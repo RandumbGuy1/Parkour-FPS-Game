@@ -5,7 +5,7 @@ using System;
 
 public class Sword : MonoBehaviour, IItem, IWeapon
 {
-    public ScriptManager Player { get { return s; } }
+    public PlayerManager Player { get { return s; } }
     public WeaponClass WeaponType { get { return type; } }
     public Sprite ItemSprite { get { return weaponSprite; } }
 
@@ -62,7 +62,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     [SerializeField] private Transform attackPoint;
     private Rigidbody rb;
     private BoxCollider bc;
-    private ScriptManager s;
+    private PlayerManager s;
 
     void Awake()
     {
@@ -125,7 +125,7 @@ public class Sword : MonoBehaviour, IItem, IWeapon
     }
 
     public bool SecondaryAction() => true;
-    public void OnPickup(ScriptManager s) => this.s = s;
+    public void OnPickup(PlayerManager s) => this.s = s;
 
     public void ItemUpdate() 
     {

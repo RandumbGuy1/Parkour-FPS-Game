@@ -14,7 +14,7 @@ public class StandingState : MovementState
 
     }
 
-    public override void EnterState(ScriptManager controller) => SetController(controller);
+    public override void EnterState(PlayerManager controller) => SetController(controller);
     public override void ExitState() { }
 
     public override void StateInput(PlayerInput input)

@@ -37,7 +37,7 @@ public class CameraBobbing : MonoBehaviour
     private Vector3 vaultDesync = Vector3.zero;
 
     [Header("Assignables")]
-    [SerializeField] private ScriptManager s;
+    [SerializeField] private PlayerManager s;
     [SerializeField] private Transform playerGraphics;
 
     void Awake()
@@ -129,8 +129,8 @@ public class CameraBobbing : MonoBehaviour
         }
 
         bool crouched = s.PlayerInput.Crouching;
-        float newMag = -impactForce * (crouched ? 0.6f : 0.4f);
-        float newSmooth = Mathf.Clamp(newMag * 5f, 5f, 15f);
+        float newMag = -impactForce * (crouched ? 0.7f : 0.33f);
+        float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f);
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;

@@ -6,7 +6,7 @@ public interface IProjectile
     float LifeTime { get; }
 
     void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, 
-        ScriptManager s = null, bool bulletClip = false);
+        PlayerManager s = null, bool bulletClip = false);
 }
 
 public enum ProjectileType

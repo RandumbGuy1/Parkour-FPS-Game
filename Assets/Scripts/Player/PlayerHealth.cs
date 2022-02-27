@@ -51,7 +51,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         HandleInvincibility();
     }
 
-    public void OnDamage(float damage, ScriptManager player = null)
+    public void OnDamage(float damage, PlayerManager player = null)
     {
         if (State == UnitState.Dead) return;
 
@@ -76,7 +76,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         if (currentHealth <= 0f) OnDeath();
     }
 
-    private void EvaluateHitMarker(ScriptManager player) => player?.WeaponControls.HitMarker.Flash(transform.position, currentHealth <= 0);
+    private void EvaluateHitMarker(PlayerManager player) => player?.WeaponControls.HitMarker.Flash(transform.position, currentHealth <= 0);
 
     public void OnDeath() 
     {

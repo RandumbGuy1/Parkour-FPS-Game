@@ -50,7 +50,7 @@ public class CameraFollow : MonoBehaviour
 	private float headSwayScroller = 0;
 
 	[Header("Assignables")]
-	[SerializeField] private ScriptManager s;
+	[SerializeField] private PlayerManager s;
 	[SerializeField] private ParticleSystem sprintEffect;
 	private Camera cam;
 

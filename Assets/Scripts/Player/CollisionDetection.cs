@@ -38,7 +38,7 @@ public class CollisionDetection
     public int StepsSinceLastJumped { get; private set; } = 0;
     public int StepsSinceLastWallJumped { get; private set; } = 0;
 
-    public void UpdateCollisionChecks(ScriptManager s) {
+    public void UpdateCollisionChecks(PlayerManager s) {
 
         ReachedMaxSlope = Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
 
@@ -76,7 +76,7 @@ public class CollisionDetection
         }
     }
 
-    public void EvaluateCollisionEnter(ScriptManager s, Collision col) {
+    public void EvaluateCollisionEnter(PlayerManager s, Collision col) {
         int layer = col.gameObject.layer;
         ContactPoint contact = col.GetContact(0);
 
@@ -115,7 +115,7 @@ public class CollisionDetection
         }
     }
 
-    public void RecordMovementSteps(ScriptManager s, int maxJumpSteps) {
+    public void RecordMovementSteps(PlayerManager s, int maxJumpSteps) {
         if (StepsSinceLastJumped < maxJumpSteps) StepsSinceLastJumped++;
         if (StepsSinceLastWallJumped < 100) StepsSinceLastWallJumped++;
 
@@ -131,7 +131,7 @@ public class CollisionDetection
         }
     }
 
-    public bool SnapToGround(ScriptManager s, int maxJumpSteps) {
+    public bool SnapToGround(PlayerManager s, int maxJumpSteps) {
         float speed = s.PlayerMovement.Magnitude;
         Rigidbody rb = s.rb;
 
@@ -148,7 +148,7 @@ public class CollisionDetection
         return true;
     }
 
-    public bool CanWallJump(ScriptManager s, float minimumJumpHeight) {
+    public bool CanWallJump(PlayerManager s, float minimumJumpHeight) {
         if (!NearWall || ReachedMaxSlope || Grounded || s.PlayerMovement.Vaulting || !s.PlayerMovement.CanCrouchWalk) return false;
         return !Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, minimumJumpHeight, Ground);
     }
@@ -161,7 +161,7 @@ public class CollisionDetection
     public bool IsFloor(Vector3 normal) => Vector3.Angle(Vector3.up, normal) < maxSlopeAngle;
     public bool IsWall(Vector3 normal, float threshold) => Math.Abs(normal.y) < threshold;
 
-    public bool CeilingAbove(ScriptManager s, bool crouched) {
+    public bool CeilingAbove(PlayerManager s, bool crouched) {
 
         if (!crouched) return false;
 

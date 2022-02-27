@@ -26,7 +26,7 @@ public class WallRunningState : MovementState
 
     }
 
-    public override void EnterState(ScriptManager controller)
+    public override void EnterState(PlayerManager controller)
     {
         SetController(controller);
         InitialWallClimb();

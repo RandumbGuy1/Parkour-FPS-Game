@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 {
-    public ScriptManager Player { get { return s; } }
+    public PlayerManager Player { get { return s; } }
     public WeaponClass WeaponType { get { return type; } }
     public Sprite ItemSprite { get { return weaponSprite; } }
 
@@ -69,7 +69,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private Transform attackPoint;
     [SerializeField] private PlayParticleOnEnable muzzleFlash;
     [SerializeField] private ShakeData recoilShake;
-    private ScriptManager s;
+    private PlayerManager s;
     private BoxCollider col;
 
     void Start()
@@ -144,7 +144,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     public void ItemUpdate() { }
 
-    public void OnPickup(ScriptManager s) => this.s = s;
+    public void OnPickup(PlayerManager s) => this.s = s;
 
     public void OnDrop()
     {

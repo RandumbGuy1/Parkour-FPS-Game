@@ -104,13 +104,13 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 RelativeVel { get; private set; }
     public Vector3 Velocity { get; private set; }
 
-    private ScriptManager s;
+    private PlayerManager s;
     private Rigidbody rb;
     private CollisionDetectionMode detection;
 
     void Awake()
     {
-        s = GetComponent<ScriptManager>();
+        s = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
 
         detection = rb.collisionDetectionMode;
@@ -277,17 +277,13 @@ public class PlayerMovement : MonoBehaviour
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Math.Abs(Velocity.y) * 0.3f, 4f, 0.6f, 5f)));
         s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 5f, 20f), 4f, 0.6f, 9f), Vector3.forward));
 
-        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-        rb.isKinematic = true;
-        rb.interpolation = RigidbodyInterpolation.None;
+        RigidbodyManager.Instance.FreezeOne(rb);
         Vaulting = true;
 
         yield return new WaitForSeconds(duration * 0.8f);
 
         Vaulting = false;
-        rb.isKinematic = false;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.collisionDetectionMode = detection;
+        RigidbodyManager.Instance.FreezeOne(rb, false, false);
 
         rb.velocity = 0.5f * vaultForce * normal;
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
@@ -498,6 +494,11 @@ public class PlayerMovement : MonoBehaviour
             if (Time.time - timeSinceLastTap <= sprintDoubleTapTime) Sprinting = true;
             timeSinceLastTap = Time.time;
         }
+    }
+
+    public void OnGameStateChanged(GameState newState)
+    {
+        //pausing stuff
     }
 
     public void OnPlayerStateChanged(UnitState newState)

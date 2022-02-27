@@ -28,7 +28,7 @@ public class PostProcessingManager : MonoBehaviour
     private bool updateVignette = true;
 
     [Header("Assignables")]
-    [SerializeField] private ScriptManager s;
+    [SerializeField] private PlayerManager s;
     public static PostProcessingManager Instance { get; private set; }
 
     private Volume volume;

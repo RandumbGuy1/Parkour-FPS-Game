@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 {
-    public ScriptManager Player { get { return s; } }
+    public PlayerManager Player { get { return s; } }
     public WeaponClass WeaponType { get { return type; } }
     public Sprite ItemSprite { get { return weaponSprite; } }
 
@@ -80,7 +80,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private ShakeData recoilShake;
     [SerializeField] private GrappleRope rope;
     [SerializeField] private Transform grapplePoint;
-    private ScriptManager s;
+    private PlayerManager s;
 
     private Rigidbody grappledToRigidbody;
     private SpringJoint grappledToSpringJoint;
@@ -215,7 +215,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
     public bool SecondaryAction() => true;
 
-    public void OnPickup(ScriptManager s)
+    public void OnPickup(PlayerManager s)
     {
         timesGrappled = 0;
         this.s = s;

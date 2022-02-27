@@ -4,7 +4,7 @@ public class DynaimcReticle : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private RectTransform reticle;
-    [SerializeField] private ScriptManager s;
+    [SerializeField] private PlayerManager s;
 
     [Header("Dynamic Reticle")]
     [SerializeField] private float resizeSmoothTime;

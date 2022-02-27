@@ -81,13 +81,13 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private ValueSlider slider;
     [SerializeField] private DynaimcReticle reticleEffects;
 
-    private ScriptManager s;
+    private PlayerManager s;
     public HitMarker HitMarker { get { return hitMarker; } }
     public Transform WeaponPos { get { return weaponPos; } }
 
     void Awake()
     {
-        s = GetComponent<ScriptManager>();
+        s = GetComponent<PlayerManager>();
 
         weaponDataText.gameObject.SetActive(false);
 

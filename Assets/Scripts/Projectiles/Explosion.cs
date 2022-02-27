@@ -28,8 +28,8 @@ public class Explosion : MonoBehaviour
             if (applyForceToShooter && shooter != null && enemy == shooter.transform) continue;
 
             Rigidbody rb = enemy.gameObject.GetComponent<Rigidbody>();
-            enemy.GetComponent<ScriptManager>()?.PlayerMovement.MovementCollision.ResetJumpSteps();
-            if (shooter != null && enemy != shooter.transform) enemy.GetComponent<IDamagable>()?.OnDamage(damage, shooter.GetComponent<ScriptManager>());
+            enemy.GetComponent<PlayerManager>()?.PlayerMovement.MovementCollision.ResetJumpSteps();
+            if (shooter != null && enemy != shooter.transform) enemy.GetComponent<IDamagable>()?.OnDamage(damage, shooter.GetComponent<PlayerManager>());
 
             if (rb == null) continue;
 
