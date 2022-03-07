@@ -5,52 +5,53 @@ public class RigidbodyManager : MonoBehaviour
 {
     [Header("Rigidbodies In Scene")]
     [SerializeField] private List<Rigidbody> allRigidbodies = new List<Rigidbody>();
-    private readonly List<AffectedBody> affectedBodies = new List<AffectedBody>();
+    [SerializeField] private bool allFrozen = false;
+    private readonly Dictionary<Rigidbody, AffectedBody> affectedBodies = new Dictionary<Rigidbody, AffectedBody>();
     public static RigidbodyManager Instance { get; private set; }
 
     void Awake()
     {
-        RegisterRigidbodies();
         Instance = this;
+
+        for (int i = 0; i < allRigidbodies.Count; i++) affectedBodies.Add(allRigidbodies[i], new AffectedBody(allRigidbodies[i]));
     }
 
     private void RegisterRigidbodies()
     {
-        int syncLists = allRigidbodies.Count - affectedBodies.Count;
-        if (syncLists != 0) 
-            for (int i = Mathf.Max(0, affectedBodies.Count - 1); i < syncLists; i++) 
-                affectedBodies.Add(new AffectedBody(allRigidbodies[i]));
-
-        for (int i = 0; i < affectedBodies.Count; i++) affectedBodies[i].RegisterState();
+        for (int i = 0; i < allRigidbodies.Count; i++) affectedBodies[allRigidbodies[i]].RegisterState();
     }
 
     public void FreezeAll(bool freeze = true, bool reapplyVelocity = true)
     {
-        if (freeze) RegisterRigidbodies();
+        allFrozen = freeze;
+        if (allFrozen) RegisterRigidbodies();
 
         for (int i = 0; i < allRigidbodies.Count; i++)
         {
             if (!allRigidbodies[i].gameObject.activeInHierarchy) return;
-            affectedBodies[i].Freeze(freeze, reapplyVelocity);
+            affectedBodies[allRigidbodies[i]].Freeze(freeze, reapplyVelocity);
         }
     }
 
     public void FreezeOne(Rigidbody rb, bool freeze = true, bool reapplyVelocity = true)
     {
-        if (!allRigidbodies.Contains(rb)) return;
-        if (freeze) RegisterRigidbodies();
-
-        int i = allRigidbodies.IndexOf(rb);
-        affectedBodies[i].Freeze(freeze, reapplyVelocity);
+        if (!affectedBodies.ContainsKey(rb)) return;
+        if (freeze) affectedBodies[rb].RegisterState();
+        affectedBodies[rb].Freeze(freeze, reapplyVelocity);
     }
 
     public void AddToManager(Rigidbody rb)
     {
+        if (rb == null || allRigidbodies.Contains(rb)) return;
+
         allRigidbodies.Add(rb);
-        RegisterRigidbodies();
+        affectedBodies.Add(rb, new AffectedBody(rb));
+
+        if (allFrozen) FreezeOne(rb);
     }
 }
 
+[System.Serializable]
 public class AffectedBody
 {
     private readonly Rigidbody rb;
@@ -60,6 +61,7 @@ public class AffectedBody
 
     private CollisionDetectionMode collisionDetectionMode;
     private RigidbodyInterpolation interpolation;
+    private RigidbodyConstraints constraints;
 
     public AffectedBody(Rigidbody rb)
     {
@@ -74,6 +76,7 @@ public class AffectedBody
 
         collisionDetectionMode = rb.collisionDetectionMode;
         interpolation = rb.interpolation;
+        constraints = rb.constraints;
     }
 
     public void Freeze(bool freeze = true, bool reapplyVelocity = true)
@@ -83,9 +86,11 @@ public class AffectedBody
             rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
             rb.isKinematic = true;
             rb.interpolation = RigidbodyInterpolation.None;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
             return;
         }
 
+        rb.constraints = constraints;
         rb.isKinematic = false;
         rb.collisionDetectionMode = collisionDetectionMode;
         rb.interpolation = interpolation;

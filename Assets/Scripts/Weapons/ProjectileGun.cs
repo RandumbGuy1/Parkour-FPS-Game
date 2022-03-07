@@ -13,14 +13,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     public float RecoilSmoothTime { get { return weaponRecoilSmoothTime; } }
     public ShakeData RecoilShakeData { get { return recoilShake; } }
 
-    public Vector3 DefaultPos { get { return weaponDefaultPos; } }
-    public Vector3 DefaultRot { get { return weaponDefaultRot; } }
-
-    public Vector3 AimPos { get { return weaponAimPos; } }
-    public Vector3 AimRot { get { return weaponAimRot; } }
-
-    public float Weight { get { return weaponWeight; } }
-
     [Header("Weapon Class")]
     [SerializeField] private WeaponClass type;
     [SerializeField] private bool weaponAutomatic;
@@ -29,13 +21,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private Sprite weaponSprite;
 
     [Header("Weapon Holding Settings")]
-    [SerializeField] private Vector3 weaponDefaultPos;
-    [SerializeField] private Vector3 weaponDefaultRot;
-    [Space(10)]
-    [SerializeField] private Vector3 weaponAimPos;
-    [SerializeField] private Vector3 weaponAimRot;
-    [Space(10)]
-    [SerializeField] private float weaponWeight;
+    [SerializeField] private HoldingSettings swaySettings;
+    public HoldingSettings SwaySettings => swaySettings;
 
     [Header("Shooting Settings")]
     [SerializeField] private string projectile;

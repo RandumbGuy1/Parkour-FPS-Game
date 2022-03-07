@@ -15,6 +15,7 @@ public class WeaponController : MonoBehaviour
     public bool HoldingWeapon { get; private set; } = false;
     public bool CanAttack { get; private set; } = true;
     public bool Firing { get; private set; } = false;
+    public bool WeaponSprinting { get; private set; } = false;
 
     public float AimFovOffset { get { return Aiming ? -aimFovOffset : 0; } }
     public bool Aiming { get; private set; } = false;
@@ -364,13 +365,16 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateDefaultValues()
     {
-        Vector3 targetDesiredPos = CurrentItem.DefaultPos + (Aiming ? CurrentItem.AimPos : Vector3.zero);
-        Vector3 targetDesiredRot = CurrentItem.DefaultRot + (Aiming ? CurrentItem.AimRot : Vector3.zero);
+        WeaponSprinting = s.PlayerMovement.Sprinting && s.PlayerMovement.MovementCollision.Grounded && !Aiming && !Firing;
+        Vector3 targetDesiredPos = CurrentItem.SwaySettings.DefaultPos + (Aiming ? CurrentItem.SwaySettings.AimPos : Vector3.zero) 
+            + (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetPos : Vector3.zero);
+        Vector3 targetDesiredRot = CurrentItem.SwaySettings.DefaultRot + (Aiming ? CurrentItem.SwaySettings.AimRot : Vector3.zero)
+            + (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetRot : Vector3.zero);
 
         if (smoothDefaultPos == targetDesiredPos && smoothDefaultRot == targetDesiredRot) return;
 
-        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.15f);
-        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.15f);
+        smoothDefaultPos = Vector3.SmoothDamp(smoothDefaultPos, targetDesiredPos, ref smoothDefaultPosVel, 0.175f * (Firing ? 0.3f : 1f));
+        smoothDefaultRot = Vector3.SmoothDamp(smoothDefaultRot, targetDesiredRot, ref smoothDefaultRotVel, 0.175f * (Firing ? 0.3f : 1f));
 
         float mag = (smoothDefaultPos - targetDesiredPos).sqrMagnitude + (smoothDefaultRot - targetDesiredRot).sqrMagnitude;
 
@@ -388,13 +392,13 @@ public class WeaponController : MonoBehaviour
         idleSwayTimer += Time.deltaTime * idleSwayFrequency;
 
         float timer = s.CameraHeadBob.BobTimer;
-        float amp = 1f / CurrentItem.Weight;
+        float amp = 1f / CurrentItem.SwaySettings.Weight;
         float bobAimMulti = Aiming ? 0.08f : 1f;
 
-        Vector3 targetPos = CalculateBob(timer, amp) + CalculateMoveOffset(amp);
-        smoothBob = Vector3.SmoothDamp(smoothBob,targetPos * bobAimMulti, ref bobVel, bobSmoothTime);
+        Vector3 targetPos = CalculateBob(timer, amp * (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetPosMulti : 1f)) + CalculateMoveOffset(amp);
+        smoothBob = Vector3.SmoothDamp(smoothBob, targetPos * bobAimMulti, ref bobVel, bobSmoothTime);
 
-        Vector3 targetSway = CalculateSway(amp) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
+        Vector3 targetSway = CalculateSway(amp * (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetRotMulti : 1f)) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
         smoothSway = Vector3.SmoothDamp(smoothSway, targetSway, ref swayVel, swaySmoothTime);
         idleLookOffset = Vector3.SmoothDamp(idleLookOffset, CalculateIdleSway(amp), ref idleVel, idleSwaySmoothTime);
 

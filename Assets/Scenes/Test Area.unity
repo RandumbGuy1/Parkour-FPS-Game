@@ -2360,11 +2360,16 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 1
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 0.9, y: -0.65, z: 1.7}
-  weaponDefaultRot: {x: -0.45, y: 5, z: 8}
-  weaponAimPos: {x: -0.71, y: 0.22, z: -1.6}
-  weaponAimRot: {x: 1, y: -5, z: 15}
-  weaponWeight: 1.5
+  swaySettings:
+    defaultPos: {x: 0.9, y: -0.65, z: 1.7}
+    defaultRot: {x: -0.45, y: 5, z: 8}
+    aimPos: {x: -0.71, y: 0.22, z: -1.6}
+    aimRot: {x: 1, y: -5, z: 15}
+    sprintOffsetPos: {x: 0, y: 0, z: 0}
+    sprintOffsetRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPosMulti: 1
+    sprintOffsetRotMulti: 1
+    weight: 1.5
   projectile: Bullet
   damagePerShot: 6
   shootForce: 28
@@ -11579,11 +11584,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   weaponSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  weaponDefaultPos: {x: 0.7, y: -0.6, z: 1.5}
-  weaponDefaultRot: {x: -0.45, y: 10, z: 5}
-  weaponAimPos: {x: -0.7, y: 0.2, z: -0.3}
-  weaponAimRot: {x: 2.5, y: -10, z: -5}
-  weaponWeight: 1.3
+  swaySettings:
+    defaultPos: {x: 0.7, y: -0.6, z: 1.5}
+    defaultRot: {x: -0.45, y: 10, z: 5}
+    aimPos: {x: -0.7, y: 0.2, z: -0.3}
+    aimRot: {x: 2.5, y: -10, z: -5}
+    sprintOffsetPos: {x: 0, y: 0, z: 0}
+    sprintOffsetRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPosMulti: 1
+    sprintOffsetRotMulti: 1
+    weight: 1.3
   grapplePullForce: 22
   grappleCameraPullForce: 70
   grappleHorizPullForce: 22
@@ -14457,7 +14467,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   landbobShakeData: {fileID: 11400000, guid: c41bbfb7baf265d4ebac361d349648c6, type: 2}
-  landBobSmoothTime: 0.043
+  landBobSmoothTime: 0.041
   landBobMultiplier: 0.085
   maxOffset: 3.5
   slideMaxOffset: 2
@@ -19490,7 +19500,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1522606435}
   m_Layer: 0
-  m_Name: Save 17.62
+  m_Name: Save 17.8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19828,11 +19838,16 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 0.6, y: -0.8, z: 1.6}
-  weaponDefaultRot: {x: -0.45, y: 5, z: 5}
-  weaponAimPos: {x: -0.6, y: 0.3, z: -0.2}
-  weaponAimRot: {x: 0, y: -5, z: -5}
-  weaponWeight: 1.35
+  swaySettings:
+    defaultPos: {x: 0.6, y: -0.8, z: 1.6}
+    defaultRot: {x: -0.45, y: 5, z: 5}
+    aimPos: {x: -0.6, y: 0.3, z: -0.2}
+    aimRot: {x: 0, y: -5, z: -5}
+    sprintOffsetPos: {x: 0, y: 0, z: 0}
+    sprintOffsetRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPosMulti: 1
+    sprintOffsetRotMulti: 1
+    weight: 1.35
   projectile: Grenade
   damagePerShot: 60
   shootForce: 5
@@ -20962,7 +20977,7 @@ MonoBehaviour:
   maxSlideSpeed: 100
   sprintMultiplier: 1.6
   sprintDoubleTapTime: 0.25
-  autoSprint: 0
+  autoSprint: 1
   jumpForce: 48
   maxJumpSteps: 10
   crouchScale: 1.3
@@ -22818,15 +22833,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allRigidbodies:
-  - {fileID: 642207236}
   - {fileID: 569643385}
   - {fileID: 1932738376}
-  - {fileID: 1011296960}
   - {fileID: 1171870410}
+  - {fileID: 1011296960}
   - {fileID: 594175418}
   - {fileID: 1870481499}
   - {fileID: 1971585147}
-  - {fileID: 1650519430}
+  - {fileID: 642207236}
+  allFrozen: 0
 --- !u!4 &1776684826
 Transform:
   m_ObjectHideFlags: 0
@@ -28586,11 +28601,16 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 1
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 0.9, y: -0.65, z: 1.7}
-  weaponDefaultRot: {x: -0.45, y: 5, z: 8}
-  weaponAimPos: {x: -0.71, y: 0.22, z: -1.6}
-  weaponAimRot: {x: 1, y: -5, z: 15}
-  weaponWeight: 1.5
+  swaySettings:
+    defaultPos: {x: 0.9, y: -0.65, z: 1.7}
+    defaultRot: {x: -0.45, y: 5, z: 8}
+    aimPos: {x: -0.71, y: 0.22, z: -1.6}
+    aimRot: {x: 1, y: -5, z: 15}
+    sprintOffsetPos: {x: -0.6, y: -0.1, z: -0.8}
+    sprintOffsetRot: {x: -5, y: -20, z: 30}
+    sprintOffsetPosMulti: 2
+    sprintOffsetRotMulti: 0.3
+    weight: 1.5
   projectile: Bullet
   damagePerShot: 6
   shootForce: 28
@@ -29909,11 +29929,16 @@ MonoBehaviour:
   type: 0
   weaponAutomatic: 0
   weaponSprite: {fileID: 0}
-  weaponDefaultPos: {x: 0.5, y: -0.6, z: 1.6}
-  weaponDefaultRot: {x: -0.45, y: -5, z: 5}
-  weaponAimPos: {x: -0.5, y: 0.35, z: -0.4}
-  weaponAimRot: {x: 2, y: 5, z: -5}
-  weaponWeight: 1.35
+  swaySettings:
+    defaultPos: {x: 0.5, y: -0.6, z: 1.6}
+    defaultRot: {x: -0.45, y: -5, z: 5}
+    aimPos: {x: -0.5, y: 0.35, z: -0.4}
+    aimRot: {x: 2, y: 5, z: -5}
+    sprintOffsetPos: {x: 0, y: 0, z: 0}
+    sprintOffsetRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPosMulti: 1.5
+    sprintOffsetRotMulti: 0.8
+    weight: 1.35
   projectile: Bullet
   damagePerShot: 12
   shootForce: 25
@@ -30583,11 +30608,16 @@ MonoBehaviour:
   type: 1
   weaponAutomatic: 1
   weaponSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  weaponDefaultPos: {x: -0.5, y: -0.9, z: 1.55}
-  weaponDefaultRot: {x: 0, y: 0, z: 85}
-  weaponAimPos: {x: 0, y: 0, z: 0}
-  weaponAimRot: {x: 0, y: 0, z: 0}
-  weaponWeight: 1.35
+  swaySettings:
+    defaultPos: {x: -0.5, y: -0.9, z: 1.55}
+    defaultRot: {x: 0, y: 0, z: 85}
+    aimPos: {x: 0, y: 0, z: 0}
+    aimRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPos: {x: 0, y: 0, z: 0}
+    sprintOffsetRot: {x: 0, y: 0, z: 0}
+    sprintOffsetPosMulti: 1
+    sprintOffsetRotMulti: 1
+    weight: 1.5
   damage: 30
   swingForce: 45
   hitboxActive: 0.25

@@ -52,13 +52,10 @@ public class PlayerManager : MonoBehaviour
     public void OnGameStateChanged(GameState newState)
     {
         RigidbodyManager.Instance.FreezeAll(newState == GameState.Paused);
-        //PlayerMovement.OnGameStateChanged(newState);
     }
 
     public void OnPlayerStateChanged(UnitState newState)
     {
-        if (newState == UnitState.Dead) GameManager.Instance.SetState(GameState.Paused);
-
         PlayerMovement.OnPlayerStateChanged(newState);
         WeaponControls.OnPlayerStateChanged(newState);
         PlayerInteraction.OnPlayerStateChanged(newState);

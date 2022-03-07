@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private bool sprinting = false;
     private float timeSinceLastTap = 0f;
 
-    public bool Sprinting { get { return autoSprint || sprinting; } set { sprinting = value; } }
+    public bool Sprinting { get { return (autoSprint && Moving || sprinting) && !crouched; } set { sprinting = value; } }
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
@@ -363,7 +363,7 @@ public class PlayerMovement : MonoBehaviour
             if (collision.Grounded) rb.velocity *= 0.65f;
             return;
         }
-            
+
         if (collision.Grounded) s.CameraHeadBob.BobOnce(-Magnitude * 0.65f);
         if (Magnitude > 5f) rb.AddForce(Magnitude * slideForce * (collision.Grounded ? 0.8f : 0.3f) * dir);
     }
@@ -496,11 +496,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void OnGameStateChanged(GameState newState)
-    {
-        //pausing stuff
-    }
-
     public void OnPlayerStateChanged(UnitState newState)
     {
         if (newState != UnitState.Dead) return;
@@ -516,4 +511,6 @@ public class PlayerMovement : MonoBehaviour
 
         ObjectPooler.Instance.Spawn("ShatteredPlayer", transform.position, transform.rotation);
     }
+
+    public void OnGameStateChanged(GameState newState) { }
 }
