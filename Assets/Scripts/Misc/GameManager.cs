@@ -14,10 +14,12 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            Instance.SetState(GameState.Gameplay);
             DontDestroyOnLoad(gameObject);
             return;
         }
 
+        Instance.SetState(GameState.Gameplay);
         Destroy(gameObject);
     }
 
@@ -27,6 +29,24 @@ public class GameManager : MonoBehaviour
 
         CurrentGameState = newGameState;
         OnGameStateChanged?.Invoke(newGameState);
+
+        HandleFreezing(CurrentGameState != GameState.Gameplay);
+    }
+
+    private void HandleFreezing(bool pause)
+    {
+        foreach (ParticleSystem particle in FindObjectsOfType<ParticleSystem>())
+        {
+            if (!particle.gameObject.activeInHierarchy) continue;
+
+            if (pause)
+            {
+                particle.Pause();
+                continue;
+            }
+
+            particle.Play();
+        }
     }
 }
 

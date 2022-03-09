@@ -33,6 +33,7 @@ public class CameraFollow : MonoBehaviour
 	[SerializeField] private float sensitivity;
 	[SerializeField] private float aimSensitivity;
 	[SerializeField] private Vector2 rotateSmoothTime;
+	private bool rotateCamera = true;
 
 	[Header("Clamp Rotation")]
 	[SerializeField] private float upClampAngle;
@@ -113,6 +114,8 @@ public class CameraFollow : MonoBehaviour
 	void CalcRotation()
 	{
 		RotationDelta = 0.02f * (s.WeaponControls.Aiming ? aimSensitivity : sensitivity) * s.PlayerInput.MouseInputVector;
+
+		if (!rotateCamera) return;
 
 		rotation.y += RotationDelta.y;
 		rotation.x -= RotationDelta.x;
@@ -206,12 +209,21 @@ public class CameraFollow : MonoBehaviour
 		wallRunRotation.z = 0f;
 
 		s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(35f, 6f, 1.5f, 10f)));
-		s.CameraShaker.DisableShakes();
+		s.CameraShaker.DisableAddShakes();
 
 		s.CameraHeadBob.enabled = false;
 
 		SetCursorState(false);
 	}	
+
+	public void OnGameStateChanged(GameState newState)
+    {
+		SetCursorState(newState == GameState.Gameplay);
+		s.CameraShaker.DisableAddShakes(newState == GameState.Gameplay);
+		s.CameraShaker.StopRunningShakes(newState == GameState.Gameplay);
+		rotateCamera = newState == GameState.Gameplay;
+		s.CameraHeadBob.enabled = newState == GameState.Gameplay;
+	}
 
 	public void SetCursorState(bool locked)
     {

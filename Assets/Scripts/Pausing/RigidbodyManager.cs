@@ -62,6 +62,9 @@ public class AffectedBody
     private CollisionDetectionMode collisionDetectionMode;
     private RigidbodyInterpolation interpolation;
     private RigidbodyConstraints constraints;
+    private bool isKinematic;
+
+    private int avoidFreezeThisGen = 0;
 
     public AffectedBody(Rigidbody rb)
     {
@@ -71,6 +74,13 @@ public class AffectedBody
 
     public void RegisterState()
     {
+        if (rb.isKinematic)
+        {
+            avoidFreezeThisGen = 2;
+            return;
+        }
+
+        isKinematic = rb.isKinematic;
         velocity = rb.velocity;
         angularVelocity = rb.angularVelocity;
 
@@ -81,6 +91,12 @@ public class AffectedBody
 
     public void Freeze(bool freeze = true, bool reapplyVelocity = true)
     {
+        if (avoidFreezeThisGen > 0)
+        {
+            avoidFreezeThisGen--;
+            return;
+        }
+
         if (freeze)
         {
             rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -94,6 +110,7 @@ public class AffectedBody
         rb.isKinematic = false;
         rb.collisionDetectionMode = collisionDetectionMode;
         rb.interpolation = interpolation;
+        rb.isKinematic = isKinematic;
 
         if (reapplyVelocity)
         {

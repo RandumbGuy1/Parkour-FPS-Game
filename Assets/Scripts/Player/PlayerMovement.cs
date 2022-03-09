@@ -106,14 +106,12 @@ public class PlayerMovement : MonoBehaviour
 
     private PlayerManager s;
     private Rigidbody rb;
-    private CollisionDetectionMode detection;
 
     void Awake()
     {
         s = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
 
-        detection = rb.collisionDetectionMode;
         playerScale = s.cc.height;
         rb.freezeRotation = true;
     }
@@ -512,5 +510,8 @@ public class PlayerMovement : MonoBehaviour
         ObjectPooler.Instance.Spawn("ShatteredPlayer", transform.position, transform.rotation);
     }
 
-    public void OnGameStateChanged(GameState newState) { }
+    public void OnGameStateChanged(GameState newState)
+    {
+        enabled = newState == GameState.Gameplay;
+    }
 }

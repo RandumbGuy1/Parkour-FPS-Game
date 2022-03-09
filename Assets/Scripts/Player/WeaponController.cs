@@ -418,4 +418,9 @@ public class WeaponController : MonoBehaviour
         Aiming = false;
         enabled = false;
     }
+
+    public void OnGameStateChanged(GameState newState)
+    {
+        enabled = newState == GameState.Gameplay;
+    }
 }

@@ -8,6 +8,7 @@ public class CameraShaker : MonoBehaviour
 
     public Vector3 Offset { get; private set; }
     private bool canAddShakes = true;
+    private bool processShakes = true;
 
     public void ShakeOnce(IShakeEvent shakeEvent)
     {
@@ -44,12 +45,13 @@ public class CameraShaker : MonoBehaviour
             }
 
             shake.SetIndexAndReceiever(this, i);
-            shake.UpdateShake(Time.deltaTime);
+            if (processShakes) shake.UpdateShake(Time.deltaTime);
             rotationOffset += shake.ShakeOffset;
         }
 
         Offset = rotationOffset;
     }
 
-    public void DisableShakes() => canAddShakes = false;
+    public void DisableAddShakes(bool b = false) => canAddShakes = b;
+    public void StopRunningShakes(bool b = false) => processShakes = b;
 }

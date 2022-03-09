@@ -21,7 +21,6 @@ public class PauseController : MonoBehaviour
         paused = newState == UnitState.Dead || !paused;
 
         GameManager.Instance.SetState(paused ? GameState.Paused : GameState.Gameplay);
-        s.CameraLook.SetCursorState(!paused);
         pauseMenu.SetActive(paused);
     }
 

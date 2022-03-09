@@ -52,6 +52,10 @@ public class PlayerManager : MonoBehaviour
     public void OnGameStateChanged(GameState newState)
     {
         RigidbodyManager.Instance.FreezeAll(newState == GameState.Paused);
+
+        PlayerMovement.OnGameStateChanged(newState);
+        CameraLook.OnGameStateChanged(newState);
+        WeaponControls.OnGameStateChanged(newState);
     }
 
     public void OnPlayerStateChanged(UnitState newState)
