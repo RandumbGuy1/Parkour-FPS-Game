@@ -137,13 +137,13 @@ public class CameraFollow : MonoBehaviour
 		Quaternion newPlayerRot = Quaternion.Euler(0, smoothRotation.y + wallRunRotation.y, 0);
 
 		cam.transform.localRotation = newCamRot;
-		s.orientation.transform.rotation = newPlayerRot;
+		s.orientation.rotation = newPlayerRot;
 	}
 
 	#region Camera Effects
 	private void IdleCameraSway()
     {
-		if (!s.PlayerMovement.MovementCollision.Grounded || s.PlayerMovement.Magnitude > 5f || s.WeaponControls.Aiming || s.WeaponControls.Firing) return;
+		if (!rotateCamera || !s.PlayerMovement.MovementCollision.Grounded || s.PlayerMovement.Magnitude > 5f || s.WeaponControls.Aiming || s.WeaponControls.Firing) return;
 
 		headSwayScroller += Time.deltaTime * swayFrequency;
 		HeadSwayOffset = Vector3.Lerp(HeadSwayOffset, LissajousCurve(headSwayScroller) * swayAmount, 5f * Time.deltaTime);
@@ -175,6 +175,8 @@ public class CameraFollow : MonoBehaviour
 
 	private void SpeedLines()
 	{
+		if (!rotateCamera) return;
+
 		if (s.PlayerMovement.Magnitude >= 10f && state != CameraState.Spectate)
 		{
 			if (!sprintEffect.isPlaying) sprintEffect.Play();
@@ -221,8 +223,8 @@ public class CameraFollow : MonoBehaviour
 		SetCursorState(newState == GameState.Gameplay);
 		s.CameraShaker.DisableAddShakes(newState == GameState.Gameplay);
 		s.CameraShaker.StopRunningShakes(newState == GameState.Gameplay);
-		rotateCamera = newState == GameState.Gameplay;
 		s.CameraHeadBob.enabled = newState == GameState.Gameplay;
+		rotateCamera = newState == GameState.Gameplay;
 	}
 
 	public void SetCursorState(bool locked)

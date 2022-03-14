@@ -70,7 +70,7 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 
     public bool OnAttack()
     {
-        if (!readyToShoot || reloading) return false;
+        if (!readyToShoot || reloading || s == null) return false;
         if (bulletsLeft <= 0)
         {
             s.WeaponControls.AddReload(weaponReloadRotOffset);

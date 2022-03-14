@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4122576796613576089}
   - component: {fileID: 4122576796613576088}
   - component: {fileID: 4122576796613576092}
+  - component: {fileID: -5921492289401910993}
   m_Layer: 10
   m_Name: Grenade
   m_TagString: Untagged
@@ -112,6 +113,18 @@ MonoBehaviour:
   killHeight: 0
   killSpeed: 0
   playerGraphics: {fileID: 4122576796613576091}
+--- !u!114 &-5921492289401910993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4122576796613576091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 084692bde293ad04db85a0c8eefbe6d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4122576797431874704
 GameObject:
   m_ObjectHideFlags: 0

@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            particle.Play();
+            if (particle.isPaused) particle.Play();
         }
     }
 }

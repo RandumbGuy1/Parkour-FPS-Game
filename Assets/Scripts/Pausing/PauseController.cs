@@ -18,7 +18,13 @@ public class PauseController : MonoBehaviour
 
     private void HandlePause(UnitState newState)
     {
-        paused = newState == UnitState.Dead || !paused;
+        if (newState == UnitState.Dead)
+        {
+            pauseMenu.SetActive(true);
+            return;
+        }
+
+        paused = !paused;
 
         GameManager.Instance.SetState(paused ? GameState.Paused : GameState.Gameplay);
         pauseMenu.SetActive(paused);

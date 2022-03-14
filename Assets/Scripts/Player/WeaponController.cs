@@ -391,14 +391,14 @@ public class WeaponController : MonoBehaviour
 
         idleSwayTimer += Time.deltaTime * idleSwayFrequency;
 
-        float timer = s.CameraHeadBob.BobTimer;
+        float timer = s.CameraHeadBob.BobTimer * (s.PlayerMovement.Sprinting ? CurrentItem.SwaySettings.SprintMulti * 0.6f : 1f);
         float amp = 1f / CurrentItem.SwaySettings.Weight;
         float bobAimMulti = Aiming ? 0.08f : 1f;
 
-        Vector3 targetPos = CalculateBob(timer, amp * (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetPosMulti : 1f)) + CalculateMoveOffset(amp);
+        Vector3 targetPos = CalculateBob(timer, amp * (WeaponSprinting ? CurrentItem.SwaySettings.SprintMulti : 1f)) + CalculateMoveOffset(amp);
         smoothBob = Vector3.SmoothDamp(smoothBob, targetPos * bobAimMulti, ref bobVel, bobSmoothTime);
 
-        Vector3 targetSway = CalculateSway(amp * (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetRotMulti : 1f)) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
+        Vector3 targetSway = CalculateSway(amp * (WeaponSprinting ? 0.2f : 1f)) + (3f * s.PlayerMovement.SlideTiltOffset * Vector3.forward);
         smoothSway = Vector3.SmoothDamp(smoothSway, targetSway, ref swayVel, swaySmoothTime);
         idleLookOffset = Vector3.SmoothDamp(idleLookOffset, CalculateIdleSway(amp), ref idleVel, idleSwaySmoothTime);
 

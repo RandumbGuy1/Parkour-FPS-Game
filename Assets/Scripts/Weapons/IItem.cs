@@ -25,8 +25,7 @@ public struct HoldingSettings
     [Space(10)]
     [SerializeField] private Vector3 sprintOffsetPos;
     [SerializeField] private Vector3 sprintOffsetRot;
-    [SerializeField] private float sprintOffsetPosMulti;
-    [SerializeField] private float sprintOffsetRotMulti;
+    [SerializeField] private float sprintMulti;
     [SerializeField] private float weight;
 
     public float Weight => weight;
@@ -39,6 +38,5 @@ public struct HoldingSettings
 
     public Vector3 SprintOffsetPos => sprintOffsetPos;
     public Vector3 SprintOffsetRot => sprintOffsetRot;
-    public float SprintOffsetPosMulti => sprintOffsetPosMulti;
-    public float SprintOffsetRotMulti => sprintOffsetRotMulti;
+    public float SprintMulti => sprintMulti;
 }
