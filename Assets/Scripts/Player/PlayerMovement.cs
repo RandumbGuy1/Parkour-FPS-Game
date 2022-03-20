@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private bool sprinting = false;
     private float timeSinceLastTap = 0f;
 
-    public bool Sprinting { get { return (autoSprint && Moving || sprinting) && !crouched; } set { sprinting = value; } }
+    public bool Sprinting { get { return (autoSprint && Moving || sprinting) && !Crouched; } set { sprinting = value; } }
 
     [Header("Jumping")]
     [SerializeField] private float jumpForce;
@@ -32,12 +32,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float slideForce;
     [SerializeField] private float slideTilt;
     private Vector2 crouchVel = Vector2.zero;
-    private bool crouched = false;
     private float playerScale;
     private float slideAngledTilt = 0;
 
+    public bool Crouched { get; private set; } = false;
+
     public Vector3 CrouchOffset { get { return (playerScale - s.cc.height) * transform.localScale.y * Vector3.down; } }
-    public bool CanCrouchWalk { get { return !crouched || (Magnitude < maxGroundSpeed * 0.7f); } }
+    public bool CanCrouchWalk { get { return !Crouched || (Magnitude < maxGroundSpeed * 0.7f); } }
     public float SlideTiltOffset { get { return slideAngledTilt; } }
 
     [Header("WallRunning")]
@@ -87,7 +88,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Collision Detection")]
     [SerializeField] private CollisionDetection collision = new CollisionDetection();
-    public CollisionDetection MovementCollision => collision;
+    public CollisionDetection Collision => collision;
 
     private Vector2 input;
     private bool jumping;
@@ -128,7 +129,7 @@ public class PlayerMovement : MonoBehaviour
     #region Movement
     private void Movement()
     {
-        float movementMultiplier = collision.Grounded ? (crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier * (crouched ? 0.5f : 1f) * (Sprinting ? 1f : 0.7f);
+        float movementMultiplier = collision.Grounded ? (Crouched ? (CanCrouchWalk ? 0.1f : 0.07f) : 1f) : airMultiplier * (Crouched ? 0.5f : 1f) * (Sprinting ? 1f : 0.7f);
 
         if (collision.ReachedMaxSlope) rb.AddForce(Vector3.down * 35f, ForceMode.Acceleration);
         if (rb.velocity.y <= 0f && !WallRunning && !Vaulting) rb.AddForce((1.7f - 1f) * Physics.gravity.y * Vector3.up, ForceMode.Acceleration);
@@ -176,7 +177,7 @@ public class PlayerMovement : MonoBehaviour
         Vector2 inputTemp = input;
         float speedCap = Sprinting ? 25f : 18f;
 
-        if (crouched && Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
+        if (Crouched && Vector3.Dot(s.orientation.forward, InputDir) < 0.5f) inputTemp *= 0.25f;
         if (inputTemp.x > 0 && RelativeVel.x > speedCap || inputTemp.x < 0 && RelativeVel.x < -speedCap) inputTemp.x = 0f;
         if (inputTemp.y > 0 && RelativeVel.z > speedCap || inputTemp.y < 0 && RelativeVel.z < -speedCap) inputTemp.y = 0f;
 
@@ -203,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
             rb.useGravity = true;
 
             rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            rb.AddForce((crouched ? 0.64f : 0.8f) * jumpForce * Vector3.up, ForceMode.Impulse);
+            rb.AddForce((Crouched ? 0.64f : 0.8f) * jumpForce * Vector3.up, ForceMode.Impulse);
         }
         else
         {
@@ -221,7 +222,7 @@ public class PlayerMovement : MonoBehaviour
     #region Vaulting And Stepping
     public void CheckForVault(ContactPoint contact, LayerMask VaultEnvironment, float maxSlopeAngle)
     {
-        if (Vaulting || WallRunning || crouched) return;
+        if (Vaulting || WallRunning || Crouched) return;
 
         Vector3 vaultDir = contact.normal;
         vaultDir.y = 0f;
@@ -255,7 +256,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        if (crouched || Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
+        if (Crouched || Vector3.Dot(s.orientation.forward, -vaultDir.normalized) < 0.6f) return;
 
         StepUpDesyncSmoothing(vaultPoint + vaultDir, lastPos, Mathf.Clamp(duration * 0.75f, 0.06f, 0.15f));
         StartCoroutine(Vault(duration * 0.9f, -vaultDir));
@@ -352,10 +353,10 @@ public class PlayerMovement : MonoBehaviour
     #region Crouching And Sliding
     private void Crouch(Vector3 dir, bool crouch = true)
     {
-        crouched = crouch;
+        Crouched = crouch;
         s.CameraLook.SetTiltSmoothing(0.15f);
 
-        if (!crouched)
+        if (!Crouched)
         {
             slideAngledTilt = 0;
             if (collision.Grounded) rb.velocity *= 0.65f;
@@ -368,7 +369,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateCrouchScale()
     {
-        float targetScale = (crouched ? crouchScale : playerScale);
+        float targetScale = (Crouched ? crouchScale : playerScale);
         float targetCenter = (targetScale - playerScale) * 0.5f;
 
         if (s.cc.height == targetScale && s.cc.center.y == targetCenter) return;
@@ -384,21 +385,20 @@ public class PlayerMovement : MonoBehaviour
 
     private void ProcessCrouching()
     {
-        if (crouching && !WallRunning && !crouched) Crouch(InputDir);
-        if (!crouching && crouched && !collision.CeilingAbove(s, crouched)) Crouch(InputDir, false);
-        if (!crouched) return;
+        if (crouching && !WallRunning && !Crouched) Crouch(InputDir);
+        if (!crouching && Crouched && !collision.CeilingAbove(s, Crouched)) Crouch(InputDir, false);
+        if (!Crouched) return;
 
         if (CanCrouchWalk) slideAngledTilt = 0;
         else if (slideAngledTilt == 0 && collision.Grounded && collision.StepsSinceLastJumped > 5)
         {
             float tiltDir = input.x != 0f ? input.x : 1f;
-            s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.9f, 5f, 20f), 1f, 0.4f, 9f), Vector3.left));
             s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.7f, 5f, 17.5f), 2f, 0.6f, 8f), Vector3.forward * tiltDir));
             s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(1f, 8f, 1.5f, 9f)));
             slideAngledTilt = tiltDir * slideTilt;
         }
 
-        rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
+        rb.AddForce(Vector3.up * 10f, ForceMode.Acceleration);
     }
     #endregion
 
@@ -409,7 +409,7 @@ public class PlayerMovement : MonoBehaviour
 
         float multiplier = frictionMultiplier < 1f ? frictionMultiplier * 0.1f : frictionMultiplier;
 
-        if (crouched && !collision.CeilingAbove(s, crouched) && !CanCrouchWalk)
+        if (Crouched && !collision.CeilingAbove(s, Crouched) && !CanCrouchWalk)
         {
             rb.AddForce(Magnitude * 0.08f * 1.5f * multiplier * slideFriction * -rb.velocity.normalized); 
             return;
@@ -471,8 +471,8 @@ public class PlayerMovement : MonoBehaviour
 
     private float CalculateMaxSpeed()
     {
-        if (crouched && CanCrouchWalk) return maxGroundSpeed * 0.4f;
-        if (crouched) return maxSlideSpeed;
+        if (Crouched && CanCrouchWalk) return maxGroundSpeed * 0.4f;
+        if (Crouched) return maxSlideSpeed;
         if (jumping || !collision.Grounded) return maxAirSpeed;
 
         if (Sprinting || autoSprint) return maxGroundSpeed * sprintMultiplier;

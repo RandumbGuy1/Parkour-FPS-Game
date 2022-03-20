@@ -68,10 +68,10 @@ public class CameraFollow : MonoBehaviour
 
 	void Update()
 	{
-		float inputX = (s.PlayerMovement.MovementCollision.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
+		float inputX = (s.PlayerMovement.Collision.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		if (inputX != 0f && (gp != null ? gp.GrappleTilt : 0) == 0) SetTiltSmoothing(0.2f);
 
-		targetCameraTilt = s.PlayerMovement.WallRunTiltOffset + s.PlayerMovement.SlideTiltOffset + (gp != null ? gp.GrappleTilt : 0) + (s.PlayerMovement.MovementCollision.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
+		targetCameraTilt = s.PlayerMovement.WallRunTiltOffset + s.PlayerMovement.SlideTiltOffset + (gp != null ? gp.GrappleTilt : 0) + (s.PlayerMovement.Collision.Grounded ? s.PlayerInput.InputVector.x * 1.25f : 0f);
 		targetFov = setFov + s.PlayerMovement.WallRunFovOffset + s.WeaponControls.AimFovOffset + (gp != null ? gp.GrappleFov : 0);
 
 		SpeedLines();
@@ -143,7 +143,7 @@ public class CameraFollow : MonoBehaviour
 	#region Camera Effects
 	private void IdleCameraSway()
     {
-		if (!rotateCamera || !s.PlayerMovement.MovementCollision.Grounded || s.PlayerMovement.Magnitude > 5f || s.WeaponControls.Aiming || s.WeaponControls.Firing) return;
+		if (!rotateCamera || !s.PlayerMovement.Collision.Grounded || s.PlayerMovement.Magnitude > 5f || s.WeaponControls.Aiming || s.WeaponControls.Firing) return;
 
 		headSwayScroller += Time.deltaTime * swayFrequency;
 		HeadSwayOffset = Vector3.Lerp(HeadSwayOffset, LissajousCurve(headSwayScroller) * swayAmount, 5f * Time.deltaTime);
@@ -186,7 +186,7 @@ public class CameraFollow : MonoBehaviour
 			rateOverLifeTime = s.PlayerMovement.Magnitude * 3.5f / rateOverLifeTime;
 
 			ParticleSystem.EmissionModule em = sprintEffect.emission;
-			em.rateOverTime = (s.PlayerMovement.MovementCollision.Grounded ? 0f : rateOverLifeTime);
+			em.rateOverTime = (s.PlayerMovement.Collision.Grounded ? 0f : rateOverLifeTime);
 		}
 		else if (sprintEffect.isPlaying) sprintEffect.Stop();
 	}

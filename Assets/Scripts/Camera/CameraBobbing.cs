@@ -56,7 +56,7 @@ public class CameraBobbing : MonoBehaviour
         Vector3 newPos = (Vector3.up * landBobOffset) + viewBobOffset * 0.6f + s.PlayerMovement.CrouchOffset + vaultDesync;
 		transform.localPosition = newPos;
 
-        BobTimer = (s.PlayerMovement.MovementCollision.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.MovementCollision.StepsSinceLastJumped > 4 && s.PlayerMovement.Magnitude > 0.5f && s.PlayerMovement.Moving ? BobTimer + Time.deltaTime : 0f;
+        BobTimer = (s.PlayerMovement.Collision.Grounded || s.PlayerMovement.WallRunning) && s.PlayerMovement.CanCrouchWalk && s.PlayerMovement.Collision.StepsSinceLastJumped > 4 && s.PlayerMovement.Magnitude > 0.5f && s.PlayerMovement.Moving ? BobTimer + Time.deltaTime : 0f;
     }
 
     void FixedUpdate()
@@ -66,7 +66,7 @@ public class CameraBobbing : MonoBehaviour
 
     private void LastBobStep(float mag)
     {
-        if (!s.PlayerMovement.MovementCollision.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
+        if (!s.PlayerMovement.Collision.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f)));
     }
@@ -128,15 +128,15 @@ public class CameraBobbing : MonoBehaviour
             velocityOverLifetime.z = magnitude.z * 1.3f;
         }
 
-        bool crouched = s.PlayerInput.Crouching;
+        bool crouched = s.PlayerMovement.Crouched;
         float newMag = -impactForce * (crouched ? 0.7f : 0.35f);
         float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f);
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
 
-        //s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(newMag * 0.8f, 1f, 0.6f, newSmooth), Vector3.right));
+        if (crouched) s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
+        else s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(newMag * 0.8f, 1f, 0.6f, newSmooth), Vector3.right));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

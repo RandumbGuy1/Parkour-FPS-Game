@@ -111,7 +111,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         readyToGrapple = false;
         timesGrappled++;
 
-        s.PlayerMovement.MovementCollision.ResetJumpSteps();
+        s.PlayerMovement.Collision.ResetJumpSteps();
         s.CameraLook.SetGrapplingGun(this);
 
         StopAllCoroutines();
@@ -125,7 +125,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     {
         float wallIntersectElapsed = 0f;
 
-        s.rb.AddForce(wallNormal + (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.MovementCollision.Grounded ? 0.2f : 0.7f)) * initialGrapplePullForce * Vector3.up, ForceMode.Impulse);
+        s.rb.AddForce(wallNormal + (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.Collision.Grounded ? 0.2f : 0.7f)) * initialGrapplePullForce * Vector3.up, ForceMode.Impulse);
 
         grappledToSpringJoint = grappledToRigidbody.gameObject.AddComponent<SpringJoint>();
         grappledToSpringJoint.autoConfigureConnectedAnchor = false;
@@ -161,7 +161,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
         float groundElapsed = 0f;
         float wallIntersectElapsed = 0f;
 
-        s.rb.AddForce(wallNormal + (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.MovementCollision.Grounded ? 1.2f : 0.9f)) * initialGrapplePullForce * Vector3.up, ForceMode.Impulse);
+        s.rb.AddForce(wallNormal + (s.PlayerInput.Jumping ? 0.1f : (s.PlayerMovement.Collision.Grounded ? 1.2f : 0.9f)) * initialGrapplePullForce * Vector3.up, ForceMode.Impulse);
 
         if (wallRunning)
         {
@@ -171,7 +171,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
             yield return new WaitForSeconds(0.05f);
         }
 
-        s.PlayerMovement.MovementCollision.ResetJumpSteps();
+        s.PlayerMovement.Collision.ResetJumpSteps();
             
         while (s.PlayerInput.LeftHoldClick && !s.PlayerMovement.WallRunning && groundElapsed < 0.7f && wallIntersectElapsed < 0.1f)
         {
@@ -191,7 +191,7 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 
             s.rb.AddForce(grappleToPlayer.normalized * (grappleHorizPullForce - horizPlayerMovement.magnitude * 0.55f), ForceMode.Acceleration);
 
-            groundElapsed = (s.PlayerMovement.MovementCollision.Grounded ? groundElapsed += Time.fixedDeltaTime : 0f);
+            groundElapsed = (s.PlayerMovement.Collision.Grounded ? groundElapsed += Time.fixedDeltaTime : 0f);
             wallIntersectElapsed = (Physics.Linecast(transform.position, grapplePoint.position + wallNormal, GrappleRopeIntersects) ? wallIntersectElapsed += Time.fixedDeltaTime : 0f);
 
             yield return new WaitForFixedUpdate();

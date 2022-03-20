@@ -365,7 +365,7 @@ public class WeaponController : MonoBehaviour
 
     private void CalculateDefaultValues()
     {
-        WeaponSprinting = s.PlayerMovement.Sprinting && s.PlayerMovement.MovementCollision.Grounded && !Aiming && !Firing;
+        WeaponSprinting = s.PlayerMovement.Sprinting && s.PlayerMovement.Collision.Grounded && !Aiming && !Firing;
         Vector3 targetDesiredPos = CurrentItem.SwaySettings.DefaultPos + (Aiming ? CurrentItem.SwaySettings.AimPos : Vector3.zero) 
             + (WeaponSprinting ? CurrentItem.SwaySettings.SprintOffsetPos : Vector3.zero);
         Vector3 targetDesiredRot = CurrentItem.SwaySettings.DefaultRot + (Aiming ? CurrentItem.SwaySettings.AimRot : Vector3.zero)
