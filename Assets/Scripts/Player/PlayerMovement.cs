@@ -227,8 +227,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vaultDir = contact.normal;
         vaultDir.y = 0f;
 
-        //Physics.Raycast(contact.point + vaultDir * 0.01f, -vaultDir, out var checkWallHit, 1f, VaultEnvironment);
-        if (!collision.IsWall(contact.normal, 0.35f)) return;
+        if (!collision.IsWall(contact.normal, 0.6f)) return;
+        if (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var edgeHit, 1f, VaultEnvironment))
+            if (edgeHit.collider == contact.otherCollider) return;
 
         Vector3 vel = Velocity;
         vel.y = 0;
@@ -236,7 +237,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vaultCheck = transform.position + s.cc.center + Vector3.up * 2f;
         Vector3 lastPos = transform.position;
 
-        if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.4f) return;
+        //if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.4f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, VaultEnvironment)) return;
         if (!Physics.Raycast(vaultCheck + (vel.normalized * 0.5f - vaultDir.normalized).normalized, Vector3.down, out var vaultHit, 3.5f, VaultEnvironment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
@@ -251,8 +252,9 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.55f, 0.04f, 0.1f));
-            rb.velocity = vel * (Sprinting ? 1f : 0.6f);
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.65f, 0.05f, 0.1f));
+            vel.y = 0;
+            rb.velocity = vel * (Sprinting ? 0.65f : 0.55f);
             return;
         }
 
