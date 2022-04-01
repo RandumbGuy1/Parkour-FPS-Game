@@ -96,6 +96,23 @@ public class WeaponController : MonoBehaviour
         circleCursor.SetActive(true);
     }
 
+    void Start()
+    {
+        if (weapons.Count != 0)
+        {
+            foreach (GameObject weapon in weapons)
+            {
+                AddWeapon(weapon, false);
+
+                weapon.GetComponent<Interactable>()?.OnInteract();
+                weapon.GetComponent<IItem>()?.OnPickup(s);
+
+                weapon.transform.localPosition = Vector3.zero;
+                weapon.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            }
+        }
+    }
+
     void Update()
     {
         float previousWeapon = selectedWeapon;
@@ -183,7 +200,7 @@ public class WeaponController : MonoBehaviour
     #endregion
 
     #region Inventory Management
-    public void AddWeapon(GameObject obj)
+    public void AddWeapon(GameObject obj, bool addToList = true)
     {
         weaponDataText.gameObject.SetActive(true);
         weaponReticle.SetActive(true);
@@ -192,38 +209,41 @@ public class WeaponController : MonoBehaviour
         obj.transform.SetParent(weaponPos, true);
         obj.transform.localScale = Vector3.one;
 
-        if (weapons.Count >= maxWeapons)
+        if (addToList)
         {
-            Drop(true);
-            weapons.Insert(selectedWeapon, obj);
+            if (weapons.Count >= maxWeapons)
+            {
+                Drop(true);
+                weapons.Insert(selectedWeapon, obj);
+            }
+            else
+            {
+                weapons.Add(obj);
+                selectedWeapon = weapons.Count - 1;
+            }
         }
-        else
-        {
-            weapons.Add(obj);
-            selectedWeapon = weapons.Count - 1;
-        }
+        else selectedWeapon = 0;
 
         SelectWeapon(false);
-
-        CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
-        CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
-
-        if (CurrentItem != null) CurrentItem.OnPickup(s);
     }
 
     private void SelectWeapon(bool switching = true)
     {
         ResetMovementValues();
 
+        CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
+        CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
+
         if (switching)
         {
             switchOffsetPos = switchPosOffset;
             switchOffsetRot = switchRotOffset;
-
-            CurrentWeapon = weapons[selectedWeapon].GetComponent<IWeapon>();
-            CurrentItem = weapons[selectedWeapon].GetComponent<IItem>();
         }
-        else Aiming = false;
+        else
+        {
+            Aiming = false;
+            if (CurrentItem != null) CurrentItem.OnPickup(s);
+        }
 
         for (int i = 0; i < weapons.Count; i++) weapons[i].SetActive(i == selectedWeapon);
 

@@ -43,6 +43,8 @@ public class WeaponPickup : Interactable
         rb.isKinematic = true;
         rb.detectCollisions = false;
 
+        if (!gameObject.activeInHierarchy) return;
+
         StopAllCoroutines();
         StartCoroutine(Pickup());
     }
