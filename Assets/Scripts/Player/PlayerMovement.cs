@@ -216,7 +216,7 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 4.25f, 5.5f), 2f, 0.8f, 9f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.625f, 4.5f, 6f), 1f, 0.8f, 12f), Vector3.right));
     }
 
     #region Vaulting And Stepping
@@ -237,7 +237,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 vaultCheck = transform.position + s.cc.center + Vector3.up * 2f;
         Vector3 lastPos = transform.position;
 
-        //if (Vector3.Dot(-vaultDir.normalized, vel.normalized) < 0.4f && Vector3.Dot(-vaultDir.normalized, InputDir) < 0.4f) return;
         if (Physics.Raycast(vaultCheck, Vector3.up, 2f, VaultEnvironment)) return;
         if (!Physics.Raycast(vaultCheck + (vel.normalized * 0.5f - vaultDir.normalized).normalized, Vector3.down, out var vaultHit, 3.5f, VaultEnvironment)) return;
         if (Vector3.Angle(Vector3.up, vaultHit.normal) > maxSlopeAngle) return;
@@ -252,7 +251,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (verticalDistance < 4f)
         {
-            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration * 0.65f, 0.05f, 0.1f));
+            StepUpDesyncSmoothing(vaultPoint, lastPos, Mathf.Clamp(duration, 0.06f, 0.15f));
             vel.y = 0;
             rb.velocity = vel * (Sprinting ? 0.65f : 0.55f);
             return;

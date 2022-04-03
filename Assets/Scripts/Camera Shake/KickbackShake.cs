@@ -70,7 +70,7 @@ public class KickbackShake : IShakeEvent
         {
             Vector3 randomDir = Random.insideUnitSphere;
             while (!InBounds(Vector3.Dot(-targetDir, randomDir), 0.5f, -0.5f)) randomDir = Random.insideUnitSphere;
-            targetDir = (randomDir * 2.8f - desiredDir).normalized * shakeData.Magnitude;
+            targetDir = (randomDir * 2f - desiredDir * 0.7f).normalized * shakeData.Magnitude;
         }
         else targetDir = Vector3.zero;
     }

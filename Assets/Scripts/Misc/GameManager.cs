@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
             if (pause)
             {
-                particle.Pause();
+                if (particle.isPlaying) particle.Pause();
                 continue;
             }
 

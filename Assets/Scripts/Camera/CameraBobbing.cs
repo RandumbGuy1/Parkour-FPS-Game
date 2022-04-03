@@ -124,19 +124,32 @@ public class CameraBobbing : MonoBehaviour
 
             Vector3 magnitude = s.rb.velocity;
 
-            velocityOverLifetime.x = magnitude.x * 1.3f;
-            velocityOverLifetime.z = magnitude.z * 1.3f;
+            velocityOverLifetime.x = magnitude.x * 2f;
+            velocityOverLifetime.z = magnitude.z * 2f;
         }
 
         bool crouched = s.PlayerMovement.Crouched;
-        float newMag = -impactForce * (crouched ? 0.7f : 0.35f);
+        float newMag = -impactForce * (crouched ? 0.8f : 0.35f);
         float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f);
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
 
-        if (crouched) s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        else s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(newMag * 0.8f, 1f, 0.6f, newSmooth), Vector3.right));
+        if (crouched)
+        {
+            landbobShakeData.Frequency = 0f;
+            landbobShakeData.Duration = 0.4f;
+
+            s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
+        }
+        else
+        {
+            landbobShakeData.Magnitude *= 0.8f;
+            landbobShakeData.Frequency = 1f;
+            landbobShakeData.Duration = 0.65f;
+
+            s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
+        }
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

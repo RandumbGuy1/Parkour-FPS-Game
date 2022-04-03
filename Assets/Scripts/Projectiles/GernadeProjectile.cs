@@ -16,6 +16,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
     [SerializeField] private float impactDestroyTime;
     private bool exploded = false;
     private int collisionCount;
+    private float elapsed = 0f;
 
     private float bulletDamage = 60f;
     private Transform shooter;
@@ -39,6 +40,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         if (trails.Count > 0) foreach (TrailRenderer trail in trails) trail.Clear();
 
         collisionCount = 0;
+        elapsed = 0f;
 
         rb.isKinematic = false;
         rb.detectCollisions = true;
@@ -64,8 +66,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
 
         rb.AddForce(40f * velocity, ForceMode.Impulse);
 
-        CancelInvoke(nameof(Explode));
-        Invoke(nameof(Explode), grenadeLifeTime);
+        StartCoroutine(LifeTimeTimer());
     }
 
     private void HandleDamage(float damage = 1f)
@@ -76,16 +77,32 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         if (collisionCount >= maxCollisions) Explode();
     }
 
+    private IEnumerator LifeTimeTimer()
+    {
+        while (elapsed < grenadeLifeTime)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Explode();
+    }
+
     void OnCollisionEnter(Collision col)
     {
         int layer = col.gameObject.layer;
-
         if (CollidesWith != (CollidesWith | 1 << layer)) return;
+
+        if (elapsed / grenadeLifeTime < 0.25f)
+        {
+            GernadeProjectile projectile = col.transform.GetComponent<GernadeProjectile>();
+            if (projectile != null && projectile.CompareShooter(shooter)) return;
+        }
 
         HandleDamage();
     }
 
-    void Explode()
+    private void Explode()
     {
         if (exploded) return;
 
@@ -101,5 +118,11 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
 
         GameObject explosion = ObjectPooler.Instance.Spawn(impactEffect, transform.position + hit.normal * 0.2f, hit.normal != Vector3.zero ? Quaternion.LookRotation(hit.normal) : Quaternion.identity);
         explosion.GetComponent<Explosion>()?.Explode(shooter != null ? shooter.gameObject : null, CollidesWith, ForceMode.VelocityChange, transform.position - hit.normal * 0.6f, explosionRadius, explosionForce, 1.5f, bulletDamage);
+    }
+
+    public bool CompareShooter(Transform shooter)
+    {
+        if (this.shooter == null) return false;
+        return shooter == this.shooter;
     }
 }
