@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51a9a8a8608fe314687f63c813b71a21, type: 3}
   m_Name: LandBobShake
   m_EditorClassIdentifier: 
-  type: 0
-  magnitude: 3.1491132
-  frequency: 0
-  duration: 0.8
-  smoothSpeed: 1.5745566
+  magnitude: 1.2495
+  frequency: 1
+  duration: 0.65
+  smoothSpeed: 3.12375
   blendOverLifetime:
     serializedVersion: 2
     m_Curve:

@@ -32,7 +32,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        grenadeHealth.OnPlayerDamage += HandleDamage;
+        grenadeHealth.OnPlayerStateChanged += Explode;
     }
 
     public void OnShoot(Transform shooter, RaycastHit target, Vector3 velocity, float bulletDamage, PlayerManager s = null, bool bulletClip = false)
@@ -42,6 +42,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         collisionCount = 0;
         elapsed = 0f;
 
+        grenadeHealth.SetState(UnitState.Alive);
         rb.isKinematic = false;
         rb.detectCollisions = true;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
@@ -69,12 +70,10 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         StartCoroutine(LifeTimeTimer());
     }
 
-    private void HandleDamage(float damage = 1f)
+    private void HandleDamage()
     {
-        if (damage < 0) return;
-
         collisionCount++;
-        if (collisionCount >= maxCollisions) Explode();
+        if (collisionCount >= maxCollisions) Explode(UnitState.Dead);
     }
 
     private IEnumerator LifeTimeTimer()
@@ -93,7 +92,7 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         int layer = col.gameObject.layer;
         if (CollidesWith != (CollidesWith | 1 << layer)) return;
 
-        if (elapsed / grenadeLifeTime < 0.25f)
+        if (elapsed / grenadeLifeTime < 0.01f)
         {
             GernadeProjectile projectile = col.transform.GetComponent<GernadeProjectile>();
             if (projectile != null && projectile.CompareShooter(shooter)) return;
@@ -102,9 +101,9 @@ public class GernadeProjectile : MonoBehaviour, IProjectile
         HandleDamage();
     }
 
-    private void Explode()
+    private void Explode(UnitState state = UnitState.Dead)
     {
-        if (exploded) return;
+        if (exploded || state == UnitState.Alive) return;
 
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rb.velocity = Vector3.zero;

@@ -19,9 +19,7 @@ public class WeaponPickup : Interactable
         rb = GetComponent<Rigidbody>();
 
         outline = GetComponent<Outline>();
-        if (outline == null) return;
-
-        outline.enabled = false;
+        if (outline != null) outline.enabled = false;
     }
 
     void OnDisable()

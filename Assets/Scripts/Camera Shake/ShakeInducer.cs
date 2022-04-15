@@ -9,9 +9,16 @@ public class ShakeInducer : MonoBehaviour
     [SerializeField] private float frequency = 1f;
     [SerializeField] private float duration = 1f;
     [SerializeField] private float smoothness = 1f;
+    [SerializeField] private bool skipFirstEnable = false;
 
-    void Update()
+    void OnEnable()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha0)) ShakeManager.Instance.ShakeAll(new PerlinShake(ShakeData.Create(magnitude, frequency, duration, smoothness)), transform.position);
+        if (skipFirstEnable)
+        {
+            skipFirstEnable = false;
+            return;
+        }
+
+        ShakeManager.Instance.ShakeAll(new PerlinShake(ShakeData.Create(magnitude, frequency, duration, smoothness)), transform.position);
     }
 }

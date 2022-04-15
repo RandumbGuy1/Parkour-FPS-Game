@@ -86,7 +86,18 @@ public class CollisionDetection
             s.CameraHeadBob.BobOnce(Mathf.Min(0, s.PlayerMovement.Velocity.y));
         }
 
-        if (!ReachedMaxSlope) s.PlayerMovement.CheckForVault(contact, Environment, maxSlopeAngle);
+        if (!ReachedMaxSlope && CancelEdgeCollision(s, contact, Ground)) s.PlayerMovement.CheckForVault(col, contact, Environment, maxSlopeAngle);
+    }
+
+    private bool CancelEdgeCollision(PlayerManager s, ContactPoint contact, LayerMask VaultEnvironment)
+    {
+        if (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var edgeHit, 1f, VaultEnvironment)
+            || Physics.Raycast(s.playerHead.position, Vector3.up, out edgeHit, 1f, VaultEnvironment))
+            if (edgeHit.collider == contact.otherCollider) return false;
+
+        s.rb.velocity = s.PlayerMovement.Velocity;
+
+        return true;
     }
 
     public void EvaluateCollisionStay(Collision col) {

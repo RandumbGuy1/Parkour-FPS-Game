@@ -7,6 +7,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     [Header("Health Settings")]
     [SerializeField] private float maxHealth;
     [SerializeField] private bool invincible = false;
+    [SerializeField] private bool flashMarker = true;
     [Space(10)]
     [SerializeField] private float regenFactor;
     [SerializeField] private float regenFrequency;
@@ -33,6 +34,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     [Header("Assignables")]
     [SerializeField] private GameObject playerGraphics;
+    [SerializeField] private string deathEffect;
 
     public float MaxHealth { get { return maxHealth; } }
     public float CurrentHealth { get { return currentHealth; } }
@@ -68,10 +70,10 @@ public class PlayerHealth : MonoBehaviour, IDamagable
             currentHealth -= damage;
             currentHealth = Mathf.Clamp(currentHealth, 0, MaxHealth);
 
-            EvaluateHitMarker(player);
-        }
+            if (flashMarker) EvaluateHitMarker(player);
 
-        OnPlayerDamage?.Invoke(damage / maxHealth);
+            OnPlayerDamage?.Invoke(damage / maxHealth);
+        }
 
         if (currentHealth <= 0f) OnDeath();
     }
@@ -82,6 +84,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     {
         if (State == UnitState.Dead) return;
         if (playerGraphics != null) playerGraphics.SetActive(false);
+        ObjectPooler.Instance.Spawn(deathEffect, transform.position, Quaternion.identity);
 
         SetState(UnitState.Dead);
     }
@@ -92,6 +95,8 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
         State = newState;
         OnPlayerStateChanged?.Invoke(newState);
+
+        if (State == UnitState.Alive) currentHealth = maxHealth;
     }
 
     private void HandleInvincibility()

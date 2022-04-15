@@ -129,27 +129,32 @@ public class CameraBobbing : MonoBehaviour
         }
 
         bool crouched = s.PlayerMovement.Crouched;
-        float newMag = -impactForce * (crouched ? 0.8f : 0.35f);
-        float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f);
+        float newMag = -impactForce * (crouched ? 0.8f : 0.33f);
+        float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f) * 1.2f;
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
-
+        /*
         if (crouched)
         {
             landbobShakeData.Frequency = 0f;
-            landbobShakeData.Duration = 0.4f;
+            landbobShakeData.Duration = 0.5f;
 
             s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
         }
         else
         {
-            landbobShakeData.Magnitude *= 0.8f;
-            landbobShakeData.Frequency = 1f;
-            landbobShakeData.Duration = 0.65f;
+            landbobShakeData.Frequency = 0.1f;
+            landbobShakeData.Duration = 0.7f;
 
             s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
         }
+        */
+        landbobShakeData.Frequency = 0f;
+        landbobShakeData.Duration = 0.6f;
+
+        s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(newMag * 0.4f, 5f, 0.6f, 8f)));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

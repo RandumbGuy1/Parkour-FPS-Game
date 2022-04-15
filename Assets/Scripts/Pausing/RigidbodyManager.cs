@@ -13,7 +13,13 @@ public class RigidbodyManager : MonoBehaviour
     {
         Instance = this;
 
-        for (int i = 0; i < allRigidbodies.Count; i++) affectedBodies.Add(allRigidbodies[i], new AffectedBody(allRigidbodies[i]));
+        AffectedBody.SetDictionary(affectedBodies);
+
+        for (int i = 0; i < allRigidbodies.Count; i++)
+        {
+            if (allRigidbodies[i] == null) continue;
+            affectedBodies.Add(allRigidbodies[i], new AffectedBody(allRigidbodies[i]));
+        }
     }
 
     private void RegisterRigidbodies()
@@ -35,7 +41,13 @@ public class RigidbodyManager : MonoBehaviour
 
     public void FreezeOne(Rigidbody rb, bool freeze = true, bool reapplyVelocity = true)
     {
-        if (!affectedBodies.ContainsKey(rb)) return;
+        if (!affectedBodies.ContainsKey(rb))
+        {
+            affectedBodies.Add(rb, new AffectedBody(rb, true));
+            FreezeOne(rb, freeze, reapplyVelocity);
+            return;
+        }
+
         if (freeze) affectedBodies[rb].RegisterState();
         affectedBodies[rb].Freeze(freeze, reapplyVelocity);
     }
@@ -54,6 +66,7 @@ public class RigidbodyManager : MonoBehaviour
 [System.Serializable]
 public class AffectedBody
 {
+    private static Dictionary<Rigidbody, AffectedBody> affectedBodies;
     private readonly Rigidbody rb;
 
     private Vector3 velocity;
@@ -65,11 +78,18 @@ public class AffectedBody
     private bool isKinematic;
 
     private int avoidFreezeThisGen = 0;
+    private readonly bool removeAfterFreeze;
 
-    public AffectedBody(Rigidbody rb)
+    public AffectedBody(Rigidbody rb, bool removeAfterFreeze = false)
     {
+        this.removeAfterFreeze = removeAfterFreeze;
         this.rb = rb;
         RegisterState();
+    }
+
+    public static void SetDictionary(Dictionary<Rigidbody, AffectedBody> affectedBodies)
+    {
+        AffectedBody.affectedBodies = affectedBodies;
     }
 
     public void RegisterState()
@@ -117,5 +137,7 @@ public class AffectedBody
             rb.velocity = velocity;
             rb.angularVelocity = angularVelocity;
         }
+
+        if (removeAfterFreeze) affectedBodies.Remove(rb);
     }
 }

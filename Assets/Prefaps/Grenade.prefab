@@ -104,15 +104,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011273a5fe2bbc546b8954423bee2ba2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1
-  invincible: 1
+  maxHealth: 0.0001
+  invincible: 0
+  flashMarker: 0
   regenFactor: 0
   regenFrequency: 0
   regenCooldown: 0
   invincibilityTime: 0
-  killHeight: 0
+  killHeight: -10
   killSpeed: 0
   playerGraphics: {fileID: 4122576796613576091}
+  deathEffect: 
 --- !u!114 &-5921492289401910993
 MonoBehaviour:
   m_ObjectHideFlags: 0

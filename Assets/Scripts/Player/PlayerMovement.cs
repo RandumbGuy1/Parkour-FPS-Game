@@ -216,11 +216,11 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.625f, 4.5f, 6f), 1f, 0.8f, 12f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 3.5f, 4.35f), 2f, 0.8f, 12f), Vector3.right));
     }
 
     #region Vaulting And Stepping
-    public void CheckForVault(ContactPoint contact, LayerMask VaultEnvironment, float maxSlopeAngle)
+    public void CheckForVault(Collision col, ContactPoint contact, LayerMask VaultEnvironment, float maxSlopeAngle)
     {
         if (Vaulting || WallRunning || Crouched) return;
 
@@ -228,8 +228,6 @@ public class PlayerMovement : MonoBehaviour
         vaultDir.y = 0f;
 
         if (!collision.IsWall(contact.normal, 0.6f)) return;
-        if (Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var edgeHit, 1f, VaultEnvironment))
-            if (edgeHit.collider == contact.otherCollider) return;
 
         Vector3 vel = Velocity;
         vel.y = 0;
@@ -302,19 +300,18 @@ public class PlayerMovement : MonoBehaviour
         s.CameraLook.SetFovSmoothing(0.18f);
 
         rb.useGravity = false;
-        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y * 0.65f, rb.velocity.z);
+        rb.velocity = new Vector3(rb.velocity.x * 0.5f, rb.velocity.y * 0.7f, rb.velocity.z * 0.5f);
 
-        float horizontalImpact = RelativeVel.x;
         float wallUpSpeed = Velocity.y;
         float wallMagnitude = Magnitude;
 
-        wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 20f);
+        wallMagnitude = Mathf.Clamp(wallMagnitude, 0f, 25f);
 
         float wallClimb = wallUpSpeed + wallClimbForce * 0.3f;
-        wallClimb = Mathf.Clamp(wallClimb, -3f, 12f);
+        wallClimb = Mathf.Clamp(wallClimb, -1f, 13f);
 
         rb.AddForce(Vector3.up * wallClimb);
-        rb.AddForce(0.25f * wallMagnitude * wallMoveDir, ForceMode.VelocityChange);
+        rb.AddForce(0.6f * wallMagnitude * wallMoveDir, ForceMode.VelocityChange);
 
         s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(4.5f, 5f, 1.25f, 7f)));
         s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(12f, 3f, 0.9f, 6.5f), Vector3.left));
@@ -513,6 +510,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnGameStateChanged(GameState newState)
     {
+        RigidbodyManager.Instance.FreezeOne(rb, newState != GameState.Gameplay);
+
         enabled = newState == GameState.Gameplay;
     }
 }
