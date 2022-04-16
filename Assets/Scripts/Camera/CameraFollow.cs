@@ -181,12 +181,14 @@ public class CameraFollow : MonoBehaviour
 		{
 			if (!sprintEffect.isPlaying) sprintEffect.Play();
 
-			float rateOverLifeTime = Vector3.Angle(s.PlayerMovement.Velocity, cam.transform.forward) * 0.15f;
-			rateOverLifeTime = Mathf.Clamp(rateOverLifeTime, 1f, 1000f);
-			rateOverLifeTime = s.PlayerMovement.Magnitude * 3.5f / rateOverLifeTime;
+			float rateOverLifeTime = Mathf.Clamp(Vector3.Angle(s.PlayerMovement.Velocity, cam.transform.forward) * 0.15f, 1f, 1000f);
+			rateOverLifeTime = s.PlayerMovement.Magnitude * 2f / rateOverLifeTime;
 
 			ParticleSystem.EmissionModule em = sprintEffect.emission;
 			em.rateOverTime = (s.PlayerMovement.Collision.Grounded ? 0f : rateOverLifeTime);
+
+			ParticleSystem.VelocityOverLifetimeModule velOverLife = sprintEffect.velocityOverLifetime;
+			velOverLife.speedModifier = s.PlayerMovement.Magnitude / 40f;
 		}
 		else if (sprintEffect.isPlaying) sprintEffect.Stop();
 	}

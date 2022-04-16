@@ -43,6 +43,7 @@ public class CameraBobbing : MonoBehaviour
     void Awake()
     {
         s.PlayerMovement.OnStopMoving += LastBobStep;
+        s.PlayerMovement.Collision.OnColliderLand += BobOnce;
     }
 
     void LateUpdate()
@@ -68,7 +69,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (!s.PlayerMovement.Collision.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
-        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.1f, 0.2f, 2.5f), 2.5f, 0.4f, 5f)));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.15f, 0.2f, 2.5f), 3f, 0.8f, 7f)));
     }
 
     private void CalculateLandOffset()
@@ -134,22 +135,7 @@ public class CameraBobbing : MonoBehaviour
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
-        /*
-        if (crouched)
-        {
-            landbobShakeData.Frequency = 0f;
-            landbobShakeData.Duration = 0.5f;
 
-            s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        }
-        else
-        {
-            landbobShakeData.Frequency = 0.1f;
-            landbobShakeData.Duration = 0.7f;
-
-            s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        }
-        */
         landbobShakeData.Frequency = 0f;
         landbobShakeData.Duration = 0.6f;
 

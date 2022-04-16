@@ -348,10 +348,11 @@ public class WeaponController : MonoBehaviour
 
     private Vector3 CalculateSway(float amp)
     {
-        Vector2 swayOffset = 0.35f * swayAmount * s.CameraLook.RotationDelta;
-        swayOffset.y += s.PlayerMovement.RelativeVel.x * 0.25f;
-        swayOffset.x *= -1f;
-        swayOffset = Vector3.ClampMagnitude(swayOffset, 60f);
+        Vector3 swayOffset = 0.35f * swayAmount * s.CameraLook.RotationDelta;
+
+        swayOffset.y = Mathf.Clamp(swayOffset.y + s.PlayerMovement.RelativeVel.x * 0.25f, -25f, 25f);
+        swayOffset.x = Mathf.Clamp(swayOffset.x * -1f, -25f, 25f);
+        swayOffset.z = -swayOffset.y * 1.1f;
 
         return (Aiming ? 0.25f : 1f) * amp * swayOffset;
     }

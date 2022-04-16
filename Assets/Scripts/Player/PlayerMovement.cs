@@ -166,11 +166,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void AirMovement(float movementMultiplier)
     {
-        if (WallRunning) WallRun();
-        if (collision.CanWallJump(s, minimumJumpHeight) && collision.NearWall && (collision.IsWallLeft && input.x < 0 || collision.IsWallRight && input.x > 0)) WallRunning = true;
+        {
+            if (WallRunning) WallRun();
+            if (collision.CanWallJump(s, minimumJumpHeight) && collision.NearWall && (collision.IsWallLeft && input.x < 0 || collision.IsWallRight && input.x > 0)) WallRunning = true;
 
-        if (collision.CanWallJump(s, minimumJumpHeight) && jumping) Jump(false);
-        else if (WallRunning && (collision.IsWallLeft && input.x > 0 || collision.IsWallRight && input.x < 0)) DetachFromWallRun();
+            if (collision.CanWallJump(s, minimumJumpHeight) && jumping) Jump(1.5f, false);
+            else if (WallRunning && (collision.IsWallLeft && input.x > 0 || collision.IsWallRight && input.x < 0)) DetachFromWallRun();
+        }
 
         if (WallRunning || Vaulting) return;
 
@@ -193,7 +195,7 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
-    private void Jump(bool normalJump = true)
+    private void Jump(float multiplier = 1f, bool normalJump = true)
     {
         collision.SetGrounded(false);
 
@@ -216,7 +218,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(Mathf.Clamp(Magnitude * 0.5f, 3.5f, 4.35f), 2f, 0.8f, 12f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(6.5f * multiplier, 0f, 0.8f, 7f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(2f, 5f, 0.8f, 8f)));
     }
 
     #region Vaulting And Stepping

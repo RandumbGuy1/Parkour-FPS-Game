@@ -38,6 +38,9 @@ public class CollisionDetection
     public int StepsSinceLastJumped { get; private set; } = 0;
     public int StepsSinceLastWallJumped { get; private set; } = 0;
 
+    public delegate void OnColliderLandHandler(float impactForce);
+    public event OnColliderLandHandler OnColliderLand;
+
     public void UpdateCollisionChecks(PlayerManager s) {
 
         ReachedMaxSlope = Physics.Raycast(s.BottomCapsuleSphereOrigin, Vector3.down, out var slopeHit, 1.5f, Ground) && Vector3.Angle(Vector3.up, slopeHit.normal) > maxSlopeAngle;
@@ -82,8 +85,8 @@ public class CollisionDetection
 
         if (IsFloor(contact.normal) && Ground == (Ground | 1 << layer) && !Grounded)
         {
+            OnColliderLand?.Invoke(Mathf.Min(0, s.PlayerMovement.Velocity.y));
             Grounded = true;
-            s.CameraHeadBob.BobOnce(Mathf.Min(0, s.PlayerMovement.Velocity.y));
         }
 
         if (!ReachedMaxSlope && CancelEdgeCollision(s, contact, Ground)) s.PlayerMovement.CheckForVault(col, contact, Environment, maxSlopeAngle);
