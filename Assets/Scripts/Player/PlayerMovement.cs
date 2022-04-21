@@ -218,8 +218,8 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(collision.WallContact.normal * wallJumpForce, ForceMode.Impulse);
         }
 
-        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(6.5f * multiplier, 0f, 0.8f, 7f), Vector3.right));
-        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(2f, 5f, 0.8f, 8f)));
+        s.CameraShaker.ShakeOnce(new KickbackShake(ShakeData.Create(6.5f * multiplier, 0f, 1f, 10f), Vector3.right));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(2.5f, 5f, 1.2f, 6f)));
     }
 
     #region Vaulting And Stepping

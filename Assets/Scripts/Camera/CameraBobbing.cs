@@ -69,7 +69,7 @@ public class CameraBobbing : MonoBehaviour
     {
         if (!s.PlayerMovement.Collision.Grounded || !s.PlayerMovement.CanCrouchWalk) return;
 
-        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.15f, 0.2f, 2.5f), 3f, 0.8f, 7f)));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(Mathf.Clamp(mag * 0.3f, 0.2f, 2.5f), 3f, 1.5f, 5f)));
     }
 
     private void CalculateLandOffset()
@@ -131,16 +131,16 @@ public class CameraBobbing : MonoBehaviour
 
         bool crouched = s.PlayerMovement.Crouched;
         float newMag = -impactForce * (crouched ? 0.8f : 0.33f);
-        float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f) * 1.2f;
+        float newSmooth = Mathf.Clamp(newMag * 2f, 3f, 15f) * 0.7f;
 
         landbobShakeData.Magnitude = newMag;
         landbobShakeData.SmoothSpeed = newSmooth;
 
         landbobShakeData.Frequency = 0f;
-        landbobShakeData.Duration = 0.6f;
+        landbobShakeData.Duration = 0.7f;
 
         s.CameraShaker.ShakeOnce(new KickbackShake(landbobShakeData, Vector3.right));
-        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(newMag * 0.4f, 5f, 0.6f, 8f)));
+        s.CameraShaker.ShakeOnce(new PerlinShake(ShakeData.Create(newMag * 0.3f, 5f, 0.7f, 6f)));
 
         impactForce = Mathf.Round(impactForce * 100f) * 0.01f;
         impactForce = Mathf.Clamp(impactForce * landBobMultiplier, -maxOffset, 0f);

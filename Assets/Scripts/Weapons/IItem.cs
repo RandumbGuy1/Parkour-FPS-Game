@@ -2,8 +2,8 @@
 
 public interface IItem
 {
+    ItemArtSettings SpriteSettings { get; }
     HoldingSettings SwaySettings { get; }
-    Sprite ItemSprite { get; }
     PlayerManager Player { get; }
 
     string ReadData();
@@ -39,4 +39,18 @@ public struct HoldingSettings
     public Vector3 SprintOffsetPos => sprintOffsetPos;
     public Vector3 SprintOffsetRot => sprintOffsetRot;
     public float SprintMulti => sprintMulti;
+}
+
+[System.Serializable]
+public struct ItemArtSettings
+{
+    [SerializeField] private Sprite itemSprite;
+    [SerializeField] private Vector3 scale;
+    [SerializeField] private Vector3 rotation;
+    [SerializeField] private Vector3 position;
+
+    public Sprite ItemSprite => itemSprite;
+    public Vector3 Scale => scale;
+    public Vector3 Rotation => rotation;
+    public Vector3 Position => position;
 }

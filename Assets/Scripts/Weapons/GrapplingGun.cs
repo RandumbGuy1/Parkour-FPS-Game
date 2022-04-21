@@ -6,7 +6,6 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
 {
     public PlayerManager Player { get { return s; } }
     public WeaponClass WeaponType { get { return type; } }
-    public Sprite ItemSprite { get { return weaponSprite; } }
 
     public bool Automatic { get { return false; } }
 
@@ -18,7 +17,8 @@ public class GrapplingGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private WeaponClass type;
 
     [Header("Weapon Artwork")]
-    [SerializeField] private Sprite weaponSprite;
+    [SerializeField] private ItemArtSettings spriteSettings;
+    public ItemArtSettings SpriteSettings => spriteSettings;
 
     [Header("Weapon Holding Settings")]
     [SerializeField] private HoldingSettings swaySettings;

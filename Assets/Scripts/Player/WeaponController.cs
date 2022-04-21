@@ -89,6 +89,8 @@ public class WeaponController : MonoBehaviour
     public HitMarker HitMarker { get { return hitMarker; } }
     public Transform WeaponPos { get { return weaponPos; } }
 
+    private Vector3 startingImagePos;
+
     void Awake()
     {
         s = GetComponent<PlayerManager>();
@@ -97,25 +99,8 @@ public class WeaponController : MonoBehaviour
 
         weaponReticle.SetActive(false);
         circleCursor.SetActive(true);
-    }
 
-    void Start()
-    {
-        /*
-        if (weapons.Count != 0)
-        {
-            foreach (GameObject weapon in weapons)
-            {
-                AddWeapon(weapon);
-
-                weapon.GetComponent<Interactable>()?.OnInteract();
-                weapon.GetComponent<IItem>()?.OnPickup(s);
-
-                weapon.transform.localPosition = Vector3.zero;
-                weapon.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-            }
-        }
-        */
+        startingImagePos = itemArt.rectTransform.localPosition;
     }
 
     void Update()
@@ -159,7 +144,11 @@ public class WeaponController : MonoBehaviour
             {
                 weaponNameText.text = CurrentItem.ReadName();
                 weaponDataText.text = CurrentItem.ReadData();
-                itemArt.sprite = CurrentItem.ItemSprite;
+
+                itemArt.sprite = CurrentItem.SpriteSettings.ItemSprite;
+                itemArt.rectTransform.localScale = CurrentItem.SpriteSettings.Scale;
+                itemArt.rectTransform.localRotation = Quaternion.Euler(CurrentItem.SpriteSettings.Rotation);
+                itemArt.rectTransform.localPosition = startingImagePos + CurrentItem.SpriteSettings.Position;
 
                 CurrentItem.ItemUpdate();
             }

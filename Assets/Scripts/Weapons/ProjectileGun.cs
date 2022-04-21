@@ -5,7 +5,6 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
 {
     public PlayerManager Player { get { return s; } }
     public WeaponClass WeaponType { get { return type; } }
-    public Sprite ItemSprite { get { return weaponSprite; } }
 
     public bool Automatic { get { return weaponAutomatic; } }
 
@@ -18,7 +17,8 @@ public class ProjectileGun : MonoBehaviour, IWeapon, IItem
     [SerializeField] private bool weaponAutomatic;
 
     [Header("Weapon Artwork")]
-    [SerializeField] private Sprite weaponSprite;
+    [SerializeField] private ItemArtSettings spriteSettings;
+    public ItemArtSettings SpriteSettings => spriteSettings;
 
     [Header("Weapon Holding Settings")]
     [SerializeField] private HoldingSettings swaySettings;
